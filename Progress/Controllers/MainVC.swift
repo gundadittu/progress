@@ -7,8 +7,9 @@
 //
 
 import UIKit
+import Pulley
 
-class ViewController: UIViewController {
+class MainVC: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
