@@ -16,5 +16,10 @@ pod 'PureLayout'
 pod 'DateTimePicker'
 pod 'Pulley'
 pod 'SwiftDate', '~> 4.5.0'
+pod 'RealmSwift'
+pod 'DZNEmptyDataSet'
+pod 'Firebase/Core'
+pod 'Fabric', '~> 1.7.2'
+pod 'Crashlytics', '~> 3.9.3'
 
 end

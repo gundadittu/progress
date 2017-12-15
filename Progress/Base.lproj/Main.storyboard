@@ -54,7 +54,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="Swv-5Y-xas">
-                                <rect key="frame" x="0.0" y="54" width="375" height="289"/>
+                                <rect key="frame" x="0.0" y="44" width="375" height="299"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <prototypes>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="TaskCell" rowHeight="108" id="xrQ-dc-p3J" customClass="TaskCell" customModule="Progress" customModuleProvider="target">
@@ -130,10 +130,10 @@
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
-                            <constraint firstItem="VYw-Zf-Lcl" firstAttribute="trailing" secondItem="Swv-5Y-xas" secondAttribute="trailing" id="Dw6-Sa-nqT"/>
-                            <constraint firstItem="VYw-Zf-Lcl" firstAttribute="bottom" secondItem="Swv-5Y-xas" secondAttribute="bottom" id="KDe-Ih-qik"/>
-                            <constraint firstItem="Swv-5Y-xas" firstAttribute="top" secondItem="VYw-Zf-Lcl" secondAttribute="top" constant="10" id="eze-8n-mYY"/>
-                            <constraint firstItem="Swv-5Y-xas" firstAttribute="leading" secondItem="VYw-Zf-Lcl" secondAttribute="leading" id="lcj-MM-Qh7"/>
+                            <constraint firstItem="Swv-5Y-xas" firstAttribute="bottom" secondItem="VYw-Zf-Lcl" secondAttribute="bottom" id="JAK-gO-oga"/>
+                            <constraint firstItem="Swv-5Y-xas" firstAttribute="leading" secondItem="VYw-Zf-Lcl" secondAttribute="leading" id="MFU-xK-2tv"/>
+                            <constraint firstItem="Swv-5Y-xas" firstAttribute="trailing" secondItem="VYw-Zf-Lcl" secondAttribute="trailing" id="R1x-3o-nDd"/>
+                            <constraint firstItem="Swv-5Y-xas" firstAttribute="top" secondItem="VYw-Zf-Lcl" secondAttribute="top" id="fAb-P4-1x8"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="VYw-Zf-Lcl"/>
                     </view>
@@ -146,12 +146,11 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="mYj-cs-2Dn" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1643.5" y="438.5"/>
+            <point key="canvasLocation" x="1642.4000000000001" y="437.63118440779613"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="9io-1A-Y1R">
             <objects>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="3GE-ez-zAa" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <navigationController id="qgT-JD-RDl" sceneMemberID="viewController">
                     <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" largeTitles="YES" id="Qi4-ZI-mCM">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
@@ -161,6 +160,7 @@
                         <segue destination="TLJ-mf-QcS" kind="relationship" relationship="rootViewController" id="bnP-uC-IQ7"/>
                     </connections>
                 </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="3GE-ez-zAa" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="911" y="-20"/>
         </scene>
@@ -258,7 +258,7 @@
                     </view>
                     <navigationItem key="navigationItem" id="hji-3M-NwO"/>
                     <connections>
-                        <outlet property="tableView" destination="cv6-bY-Vmc" id="Fl0-5x-DDj"/>
+                        <outlet property="tableView" destination="cv6-bY-Vmc" id="NMS-AQ-yQ1"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="q7T-AY-JDn" userLabel="First Responder" sceneMemberID="firstResponder"/>

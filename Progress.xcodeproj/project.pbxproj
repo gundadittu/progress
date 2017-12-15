@@ -7,37 +7,35 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0405321F1FDE2AB500E377AF /* CreateTaskView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0405321E1FDE2AB500E377AF /* CreateTaskView.swift */; };
 		040532211FDE377500E377AF /* TaskCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 040532201FDE377500E377AF /* TaskCell.swift */; };
 		043127191FDC5FD2002DEFA8 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 043127181FDC5FD2002DEFA8 /* AppDelegate.swift */; };
 		0431271B1FDC5FD2002DEFA8 /* MainVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0431271A1FDC5FD2002DEFA8 /* MainVC.swift */; };
 		0431271E1FDC5FD2002DEFA8 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0431271C1FDC5FD2002DEFA8 /* Main.storyboard */; };
-		043127211FDC5FD2002DEFA8 /* Progress.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 0431271F1FDC5FD2002DEFA8 /* Progress.xcdatamodeld */; };
 		043127231FDC5FD2002DEFA8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 043127221FDC5FD2002DEFA8 /* Assets.xcassets */; };
 		043127261FDC5FD2002DEFA8 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 043127241FDC5FD2002DEFA8 /* LaunchScreen.storyboard */; };
 		044C24261FDC6AF200AD6B8D /* TodayVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 044C24251FDC6AF200AD6B8D /* TodayVC.swift */; };
 		044C24281FDC6B0F00AD6B8D /* TasksVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 044C24271FDC6B0F00AD6B8D /* TasksVC.swift */; };
 		044C24531FDC8E7A00AD6B8D /* TodayTaskCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 044C24521FDC8E7A00AD6B8D /* TodayTaskCell.swift */; };
-		04DE55B61FDF61A0008B7ACF /* CoreDataHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04DE55B51FDF61A0008B7ACF /* CoreDataHandler.swift */; };
+		04AFA01C1FE36AEB00887B4B /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 04AFA01B1FE36AEA00887B4B /* GoogleService-Info.plist */; };
+		04CBA1D11FE30CE20013AF20 /* RealmModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04CBA1D01FE30CE20013AF20 /* RealmModels.swift */; };
 		04E38BA21FDCA0C00092D664 /* Task.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E38BA11FDCA0C00092D664 /* Task.swift */; };
 		997931A7E7DFC70541A11EA6 /* Pods_Progress.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FB50E384FE7DC903131D9D7E /* Pods_Progress.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		0405321E1FDE2AB500E377AF /* CreateTaskView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateTaskView.swift; sourceTree = "<group>"; };
 		040532201FDE377500E377AF /* TaskCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskCell.swift; sourceTree = "<group>"; };
 		043127151FDC5FD2002DEFA8 /* Progress.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Progress.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		043127181FDC5FD2002DEFA8 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		0431271A1FDC5FD2002DEFA8 /* MainVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainVC.swift; sourceTree = "<group>"; };
 		0431271D1FDC5FD2002DEFA8 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		043127201FDC5FD2002DEFA8 /* Progress.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Progress.xcdatamodel; sourceTree = "<group>"; };
 		043127221FDC5FD2002DEFA8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		043127251FDC5FD2002DEFA8 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		043127271FDC5FD2002DEFA8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		044C24251FDC6AF200AD6B8D /* TodayVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayVC.swift; sourceTree = "<group>"; };
 		044C24271FDC6B0F00AD6B8D /* TasksVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TasksVC.swift; sourceTree = "<group>"; };
 		044C24521FDC8E7A00AD6B8D /* TodayTaskCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayTaskCell.swift; sourceTree = "<group>"; };
-		04DE55B51FDF61A0008B7ACF /* CoreDataHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataHandler.swift; sourceTree = "<group>"; };
+		04AFA01B1FE36AEA00887B4B /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		04CBA1D01FE30CE20013AF20 /* RealmModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmModels.swift; sourceTree = "<group>"; };
 		04E38BA11FDCA0C00092D664 /* Task.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Task.swift; sourceTree = "<group>"; };
 		A239CE69DB84DB6FA28781AD /* Pods-Progress.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Progress.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Progress/Pods-Progress.debug.xcconfig"; sourceTree = "<group>"; };
 		C0CC3783E6740BF09C941F4F /* Pods-Progress.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Progress.release.xcconfig"; path = "Pods/Target Support Files/Pods-Progress/Pods-Progress.release.xcconfig"; sourceTree = "<group>"; };
@@ -83,9 +81,8 @@
 				0431271C1FDC5FD2002DEFA8 /* Main.storyboard */,
 				043127221FDC5FD2002DEFA8 /* Assets.xcassets */,
 				043127241FDC5FD2002DEFA8 /* LaunchScreen.storyboard */,
+				04AFA01B1FE36AEA00887B4B /* GoogleService-Info.plist */,
 				043127271FDC5FD2002DEFA8 /* Info.plist */,
-				0431271F1FDC5FD2002DEFA8 /* Progress.xcdatamodeld */,
-				0405321E1FDE2AB500E377AF /* CreateTaskView.swift */,
 			);
 			path = Progress;
 			sourceTree = "<group>";
@@ -98,7 +95,6 @@
 				044C24521FDC8E7A00AD6B8D /* TodayTaskCell.swift */,
 				044C24271FDC6B0F00AD6B8D /* TasksVC.swift */,
 				040532201FDE377500E377AF /* TaskCell.swift */,
-				04DE55B51FDF61A0008B7ACF /* CoreDataHandler.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -107,6 +103,7 @@
 			isa = PBXGroup;
 			children = (
 				04E38BA11FDCA0C00092D664 /* Task.swift */,
+				04CBA1D01FE30CE20013AF20 /* RealmModels.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -141,6 +138,7 @@
 				043127131FDC5FD2002DEFA8 /* Resources */,
 				4048E16DB89751946284C893 /* [CP] Embed Pods Frameworks */,
 				822AF5EDEA8653293C7728AF /* [CP] Copy Pods Resources */,
+				04AFA01D1FE36BF100887B4B /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -192,6 +190,7 @@
 			files = (
 				043127261FDC5FD2002DEFA8 /* LaunchScreen.storyboard in Resources */,
 				043127231FDC5FD2002DEFA8 /* Assets.xcassets in Resources */,
+				04AFA01C1FE36AEB00887B4B /* GoogleService-Info.plist in Resources */,
 				0431271E1FDC5FD2002DEFA8 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -199,6 +198,19 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		04AFA01D1FE36BF100887B4B /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Fabric/run\"";
+		};
 		4048E16DB89751946284C893 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 12;
@@ -208,27 +220,37 @@
 				"${SRCROOT}/Pods/Target Support Files/Pods-Progress/Pods-Progress-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/BEMCheckBox/BEMCheckBox.framework",
 				"${BUILT_PRODUCTS_DIR}/ChameleonFramework/ChameleonFramework.framework",
+				"${BUILT_PRODUCTS_DIR}/DZNEmptyDataSet/DZNEmptyDataSet.framework",
 				"${BUILT_PRODUCTS_DIR}/DateTimePicker/DateTimePicker.framework",
 				"${BUILT_PRODUCTS_DIR}/DottedProgressBar/DottedProgressBar.framework",
 				"${BUILT_PRODUCTS_DIR}/Floaty/Floaty.framework",
+				"${BUILT_PRODUCTS_DIR}/GoogleToolboxForMac/GoogleToolboxForMac.framework",
 				"${BUILT_PRODUCTS_DIR}/MGSwipeTableCell/MGSwipeTableCell.framework",
 				"${BUILT_PRODUCTS_DIR}/Pulley/Pulley.framework",
 				"${BUILT_PRODUCTS_DIR}/PureLayout/PureLayout.framework",
+				"${BUILT_PRODUCTS_DIR}/Realm/Realm.framework",
+				"${BUILT_PRODUCTS_DIR}/RealmSwift/RealmSwift.framework",
 				"${BUILT_PRODUCTS_DIR}/SwiftDate/SwiftDate.framework",
 				"${BUILT_PRODUCTS_DIR}/SwiftReorder/SwiftReorder.framework",
+				"${BUILT_PRODUCTS_DIR}/nanopb/nanopb.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/BEMCheckBox.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/ChameleonFramework.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/DZNEmptyDataSet.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/DateTimePicker.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/DottedProgressBar.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Floaty.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GoogleToolboxForMac.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MGSwipeTableCell.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Pulley.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/PureLayout.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Realm.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RealmSwift.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SwiftDate.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SwiftReorder.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/nanopb.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -276,9 +298,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				04E38BA21FDCA0C00092D664 /* Task.swift in Sources */,
-				04DE55B61FDF61A0008B7ACF /* CoreDataHandler.swift in Sources */,
-				043127211FDC5FD2002DEFA8 /* Progress.xcdatamodeld in Sources */,
-				0405321F1FDE2AB500E377AF /* CreateTaskView.swift in Sources */,
+				04CBA1D11FE30CE20013AF20 /* RealmModels.swift in Sources */,
 				0431271B1FDC5FD2002DEFA8 /* MainVC.swift in Sources */,
 				044C24281FDC6B0F00AD6B8D /* TasksVC.swift in Sources */,
 				044C24261FDC6AF200AD6B8D /* TodayVC.swift in Sources */,
@@ -423,6 +443,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = JQ4K8EE77P;
 				INFOPLIST_FILE = Progress/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -471,19 +492,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCVersionGroup section */
-		0431271F1FDC5FD2002DEFA8 /* Progress.xcdatamodeld */ = {
-			isa = XCVersionGroup;
-			children = (
-				043127201FDC5FD2002DEFA8 /* Progress.xcdatamodel */,
-			);
-			currentVersion = 043127201FDC5FD2002DEFA8 /* Progress.xcdatamodel */;
-			path = Progress.xcdatamodeld;
-			sourceTree = "<group>";
-			versionGroupType = wrapper.xcdatamodel;
-		};
-/* End XCVersionGroup section */
 	};
 	rootObject = 0431270D1FDC5FD2002DEFA8 /* Project object */;
 }

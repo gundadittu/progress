@@ -3,24 +3,57 @@ PODS:
   - ChameleonFramework/Default (2.1.0)
   - ChameleonFramework/Swift (2.1.0):
     - ChameleonFramework/Default
+  - Crashlytics (3.9.3):
+    - Fabric (~> 1.7.2)
   - DateTimePicker (1.2.1)
   - DottedProgressBar (1.0.4)
+  - DZNEmptyDataSet (1.8.1)
+  - Fabric (1.7.2)
+  - Firebase/Core (4.7.0):
+    - FirebaseAnalytics (= 4.0.5)
+    - FirebaseCore (= 4.0.12)
+  - FirebaseAnalytics (4.0.5):
+    - FirebaseCore (~> 4.0)
+    - FirebaseInstanceID (~> 2.0)
+    - GoogleToolboxForMac/NSData+zlib (~> 2.1)
+    - nanopb (~> 0.3)
+  - FirebaseCore (4.0.12):
+    - GoogleToolboxForMac/NSData+zlib (~> 2.1)
+  - FirebaseInstanceID (2.0.7)
   - Floaty (4.0.0)
+  - GoogleToolboxForMac/Defines (2.1.3)
+  - GoogleToolboxForMac/NSData+zlib (2.1.3):
+    - GoogleToolboxForMac/Defines (= 2.1.3)
   - MGSwipeTableCell (1.6.6)
+  - nanopb (0.3.8):
+    - nanopb/decode (= 0.3.8)
+    - nanopb/encode (= 0.3.8)
+  - nanopb/decode (0.3.8)
+  - nanopb/encode (0.3.8)
   - Pulley (2.2.2)
   - PureLayout (3.0.2)
+  - Realm (3.0.2):
+    - Realm/Headers (= 3.0.2)
+  - Realm/Headers (3.0.2)
+  - RealmSwift (3.0.2):
+    - Realm (= 3.0.2)
   - SwiftDate (4.5.1)
   - SwiftReorder (3.2.0)
 
 DEPENDENCIES:
   - BEMCheckBox
   - ChameleonFramework/Swift (from `https://github.com/ViccAlexander/Chameleon.git`)
+  - Crashlytics (~> 3.9.3)
   - DateTimePicker
   - DottedProgressBar
+  - DZNEmptyDataSet
+  - Fabric (~> 1.7.2)
+  - Firebase/Core
   - Floaty
   - MGSwipeTableCell
   - Pulley
   - PureLayout
+  - RealmSwift
   - SwiftDate (~> 4.5.0)
   - SwiftReorder
 
@@ -36,15 +69,26 @@ CHECKOUT OPTIONS:
 SPEC CHECKSUMS:
   BEMCheckBox: 5ba6e37ade3d3657b36caecc35c8b75c6c2b1a4e
   ChameleonFramework: d21a3cc247abfe5e37609a283a8238b03575cf64
+  Crashlytics: dbb07d01876c171c5ccbdf7826410380189e452c
   DateTimePicker: c7b10f7dfe6eb06014c88df964a0a994f246b791
   DottedProgressBar: 4b5cb99a9afd68e20b21f7c9a40f0014ede52e77
+  DZNEmptyDataSet: 9525833b9e68ac21c30253e1d3d7076cc828eaa7
+  Fabric: 9cd6a848efcf1b8b07497e0b6a2e7d336353ba15
+  Firebase: dbfb98ccec2dcfcd21ab9cc1b4981a3f3c8c5e26
+  FirebaseAnalytics: 5b02a63ead2c3f0259cfc7f15e053e440587ecf8
+  FirebaseCore: 6cf108b63997bc08c04a1ffa55a3ac0d71a59ffc
+  FirebaseInstanceID: 148c25c986c8699e67304b114e365713dce467f2
   Floaty: 4f88811bbf08521807f42355db6a9c0db85d5d78
+  GoogleToolboxForMac: 2501e2ad72a52eb3dfe7bd9aee7dad11b858bd20
   MGSwipeTableCell: c3bc6e261e7bc06c112909fe3fb8205de286082c
+  nanopb: 5601e6bca2dbf1ed831b519092ec110f66982ca3
   Pulley: b9c20b583663668f532853de25066ae8d89396c4
   PureLayout: 4d550abe49a94f24c2808b9b95db9131685fe4cd
+  Realm: 6f23fd1f178a09342eac21bfa7c2bf4312a7a180
+  RealmSwift: 695393add1b8f9d5fa75dd16e6355cf3935f71e2
   SwiftDate: 7b56d42a221f582047287deb256b23fc5ed49a60
   SwiftReorder: 27d737099efd6125339d5e8cb090e46c67341143
 
-PODFILE CHECKSUM: 7dbf07532e775439d6b8bf1461e230eaa6e77e0a
+PODFILE CHECKSUM: c30f9d741a62af5d02317986d3731381d5f18b24
 
 COCOAPODS: 1.4.0.beta.2

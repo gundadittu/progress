@@ -33,24 +33,17 @@ class TodayTaskCell:  MGSwipeTableCell {
     @IBOutlet weak var progressBar: DottedProgressBar!
     @IBOutlet weak var checkBox: BEMCheckBox!
     
-    var indexForCell : IndexPath!
     var dueDate: Date?
     var customDelegate: CustomTodayTaskCellDelegate?
     var pickerSelected: Bool = false
-    var didBeginEditing: Bool = false
-    
+    var isBeingEdited: Bool = false
+    var taskObj: SavedTask?
  
     override func awakeFromNib() {
         super.awakeFromNib()
         taskTitleLabel.borderStyle = .none
         self.taskTitleLabel.delegate = self
         self.checkBox.delegate = self
-        self.dueDateBtn.isHidden = true
-    }
-    
-    //for progress bar
-    required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
     }
     
     override func setSelected(_ selected: Bool, animated: Bool) {
@@ -61,14 +54,12 @@ class TodayTaskCell:  MGSwipeTableCell {
 extension TodayTaskCell: UITextFieldDelegate {
     
     func textFieldDidBeginEditing(_ textField: UITextField) {
-        if self.customDelegate != nil {
-            self.customDelegate!.cellDidBeginEditing(editingCell: self)
-        }
+        return
     }
     
     func textFieldDidEndEditing(_ textField: UITextField) {
         self.taskTitleLabel.text = textField.text!
-        if self.customDelegate != nil && pickerSelected == false {
+        if   self.customDelegate != nil && pickerSelected == false {
             self.customDelegate?.cellDidEndEditing(editingCell: self)
         }
     }
@@ -81,16 +72,6 @@ extension TodayTaskCell: UITextFieldDelegate {
 }
 
 extension TodayTaskCell: BEMCheckBoxDelegate {
-    
-    func didTap(_ checkBox: BEMCheckBox) {
-        if self.customDelegate != nil {
-            if checkBox.on == true {
-                self.customDelegate?.cellCheckBoxTapped(editingCell: self, checked: true)
-            } else {
-                self.customDelegate?.cellCheckBoxTapped(editingCell: self, checked: false)
-            }
-        }
-    }
     
     func animationDidStop(for checkBox: BEMCheckBox) {
         if self.customDelegate != nil {
@@ -106,23 +87,21 @@ extension TodayTaskCell: BEMCheckBoxDelegate {
 extension TodayTaskCell: DateTimePickerDelegate {
     
     @IBAction func dueDateBtnSelected(_ sender: UIButton) {
-        pickerSelected = true
-        if self.didBeginEditing == true {
+        self.pickerSelected = true
+        if self.isBeingEdited == true {
             self.taskTitleLabel.resignFirstResponder()
         } else {
             self.customDelegate?.cellDidBeginEditing(editingCell: self)
         }
-        
         var max: Date
         var selected: Date
-        if let unwrappedDueDate = dueDate  {
-            max = unwrappedDueDate.addingTimeInterval(60 * 60 * 24 * 100)
-            selected = unwrappedDueDate
+        if self.dueDate != nil {
+            max = (self.dueDate?.addingTimeInterval(60 * 60 * 24 * 100))!
+            selected = self.dueDate!
         } else {
-            selected = Date()
             max = Date().addingTimeInterval(60 * 60 * 24 * 100)
+            selected = Date()
         }
-        
         let picker = DateTimePicker.show(selected: selected, maximumDate: max)
         picker.highlightColor = FlatPurple()
         picker.isDatePickerOnly = true
@@ -131,7 +110,7 @@ extension TodayTaskCell: DateTimePickerDelegate {
         picker.doneBackgroundColor = FlatPurple()
         picker.includeMonth = true
         picker.cancelButtonTitle = "Clear"
-        picker.doneButtonTitle = "Set Due Date"
+        picker.doneButtonTitle = "Set Deadline"
         picker.delegate = self
         picker.completionHandler = { date in
             self.customDelegate?.cellDueDateChanged(editingCell: self, date: date)

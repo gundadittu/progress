@@ -14,7 +14,9 @@ import SwiftReorder
 import DottedProgressBar
 import MGSwipeTableCell
 import Pulley
-import CoreData
+import Realm
+import RealmSwift
+import DZNEmptyDataSet
 
 class TasksVC: UIViewController, FloatyDelegate  {
     
@@ -24,26 +26,17 @@ class TasksVC: UIViewController, FloatyDelegate  {
     let color = FlatPurple()
     let bgColor = UIColor.white
     var currentlySelectedCell: TaskCell? = nil
-    var changeIsUserDriven = false
-    let managedObjectContext = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-    var tasksArray = [SavedTask]()
     
-    
-    fileprivate lazy var fetchedResultsController: NSFetchedResultsController<SavedTask> = {
-        let fetchRequest: NSFetchRequest<SavedTask> = SavedTask.fetchRequest()
-        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "isCompleted", ascending: true), NSSortDescriptor(key: "displayOrder", ascending: true)]
-        //let isNotTodayPredicate = NSPredicate(format: "isToday == %@",  Bool(booleanLiteral: false) as CVarArg)
-       // fetchRequest.predicate = isNotTodayPredicate
-        let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.managedObjectContext, sectionNameKeyPath: "isCompleted", cacheName: "allCache")
-        fetchedResultsController.delegate = self
-        return fetchedResultsController
-    }()
+    let realm = try! Realm()
+    var tasksList: Results<SavedTask>?
+    var completedTasksList: Results<SavedTask>?
+    var sectionNames = ["All Tasks", "Completed Tasks"]
+    var token: NotificationToken?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         self.title = "All Tasks"
-        
-        self.fetchObjects()
+        self.navigationController?.navigationBar.prefersLargeTitles = true
         
         //plus button attributes
         Floaty.global.button.buttonColor = color
@@ -70,89 +63,81 @@ class TasksVC: UIViewController, FloatyDelegate  {
         self.tableView.reorder.shadowOpacity = 0.3
         self.tableView.reorder.shadowRadius = 20
         
-        //Helps save context when application quits
-        NotificationCenter.default.addObserver(self, selector: #selector(applicationDidEnterBackground), name: Notification.Name.UIApplicationDidEnterBackground, object: nil)
-    }
-    
-    //Saves context when application quits
-    @objc func applicationDidEnterBackground() {
-        do {
-            try self.managedObjectContext.save()
-        } catch {
-            print("Unable to save changes: \(error.localizedDescription).")
+        //empty state data
+        self.tableView.emptyDataSetSource = self
+        self.tableView.emptyDataSetDelegate = self
+        
+        self.fetchObjects()
+        
+        token = self.tasksList?.observe {[weak self] (changes: RealmCollectionChange) in
+            guard let tableView = self?.tableView else { return }
+            
+            switch changes {
+            case .initial:
+                tableView.reloadData()
+                break
+            case .update(let results, let deletions, let insertions, let modifications):
+                
+                tableView.beginUpdates()
+                
+                //re-order repos when new pushes happen
+                tableView.insertRows(at: insertions.map { IndexPath(row: $0, section: 0) },
+                                     with: .automatic)
+                tableView.deleteRows(at: deletions.map { IndexPath(row: $0, section: 0) },
+                                     with: .automatic)
+                
+                //flash cells when repo gets more stars
+                for row in modifications {
+                    let indexPath = IndexPath(row: row, section: 0)
+                    let selectedTask = results[indexPath.row]
+                    let cell = tableView.cellForRow(at: indexPath) as! TaskCell
+                    self?.configure(cell: cell, with: selectedTask)
+                }
+                
+                tableView.endUpdates()
+                break
+            case .error(let error):
+                print(error)
+                break
+            }
         }
-      NSFetchedResultsController<SavedTask>.deleteCache(withName: "allCache")
     }
     
-    func saveContext(_ selectedObject: NSManagedObject) {
-        do {
-            try selectedObject.managedObjectContext?.save()
-            //fetchObjects()
-        } catch {
-            print("Unable to save changes: \(error.localizedDescription).")
-        }
+    func fetchObjects(){
+        let isNotTodayPredicate = NSPredicate(format: "isToday == %@",  Bool(booleanLiteral: false) as CVarArg)
+        let list = self.realm.objects(SavedTask.self).filter(isNotTodayPredicate)
+        let sortProperties = [SortDescriptor(keyPath: "isCompleted", ascending: true), SortDescriptor(keyPath: "displayOrder", ascending: true)]
+        self.tasksList = list.sorted(by: sortProperties)
+        self.updateArrayDisplayOrder(self.tasksList!)
     }
     
-    func saveContext() {
-        do {
-            try self.managedObjectContext.save()
-        } catch {
-            print("Unable to save changes: \(error.localizedDescription).")
-        }
-    }
-    
-    func fetchObjects() {
-        do {
-           try self.fetchedResultsController.performFetch()
-            self.tasksArray = self.fetchedResultsController.fetchedObjects as! [SavedTask]
-            self.updateTasksArrayOrder()
-        } catch {
-            let fetchError = error as NSError
-            print("Unable to Perform FetchRequest: \(fetchError.localizedDescription)")
+    func updateArrayDisplayOrder(_ array: Results<SavedTask>){
+        var i = 0
+        for ro in array {
+            i+=1
+            try! self.realm.write {
+                ro.displayOrder = i
+            }
         }
     }
     
     //Plus button tapped to create new task
     func emptyFloatySelected(_ floaty: Floaty) {
+        self.createNewTask()
+    }
+    
+    //Creates a new task
+    func createNewTask(){
         if currentlySelectedCell == nil {
+            Floaty.global.button.isHidden = true
             if let drawerVC = self.navigationController?.parent as? PulleyViewController {
                 drawerVC.setDrawerPosition(position: .open, animated: true)
             }
-
-            let altMessage = UIAlertController(title: "Create a New Task", message: nil, preferredStyle: UIAlertControllerStyle.alert)
-            altMessage.addAction(UIAlertAction(title: "Create", style: UIAlertActionStyle.default, handler: { (action) in
-                let textField = altMessage.textFields![0]
-                let newTaskTitle = textField.text
-                if newTaskTitle == "" {
-                    return
-                } else {
-                    let entity = NSEntityDescription.entity(forEntityName: "SavedTask", in: self.managedObjectContext)
-                    let newTask = NSManagedObject(entity: entity!, insertInto: self.managedObjectContext) as! SavedTask
-                    newTask.setValue(newTaskTitle, forKey: "title")
-                    newTask.setValue(0, forKey: "points")
-                    newTask.setValue(false, forKey: "isCompleted")
-                    newTask.setValue(false, forKey: "isToday")
-                    //newTask.setValue(0, forKey: "displayOrder")
-                    self.tasksArray.insert(newTask, at: 0)
-                    self.updateTasksArrayOrder()
-                    newTask.managedObjectContext?.insert(newTask)
-                    //self.saveContext()
-                    //self.fetchObjects()
-                }
-                
-            }))
-            altMessage.addTextField(configurationHandler: { (field) in return })
-            self.present(altMessage, animated: true, completion: nil)
-            
-            //need to make textfield of this new task the first responder by calling did begin editing
-        }
-    }
-    
-    func updateTasksArrayOrder(){
-        var i = 0
-        for mo in tasksArray {
-            i+=1
-            mo.setValue(i, forKey: "displayOrder")
+            let newTask = SavedTask()
+            newTask.isNewTask = true
+            try! self.realm.write {
+                self.realm.add(newTask)
+            }
         }
     }
 }
@@ -163,20 +148,46 @@ extension TasksVC: UITableViewDelegate, UITableViewDataSource, TableViewReorderD
         if let spacer = tableView.reorder.spacerCell(for: indexPath) {
             return spacer
         }
+        let selectedTask = tasksList![indexPath.row]
         let cell = tableView.dequeueReusableCell(withIdentifier: "TaskCell", for: indexPath) as! TaskCell
-        self.configure(cell, at: indexPath)
+        self.configure(cell: cell, with: selectedTask)
+        if selectedTask.isNewTask == true {
+            self.realm.beginWrite()
+            selectedTask.isNewTask = false
+            try! self.realm.commitWrite(withoutNotifying: [self.token!])
+            cell.customDelegate?.cellDidBeginEditing(editingCell: cell)
+        }
         return cell
     }
     
     //when user reorders table cells
     func tableView(_ tableView: UITableView, reorderRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
-        self.changeIsUserDriven = true
-        let movedObj = tasksArray.remove(at: sourceIndexPath.row)
-        tasksArray.insert(movedObj, at: destinationIndexPath.row)
-        self.updateTasksArrayOrder()
-        self.saveContext()
-       // self.fetchObjects()
-        self.changeIsUserDriven = false
+        self.realm.beginWrite()
+        let sourceObject = tasksList![sourceIndexPath.row]
+        let destinationObject = tasksList![destinationIndexPath.row]
+        
+        let sourceStatus = sourceObject.isCompleted
+        let destinationStatus = destinationObject.isCompleted
+        
+        if sourceStatus != destinationStatus {
+            sourceObject.isCompleted = destinationStatus
+        }
+        
+        let destinationObjectOrder = destinationObject.displayOrder
+        
+        if sourceIndexPath.row < destinationIndexPath.row {
+            for index in sourceIndexPath.row...destinationIndexPath.row {
+                let object = tasksList![index]
+                object.displayOrder -= 1
+            }
+        } else {
+            for index in (destinationIndexPath.row..<sourceIndexPath.row).reversed() {
+                let object = tasksList![index]
+                object.displayOrder += 1
+            }
+        }
+        sourceObject.displayOrder = destinationObjectOrder
+        try! self.realm.commitWrite(withoutNotifying: [self.token!])
     }
     
     //when user taps on cell to edit it
@@ -193,69 +204,14 @@ extension TasksVC: UITableViewDelegate, UITableViewDataSource, TableViewReorderD
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        guard let sectionInfo = self.fetchedResultsController.sections?[section] else { fatalError("Unexpected Section")}
-        return sectionInfo.numberOfObjects
-    }
-    
-     func numberOfSections(in tableView: UITableView) -> Int {
-         guard let sections = self.fetchedResultsController.sections else { return 0 }
-         return sections.count
-     }
-
-     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        guard let sectionInfo = self.fetchedResultsController.sections?[section] else { fatalError("Unexpected Section")}
-        return sectionInfo.name
-       // return ""
-     }
-}
-
-extension TasksVC: NSFetchedResultsControllerDelegate {
-    
-    func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        self.tableView.beginUpdates()
-    }
-    
-    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
-        switch(type) {
-        case NSFetchedResultsChangeType.insert:
-            if let uwIndexPath = newIndexPath {
-                self.tableView.insertRows(at: [uwIndexPath], with: UITableViewRowAnimation.fade)
-            }
-            break
-        case NSFetchedResultsChangeType.delete:
-            if let uwIndexPath = newIndexPath {
-                self.tableView.deleteRows(at: [uwIndexPath], with: .fade)
-            }
-            break
-        case NSFetchedResultsChangeType.update:
-            if let unwrappedIndexPath = indexPath, let cell = self.tableView.cellForRow(at: unwrappedIndexPath) as? TaskCell{
-                self.configure(cell, at: unwrappedIndexPath)
-            }
-            break
-        case NSFetchedResultsChangeType.move:
-            if self.changeIsUserDriven == false {
-                if let uwIndexPath = indexPath {
-                    self.tableView.deleteRows(at: [uwIndexPath], with: .fade)
-                }
-                if let uwNewIndexPath = newIndexPath {
-                    self.tableView.insertRows(at: [uwNewIndexPath], with: .fade)
-                }
-            }
-            break
-        }
-    }
-    
-    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        self.tableView.endUpdates()
-        self.tableView.reloadData()
+        return tasksList!.count
     }
 }
 
 extension TasksVC: CustomTaskCellDelegate {
     
-    func configure(_ cell: TaskCell, at indexPath: IndexPath) {
-        //update title, count, date, etc. from core data
-        let cellTask = self.tasksArray[indexPath.row]//self.fetchedResultsController.object(at: indexPath)
+    func configure(cell: TaskCell, with savedTask: SavedTask) {
+        let cellTask = savedTask
         let title = cellTask.title
         let count = cellTask.points
         let date = cellTask.deadline
@@ -272,11 +228,9 @@ extension TasksVC: CustomTaskCellDelegate {
         cell.taskTitleLabel.text = title
         
         //due date button
-       
-
         cell.dueDateBtn.setTitle("Choose Deadline", for: .highlighted)
         cell.dueDateBtn.setTitleColor(FlatPurple(), for: .highlighted)
-        
+
         if date != nil {
             cell.dueDate = date
             cell.dueDateBtn.isHidden = false
@@ -285,8 +239,6 @@ extension TasksVC: CustomTaskCellDelegate {
             formatter.dateStyle = .short
             formatter.timeStyle = .none
             let formattedDate = formatter.string(from: date!)
-            print("\(title!): \(formattedDate)")
-            
             
             if (date?.isYesterday)! == true {
                 cell.dueDateBtn.setTitle("Yesterday", for: .normal)
@@ -338,18 +290,21 @@ extension TasksVC: CustomTaskCellDelegate {
                 dotsProgressColor: color,
                 backColor: UIColor.clear
             )
-            cell.progressBar.setNumberOfDots(Int(count), animated: true)
-            cell.progressBar.setProgress(Int(count))
+            cell.progressBar.setNumberOfDots(count, animated: false)
+            cell.progressBar.setProgress(count, animated: false)
         }
         
         //sliding options
+       
         let leftButton1 = MGSwipeButton(title: "Add to Today", backgroundColor: FlatGreen())
+        leftButton1.titleLabel?.font = UIFont(name: "SF Pro Text Regular" , size: 12)
         cell.leftButtons = [leftButton1]
         cell.leftSwipeSettings.transition = .drag
         cell.leftExpansion.buttonIndex = 0
         cell.leftExpansion.fillOnTrigger = true
         cell.leftExpansion.threshold = 2
         let rightButton1 = MGSwipeButton(title: "Delete", backgroundColor: FlatRed())
+        rightButton1.titleLabel?.font = UIFont(name: "SF Pro Text Regular" , size: 12)
         cell.rightButtons = [ rightButton1]
         cell.rightSwipeSettings.transition = .drag
         cell.rightExpansion.buttonIndex = 0
@@ -359,64 +314,71 @@ extension TasksVC: CustomTaskCellDelegate {
         //cell checkbox attributes
         if checked == true {
             cell.checkBox.on = true
-            cell.alpha = CGFloat(0.3)
+            cell.contentView.alpha = CGFloat(0.2)
         } else {
             cell.checkBox.on = false
-            cell.alpha = CGFloat(1.0)
+            cell.contentView.alpha = CGFloat(1.0)
         }
         cell.checkBox.onAnimationType = .fill
-        // cell.checkBox.offAnimationType = .fill
-        //cell.checkBox.animationDuration = CGFloat(1)
         cell.checkBox.onTintColor = color
         cell.checkBox.onFillColor = color
         cell.checkBox.onCheckColor = UIColor.white
     }
     
-    //mark task as completed when checked - core data
+    //mark task as completed when checked
     func cellCheckBoxTapped(editingCell: TaskCell, checked: Bool) {
         let selectedTask = editingCell.taskObj!
-        //selectedTask.isCompleted = checked
-        selectedTask.setValue(checked, forKey: "isCompleted")
-        self.saveContext()
-        self.fetchObjects()
+        try! self.realm.write {
+            selectedTask.isCompleted = checked
+        }
     }
     
     //update changed deadline - core data
     func cellDueDateChanged(editingCell: TaskCell, date: Date?) {
         let selectedTask = editingCell.taskObj!
-        if let unwrappedDate = date {
-            //selectedTask.deadline = unwrappedDate
-            selectedTask.setValue(unwrappedDate, forKey: "deadline")
-        } else {
-            //selectedTask.deadline = nil
-            selectedTask.setValue(nil, forKey: "deadline")
+        try! self.realm.write {
+            if let unwrappedDate = date {
+                selectedTask.deadline = unwrappedDate
+            } else {
+                selectedTask.deadline = nil
+            }
         }
-        self.saveContext(selectedTask)
     }
     
     //delete task - core data
     func deleteTask(editingCell: TaskCell) {
-        let selectedTask = editingCell.taskObj!
-        selectedTask.managedObjectContext?.delete(selectedTask)
+        let selectedTask = (editingCell.taskObj)!
+        try! self.realm.write {
+            self.realm.delete(selectedTask)
+        }
     }
     
     //update new task title
     func updateTaskTitle(editingCell: TaskCell, newTitle: String) {
-        let selectedTask = editingCell.taskObj!
-        //selectedTask.title = newTitle
-        selectedTask.setValue(newTitle, forKey: "title")
-        self.saveContext(selectedTask)
+        let selectedTask = (editingCell.taskObj)!
+        try! self.realm.write {
+            selectedTask.title = newTitle
+        }
     }
     
     //add task to today
     func addTasktoToday(editingCell: TaskCell) {
-        let selectedTask = editingCell.taskObj!
-        // selectedTask.isToday = true
-        selectedTask.setValue(true, forKey: "isToday")
-        self.saveContext(selectedTask)
+        let selectedTask = (editingCell.taskObj)!
+        try! self.realm.write {
+            selectedTask.isCompleted = false
+            selectedTask.isToday = true
+        }
     }
     
     func cellDidBeginEditing(editingCell: TaskCell) {
+        
+        if editingCell.taskObj?.isCompleted == true {
+            return
+        }
+        
+        if let drawerVC = self.navigationController?.parent as? PulleyViewController {
+            drawerVC.setDrawerPosition(position: .open, animated: true)
+        }
         
         editingCell.isBeingEdited = true
         
@@ -429,15 +391,14 @@ extension TasksVC: CustomTaskCellDelegate {
         Floaty.global.button.isHidden = true
         
         editingCell.taskTitleLabel.isEnabled = true
-        // print(editingCell.pickerSelected)
         if editingCell.pickerSelected == false {
             //triggers keyboard if picker is not the first responder
             editingCell.taskTitleLabel.becomeFirstResponder()
         }
         
         let editingOffset = self.tableView.contentOffset.y - editingCell.frame.origin.y as CGFloat
-        let visibleCells = self.tableView.visibleCells as! [TaskCell]
-        for cell in visibleCells {
+       let visibleCells = self.tableView.visibleCells as! [TaskCell]
+       for cell in visibleCells {
             UIView.animate(withDuration: 0.3, animations: { () -> Void in
                 cell.transform = CGAffineTransform(translationX: 0, y: editingOffset)
                 if cell != editingCell {
@@ -448,7 +409,7 @@ extension TasksVC: CustomTaskCellDelegate {
     }
     
     func cellDidEndEditing(editingCell: TaskCell) {
-        
+
         editingCell.isBeingEdited = false
         
         if self.currentlySelectedCell == editingCell{
@@ -478,8 +439,6 @@ extension TasksVC: CustomTaskCellDelegate {
         }
         
         let visibleCells = tableView.visibleCells as! [TaskCell]
-        let lastView = visibleCells[visibleCells.count - 1]
-        let editingOffset = self.tableView.contentOffset.y - editingCell.frame.origin.y as CGFloat
         for cell: TaskCell in visibleCells {
             UIView.animate(withDuration: 0.2, animations: { () -> Void in
                 cell.transform = CGAffineTransform.identity
@@ -487,9 +446,6 @@ extension TasksVC: CustomTaskCellDelegate {
                     cell.alpha = 1.0
                 }
             }, completion: { (Finished: Bool) -> Void in
-                if cell == lastView {
-                    self.tableView.reloadData()
-                }
             })
         }
     }
@@ -498,24 +454,30 @@ extension TasksVC: CustomTaskCellDelegate {
 extension TasksVC: MGSwipeTableCellDelegate {
     
     func swipeTableCell(_ cell: MGSwipeTableCell, tappedButtonAt index: Int, direction: MGSwipeDirection, fromExpansion: Bool) -> Bool {
+       
         let modifiedCell = cell as! TaskCell
-        //let cellIndex = self.tableView.indexPath(for: modifiedCell)!
-        //let savedTask = self.fetchedResultsController.object(at: cellIndex)
         
         if direction == .rightToLeft {
             if index == 0 {
                 //if user swipes to delete cell
-                self.deleteTask(editingCell: modifiedCell)
+                if modifiedCell.taskObj?.title != ""{
+                    self.deleteTask(editingCell: modifiedCell)
+                }
             }
         } else {
             if index == 0 {
+                //if user swipes to add task to today
                 self.addTasktoToday(editingCell: modifiedCell)
             }
+        }
+        if modifiedCell.isBeingEdited == true {
+            modifiedCell.customDelegate?.cellDidEndEditing(editingCell: modifiedCell)
         }
         return true
     }
 }
 
+/*
 extension TasksVC: PulleyDrawerViewControllerDelegate {
     
     func collapsedDrawerHeight(bottomSafeArea: CGFloat) -> CGFloat {
@@ -527,13 +489,39 @@ extension TasksVC: PulleyDrawerViewControllerDelegate {
     }
     
     func supportedDrawerPositions() -> [PulleyPosition] {
-        return PulleyPosition.all
+        return [.partiallyRevealed, .open]
     }
     
     func drawerDisplayModeDidChange(drawer: PulleyViewController) {
-        self.saveContext()
-        self.fetchObjects()
+       // self.fetchObjects()
     }
+}
+*/
 
+extension TasksVC: DZNEmptyDataSetSource, DZNEmptyDataSetDelegate {
+    
+    func image(forEmptyDataSet scrollView: UIScrollView!) -> UIImage! {
+        return UIImage(named: "confused" )
+    }
+    
+    func title(forEmptyDataSet scrollView: UIScrollView!) -> NSAttributedString! {
+        let str = "What to do?"
+       let attrs = [NSAttributedStringKey.font: UIFont.preferredFont(forTextStyle: UIFontTextStyle.headline)]
+        return NSAttributedString(string: str, attributes: attrs)
+    }
+    
+    func description(forEmptyDataSet scrollView: UIScrollView!) -> NSAttributedString! {
+        let str = "Looks like you have no pending tasks."
+        let attrs = [NSAttributedStringKey.font: UIFont.preferredFont(forTextStyle: UIFontTextStyle.headline)]
+        return NSAttributedString(string: str, attributes: attrs)
+    }
+    
+    func emptyDataSet(_ scrollView: UIScrollView!, didTap view: UIView!) {
+        self.createNewTask()
+    }
+    
+    func verticalOffset(forEmptyDataSet scrollView: UIScrollView!) -> CGFloat {
+        return -((self.navigationController?.navigationBar.frame.size.height)!/2.0)
+    }
 }
 
