@@ -21,5 +21,7 @@ pod 'DZNEmptyDataSet'
 pod 'Firebase/Core'
 pod 'Fabric', '~> 1.7.2'
 pod 'Crashlytics', '~> 3.9.3'
+pod 'Instabug'
+pod 'paper-onboarding', :git => 'git@github.com:MaTriXy/paper-onboarding'
 
 end

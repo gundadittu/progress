@@ -41,5 +41,11 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>UIAppFonts</key>
+	<array/>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Progress needs access to the microphone to be able to attach voice notes.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Progress needs access to your photo library for you to be able to attach images.</string>
 </dict>
 </plist>

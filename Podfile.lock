@@ -24,12 +24,19 @@ PODS:
   - GoogleToolboxForMac/Defines (2.1.3)
   - GoogleToolboxForMac/NSData+zlib (2.1.3):
     - GoogleToolboxForMac/Defines (= 2.1.3)
+  - Instabug (7.4):
+    - Instabug/Instabug (= 7.4)
+    - Instabug/InstabugCore (= 7.4)
+  - Instabug/Instabug (7.4):
+    - Instabug/InstabugCore
+  - Instabug/InstabugCore (7.4)
   - MGSwipeTableCell (1.6.6)
   - nanopb (0.3.8):
     - nanopb/decode (= 0.3.8)
     - nanopb/encode (= 0.3.8)
   - nanopb/decode (0.3.8)
   - nanopb/encode (0.3.8)
+  - paper-onboarding (3.0.0)
   - Pulley (2.2.2)
   - PureLayout (3.0.2)
   - Realm (3.0.2):
@@ -50,7 +57,9 @@ DEPENDENCIES:
   - Fabric (~> 1.7.2)
   - Firebase/Core
   - Floaty
+  - Instabug
   - MGSwipeTableCell
+  - paper-onboarding (from `git@github.com:MaTriXy/paper-onboarding`)
   - Pulley
   - PureLayout
   - RealmSwift
@@ -60,11 +69,16 @@ DEPENDENCIES:
 EXTERNAL SOURCES:
   ChameleonFramework:
     :git: https://github.com/ViccAlexander/Chameleon.git
+  paper-onboarding:
+    :git: git@github.com:MaTriXy/paper-onboarding
 
 CHECKOUT OPTIONS:
   ChameleonFramework:
     :commit: 6dd284bde21ea2e7f9fd89bc36f40df16e16369d
     :git: https://github.com/ViccAlexander/Chameleon.git
+  paper-onboarding:
+    :commit: 7af4ed10a15fb15924e20ab2ca15bc43dc196d2b
+    :git: git@github.com:MaTriXy/paper-onboarding
 
 SPEC CHECKSUMS:
   BEMCheckBox: 5ba6e37ade3d3657b36caecc35c8b75c6c2b1a4e
@@ -80,8 +94,10 @@ SPEC CHECKSUMS:
   FirebaseInstanceID: 148c25c986c8699e67304b114e365713dce467f2
   Floaty: 4f88811bbf08521807f42355db6a9c0db85d5d78
   GoogleToolboxForMac: 2501e2ad72a52eb3dfe7bd9aee7dad11b858bd20
+  Instabug: 3286aa572bd3c051071623198ac665f0dbac2a8c
   MGSwipeTableCell: c3bc6e261e7bc06c112909fe3fb8205de286082c
   nanopb: 5601e6bca2dbf1ed831b519092ec110f66982ca3
+  paper-onboarding: 923fface524d329afb3347d2c2bc1e1b116f8c69
   Pulley: b9c20b583663668f532853de25066ae8d89396c4
   PureLayout: 4d550abe49a94f24c2808b9b95db9131685fe4cd
   Realm: 6f23fd1f178a09342eac21bfa7c2bf4312a7a180
@@ -89,6 +105,6 @@ SPEC CHECKSUMS:
   SwiftDate: 7b56d42a221f582047287deb256b23fc5ed49a60
   SwiftReorder: 27d737099efd6125339d5e8cb090e46c67341143
 
-PODFILE CHECKSUM: c30f9d741a62af5d02317986d3731381d5f18b24
+PODFILE CHECKSUM: e8844277de915474e15826382520b3e68a244b7e
 
 COCOAPODS: 1.4.0.beta.2

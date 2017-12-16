@@ -9,29 +9,45 @@
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Pods/DottedProgressBar/DottedProgressBar/Classes/DottedProgressBar.swift"
-            timestampString = "535074877.396165"
+            filePath = "Progress/Controllers/TasksVC.swift"
+            timestampString = "535148308.256716"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "297"
-            endingLineNumber = "297"
-            landmarkName = "animateProgress(animation:)"
+            startingLineNumber = "473"
+            endingLineNumber = "473"
+            landmarkName = "swipeTableCell(_:tappedButtonAt:direction:fromExpansion:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Progress/Controllers/TasksVC.swift"
-            timestampString = "535074877.396492"
+            timestampString = "535148308.256807"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "452"
-            endingLineNumber = "452"
-            landmarkName = "cellDidEndEditing(editingCell:)"
+            startingLineNumber = "356"
+            endingLineNumber = "356"
+            landmarkName = "deleteTask(editingCell:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Progress/Controllers/TaskCell.swift"
+            timestampString = "535147083.994365"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "63"
+            endingLineNumber = "63"
+            landmarkName = "textFieldDidEndEditing(_:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

@@ -9,6 +9,11 @@
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
+    <customFonts key="customFonts">
+        <array key="HelveticaNeue.ttc">
+            <string>HelveticaNeue</string>
+        </array>
+    </customFonts>
     <scenes>
         <!--Pulley View Controller-->
         <scene sceneID="tne-QT-ifu">
@@ -76,15 +81,15 @@
                                                             </constraints>
                                                         </view>
                                                         <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" alignment="top" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="faG-Ba-kHu">
-                                                            <rect key="frame" x="30" y="0.0" width="138" height="86"/>
+                                                            <rect key="frame" x="30" y="0.0" width="127.5" height="86"/>
                                                             <subviews>
                                                                 <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" usesAttributedText="YES" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="e1y-lm-PM6">
-                                                                    <rect key="frame" x="0.0" y="0.0" width="138" height="40.5"/>
+                                                                    <rect key="frame" x="0.0" y="0.0" width="127.5" height="40.5"/>
                                                                     <attributedString key="attributedText"/>
                                                                     <textInputTraits key="textInputTraits"/>
                                                                 </textField>
                                                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="WQg-8N-ryE" customClass="DottedProgressBar" customModule="DottedProgressBar">
-                                                                    <rect key="frame" x="0.0" y="45.5" width="138" height="40.5"/>
+                                                                    <rect key="frame" x="0.0" y="45.5" width="127.5" height="40.5"/>
                                                                     <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                                 </view>
                                                             </subviews>
@@ -96,7 +101,7 @@
                                                             </constraints>
                                                         </stackView>
                                                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="right" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bN4-J7-0q8">
-                                                            <rect key="frame" x="178" y="29.5" width="167" height="27"/>
+                                                            <rect key="frame" x="167.5" y="29.5" width="177.5" height="27"/>
                                                             <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                                             <state key="normal">
                                                                 <color key="titleColor" red="0.68888300660000001" green="0.71366006140000005" blue="0.73448425530000006" alpha="1" colorSpace="calibratedRGB"/>
@@ -192,15 +197,15 @@
                                                             </constraints>
                                                         </view>
                                                         <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" alignment="top" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="inb-C7-ydt">
-                                                            <rect key="frame" x="30" y="0.0" width="138" height="99.5"/>
+                                                            <rect key="frame" x="30" y="0.0" width="127.5" height="99.5"/>
                                                             <subviews>
                                                                 <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" usesAttributedText="YES" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="yBc-1c-8w8">
-                                                                    <rect key="frame" x="0.0" y="0.0" width="138" height="47.5"/>
+                                                                    <rect key="frame" x="0.0" y="0.0" width="127.5" height="47.5"/>
                                                                     <attributedString key="attributedText"/>
                                                                     <textInputTraits key="textInputTraits"/>
                                                                 </textField>
                                                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sA9-4r-TGL" customClass="DottedProgressBar" customModule="DottedProgressBar">
-                                                                    <rect key="frame" x="0.0" y="52.5" width="138" height="47"/>
+                                                                    <rect key="frame" x="0.0" y="52.5" width="127.5" height="47"/>
                                                                     <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                                 </view>
                                                             </subviews>
@@ -212,7 +217,7 @@
                                                             </constraints>
                                                         </stackView>
                                                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="right" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="mEH-Xx-cRx">
-                                                            <rect key="frame" x="178" y="36.5" width="167" height="27"/>
+                                                            <rect key="frame" x="167.5" y="36.5" width="177.5" height="27"/>
                                                             <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                                             <state key="normal">
                                                                 <color key="titleColor" red="0.68888300657272339" green="0.71366006135940552" blue="0.73448425531387329" alpha="1" colorSpace="calibratedRGB"/>
@@ -250,7 +255,14 @@
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="s9P-yW-HLi"/>
                     </view>
-                    <navigationItem key="navigationItem" id="hji-3M-NwO"/>
+                    <navigationItem key="navigationItem" id="hji-3M-NwO">
+                        <barButtonItem key="rightBarButtonItem" title="Report" image="report" id="rnC-sq-YWa">
+                            <color key="tintColor" red="0.68888300660000001" green="0.71366006140000005" blue="0.73448425530000006" alpha="1" colorSpace="calibratedRGB"/>
+                            <connections>
+                                <action selector="reportBtnTapped:" destination="TLJ-mf-QcS" id="UBo-5i-qBo"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
                         <outlet property="tableView" destination="cv6-bY-Vmc" id="NMS-AQ-yQ1"/>
                     </connections>
@@ -258,6 +270,96 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="q7T-AY-JDn" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1644" y="-20"/>
+        </scene>
+        <!--SettingsVC-->
+        <scene sceneID="Edq-5z-wek">
+            <objects>
+                <viewController id="mb5-TN-PVf" customClass="SettingsVC" customModule="Progress" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="3kV-Cp-nJ9">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <viewLayoutGuide key="safeArea" id="KcB-Ha-Fyw"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="vhQ-CK-55I" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2449" y="-21"/>
+        </scene>
+        <!--OnboardingVC-->
+        <scene sceneID="otn-jp-nvd">
+            <objects>
+                <viewController storyboardIdentifier="onboarding" id="Yub-tf-95W" customClass="OnboardingVC" customModule="Progress" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="Gfw-XN-Lpy">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="WdX-SZ-4SU" customClass="PaperOnboarding" customModule="paper_onboarding">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                                <subviews>
+                                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="background" translatesAutoresizingMaskIntoConstraints="NO" id="hts-6z-NQq">
+                                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                                    </imageView>
+                                </subviews>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <constraints>
+                                    <constraint firstAttribute="trailing" secondItem="hts-6z-NQq" secondAttribute="trailing" id="5sO-Nv-JcX"/>
+                                    <constraint firstItem="hts-6z-NQq" firstAttribute="leading" secondItem="WdX-SZ-4SU" secondAttribute="leading" id="VcV-wx-ttp"/>
+                                    <constraint firstItem="hts-6z-NQq" firstAttribute="top" secondItem="WdX-SZ-4SU" secondAttribute="top" id="bbF-TW-tlh"/>
+                                    <constraint firstAttribute="bottom" secondItem="hts-6z-NQq" secondAttribute="bottom" id="bxL-wh-hDA"/>
+                                </constraints>
+                            </view>
+                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="id7-GV-vHL">
+                                <rect key="frame" x="36" y="541" width="303" height="45"/>
+                                <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="45" id="X2X-mU-Sb4"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="22"/>
+                                <state key="normal" title="Get Started">
+                                    <color key="titleColor" red="0.2783651352" green="0.1853051037" blue="0.59323644639999995" alpha="1" colorSpace="calibratedRGB"/>
+                                </state>
+                                <connections>
+                                    <action selector="getStartedBtnHandler:" destination="Yub-tf-95W" eventType="touchUpInside" id="3QU-Ko-cZz"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jxL-7S-Sx7">
+                                <rect key="frame" x="16" y="596" width="30" height="45"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="45" id="8H8-jo-VCi"/>
+                                </constraints>
+                                <state key="normal" title="Skip">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="skipBtnHandler:" destination="Yub-tf-95W" eventType="touchUpInside" id="14F-9E-ZrJ"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="WdX-SZ-4SU" firstAttribute="leading" secondItem="7Hb-tE-LIH" secondAttribute="leading" id="205-dU-mKb"/>
+                            <constraint firstItem="7Hb-tE-LIH" firstAttribute="trailing" secondItem="id7-GV-vHL" secondAttribute="trailing" constant="36" id="2la-ZF-bji"/>
+                            <constraint firstItem="jxL-7S-Sx7" firstAttribute="top" secondItem="id7-GV-vHL" secondAttribute="bottom" constant="10" id="KFq-5r-Lcu"/>
+                            <constraint firstItem="7Hb-tE-LIH" firstAttribute="trailing" secondItem="jxL-7S-Sx7" secondAttribute="trailing" constant="329" id="Phz-TA-1su"/>
+                            <constraint firstItem="7Hb-tE-LIH" firstAttribute="bottom" secondItem="jxL-7S-Sx7" secondAttribute="bottom" constant="26" id="cTD-y1-Zk2"/>
+                            <constraint firstItem="WdX-SZ-4SU" firstAttribute="bottom" secondItem="7Hb-tE-LIH" secondAttribute="bottom" id="m7G-HI-BUu"/>
+                            <constraint firstItem="WdX-SZ-4SU" firstAttribute="top" secondItem="Gfw-XN-Lpy" secondAttribute="top" id="mhu-jp-Lfu"/>
+                            <constraint firstItem="WdX-SZ-4SU" firstAttribute="trailing" secondItem="7Hb-tE-LIH" secondAttribute="trailing" id="qjn-os-QtY"/>
+                            <constraint firstItem="id7-GV-vHL" firstAttribute="leading" secondItem="7Hb-tE-LIH" secondAttribute="leading" constant="36" id="w8W-0M-hbv"/>
+                            <constraint firstItem="jxL-7S-Sx7" firstAttribute="leading" secondItem="7Hb-tE-LIH" secondAttribute="leading" constant="16" id="yOz-Ty-1Ws"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="7Hb-tE-LIH"/>
+                    </view>
+                    <connections>
+                        <outlet property="getStartedBtn" destination="id7-GV-vHL" id="Tsl-bo-bYj"/>
+                        <outlet property="paperView" destination="WdX-SZ-4SU" id="J34-Cn-09S"/>
+                        <outlet property="skipBtn" destination="jxL-7S-Sx7" id="cn8-Vc-39P"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="9H9-ep-BPA" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="3201" y="147"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="hxW-4C-e3F">
@@ -278,4 +380,8 @@
             <point key="canvasLocation" x="924" y="440"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="background" width="802" height="1157"/>
+        <image name="report" width="33" height="33"/>
+    </resources>
 </document>

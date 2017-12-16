@@ -18,6 +18,7 @@ import Realm
 import RealmSwift
 import DZNEmptyDataSet
 import Crashlytics
+import Instabug
 
 class TodayVC: UIViewController , TableViewReorderDelegate {
 
@@ -54,7 +55,7 @@ class TodayVC: UIViewController , TableViewReorderDelegate {
         tableView.reorder.cellScale = 1.05
         tableView.reorder.shadowOpacity = 0.3
         tableView.reorder.shadowRadius = 20
-        
+    
         self.fetchObjects()
         
         token = self.tasksList?.observe {[weak self] (changes: RealmCollectionChange) in
@@ -105,6 +106,9 @@ class TodayVC: UIViewController , TableViewReorderDelegate {
                 ro.displayOrder = i
             }
         }
+    }
+    @IBAction func reportBtnTapped(_ sender: Any) {
+        Instabug.invoke()
     }
 }
 
@@ -345,6 +349,10 @@ extension TodayVC: CustomTodayTaskCellDelegate {
     }
 
     func cellDidBeginEditing(editingCell: TodayTaskCell) {
+        
+        if editingCell.taskObj?.isCompleted == true || editingCell.swipeOffset > 0 {
+            return
+        }
     
         editingCell.isBeingEdited = true
         
@@ -368,7 +376,7 @@ extension TodayVC: CustomTodayTaskCellDelegate {
             UIView.animate(withDuration: 0.3, animations: { () -> Void in
                 cell.transform = CGAffineTransform(translationX: 0, y: editingOffset)
                 if cell != editingCell {
-                    cell.alpha = 0.1
+                    cell.alpha = 0.3
                 }
             })
         }
@@ -428,7 +436,7 @@ extension TodayVC: MGSwipeTableCellDelegate {
         if direction == .rightToLeft {
             if index == 0 {
                 //if user swipes to delete cell
-                if modifiedCell.taskTitleLabel.text != "" {
+                if modifiedCell.taskObj?.title != "" || (modifiedCell.isBeingEdited == false && modifiedCell.taskObj?.title == "") {
                     self.deleteTask(editingCell: modifiedCell)
                 }
             } else if index == 1 {
@@ -495,5 +503,6 @@ extension TodayVC: DZNEmptyDataSetSource, DZNEmptyDataSetDelegate {
         return true
     }
 }
+
 
 

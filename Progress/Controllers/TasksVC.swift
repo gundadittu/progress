@@ -29,7 +29,6 @@ class TasksVC: UIViewController, FloatyDelegate  {
     
     let realm = try! Realm()
     var tasksList: Results<SavedTask>?
-    var completedTasksList: Results<SavedTask>?
     var sectionNames = ["All Tasks", "Completed Tasks"]
     var token: NotificationToken?
     
@@ -106,7 +105,7 @@ class TasksVC: UIViewController, FloatyDelegate  {
     func fetchObjects(){
         let isNotTodayPredicate = NSPredicate(format: "isToday == %@",  Bool(booleanLiteral: false) as CVarArg)
         let list = self.realm.objects(SavedTask.self).filter(isNotTodayPredicate)
-        let sortProperties = [SortDescriptor(keyPath: "isCompleted", ascending: true), SortDescriptor(keyPath: "displayOrder", ascending: true)]
+        let sortProperties = [SortDescriptor(keyPath: "isNewTask", ascending: false), SortDescriptor(keyPath: "isCompleted", ascending: true), SortDescriptor(keyPath: "displayOrder", ascending: true)]
         self.tasksList = list.sorted(by: sortProperties)
         self.updateArrayDisplayOrder(self.tasksList!)
     }
@@ -129,7 +128,7 @@ class TasksVC: UIViewController, FloatyDelegate  {
     //Creates a new task
     func createNewTask(){
         if currentlySelectedCell == nil {
-            Floaty.global.button.isHidden = true
+          //  Floaty.global.button.isHidden = true
             if let drawerVC = self.navigationController?.parent as? PulleyViewController {
                 drawerVC.setDrawerPosition(position: .open, animated: true)
             }
@@ -201,9 +200,6 @@ extension TasksVC: UITableViewDelegate, UITableViewDataSource, TableViewReorderD
     //when user taps on cell to edit it
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let cell = self.tableView.cellForRow(at: indexPath) as! TaskCell
-        if self.currentlySelectedCell != nil {
-            self.currentlySelectedCell?.customDelegate?.cellDidEndEditing(editingCell: cell)
-        }
         cell.customDelegate?.cellDidBeginEditing(editingCell: cell)
     }
     
@@ -380,7 +376,7 @@ extension TasksVC: CustomTaskCellDelegate {
     
     func cellDidBeginEditing(editingCell: TaskCell) {
         
-        if editingCell.taskObj?.isCompleted == true {
+        if editingCell.taskObj?.isCompleted == true || editingCell.swipeOffset > 0 {
             return
         }
         
@@ -390,7 +386,6 @@ extension TasksVC: CustomTaskCellDelegate {
         }
         
         editingCell.isBeingEdited = true
-        
         self.currentlySelectedCell = editingCell
         
         //makes due date button visible
@@ -457,7 +452,7 @@ extension TasksVC: CustomTaskCellDelegate {
             UIView.animate(withDuration: 0.2, animations: { () -> Void in
                 cell.transform = CGAffineTransform.identity
                 if cell != editingCell {
-                    cell.alpha = 1.0
+                    cell.alpha = 0.3
                 }
             }, completion: { (Finished: Bool) -> Void in
             })
@@ -474,7 +469,7 @@ extension TasksVC: MGSwipeTableCellDelegate {
         if direction == .rightToLeft {
             if index == 0 {
                 //if user swipes to delete cell
-                if modifiedCell.taskObj?.title != ""{
+                if modifiedCell.taskObj?.title != "" || (modifiedCell.isBeingEdited == false && modifiedCell.taskObj?.title == "") {
                     self.deleteTask(editingCell: modifiedCell)
                 }
             }

@@ -304,8 +304,6 @@ private extension DottedProgressBar {
                                 Double(previousProgress - 1))) : 0.0,
                                options: .curveLinear,
                                animations: {
-                                print(index)
-                                print(self.subviews.count)
                                 self.subviews[index].backgroundColor =
                                     self.currentProgress > self.previousProgress ?
                                         self.progressAppearance.dotsProgressColor :
