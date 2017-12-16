@@ -9,13 +9,13 @@
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Progress/Controllers/TasksVC.swift"
-            timestampString = "535020634.874606"
+            filePath = "Pods/DottedProgressBar/DottedProgressBar/Classes/DottedProgressBar.swift"
+            timestampString = "535074877.396165"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "464"
-            endingLineNumber = "464"
-            landmarkName = "swipeTableCell(_:tappedButtonAt:direction:fromExpansion:)"
+            startingLineNumber = "297"
+            endingLineNumber = "297"
+            landmarkName = "animateProgress(animation:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -26,11 +26,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Progress/Controllers/TasksVC.swift"
-            timestampString = "535020634.874902"
+            timestampString = "535074877.396492"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "438"
-            endingLineNumber = "438"
+            startingLineNumber = "452"
+            endingLineNumber = "452"
             landmarkName = "cellDidEndEditing(editingCell:)"
             landmarkType = "7">
          </BreakpointContent>

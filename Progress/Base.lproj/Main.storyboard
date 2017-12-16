@@ -71,24 +71,21 @@
                                                             <rect key="frame" x="0.0" y="33" width="20" height="20"/>
                                                             <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                             <constraints>
-                                                                <constraint firstAttribute="height" constant="20" id="1Mg-iL-MYY"/>
                                                                 <constraint firstAttribute="width" constant="20" id="ALH-FR-qDT"/>
+                                                                <constraint firstAttribute="height" constant="20" id="hGr-Qv-oLK"/>
                                                             </constraints>
                                                         </view>
                                                         <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" alignment="top" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="faG-Ba-kHu">
-                                                            <rect key="frame" x="30" y="20.5" width="137" height="45"/>
+                                                            <rect key="frame" x="30" y="0.0" width="138" height="86"/>
                                                             <subviews>
                                                                 <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" usesAttributedText="YES" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="e1y-lm-PM6">
-                                                                    <rect key="frame" x="0.0" y="0.0" width="137" height="20"/>
+                                                                    <rect key="frame" x="0.0" y="0.0" width="138" height="40.5"/>
                                                                     <attributedString key="attributedText"/>
                                                                     <textInputTraits key="textInputTraits"/>
                                                                 </textField>
                                                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="WQg-8N-ryE" customClass="DottedProgressBar" customModule="DottedProgressBar">
-                                                                    <rect key="frame" x="0.0" y="25" width="137" height="20"/>
+                                                                    <rect key="frame" x="0.0" y="45.5" width="138" height="40.5"/>
                                                                     <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                                                    <constraints>
-                                                                        <constraint firstAttribute="height" constant="20" id="ABr-DD-ptV"/>
-                                                                    </constraints>
                                                                 </view>
                                                             </subviews>
                                                             <constraints>
@@ -99,7 +96,7 @@
                                                             </constraints>
                                                         </stackView>
                                                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="right" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bN4-J7-0q8">
-                                                            <rect key="frame" x="177" y="29.5" width="168" height="27"/>
+                                                            <rect key="frame" x="178" y="29.5" width="167" height="27"/>
                                                             <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                                             <state key="normal">
                                                                 <color key="titleColor" red="0.68888300660000001" green="0.71366006140000005" blue="0.73448425530000006" alpha="1" colorSpace="calibratedRGB"/>
@@ -191,23 +188,20 @@
                                                             <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                             <constraints>
                                                                 <constraint firstAttribute="width" constant="20" id="Nd1-Qu-qxe"/>
-                                                                <constraint firstAttribute="height" constant="20" id="d1C-Vs-ire"/>
+                                                                <constraint firstAttribute="height" constant="20" id="aYB-e4-1tW"/>
                                                             </constraints>
                                                         </view>
                                                         <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" alignment="top" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="inb-C7-ydt">
-                                                            <rect key="frame" x="30" y="27.5" width="134.5" height="45"/>
+                                                            <rect key="frame" x="30" y="0.0" width="138" height="99.5"/>
                                                             <subviews>
                                                                 <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" usesAttributedText="YES" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="yBc-1c-8w8">
-                                                                    <rect key="frame" x="0.0" y="0.0" width="134.5" height="20"/>
+                                                                    <rect key="frame" x="0.0" y="0.0" width="138" height="47.5"/>
                                                                     <attributedString key="attributedText"/>
                                                                     <textInputTraits key="textInputTraits"/>
                                                                 </textField>
                                                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sA9-4r-TGL" customClass="DottedProgressBar" customModule="DottedProgressBar">
-                                                                    <rect key="frame" x="0.0" y="25" width="134.5" height="20"/>
+                                                                    <rect key="frame" x="0.0" y="52.5" width="138" height="47"/>
                                                                     <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                                                    <constraints>
-                                                                        <constraint firstAttribute="height" constant="20" id="tgv-bf-ZGH"/>
-                                                                    </constraints>
                                                                 </view>
                                                             </subviews>
                                                             <constraints>
@@ -218,7 +212,7 @@
                                                             </constraints>
                                                         </stackView>
                                                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="right" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="mEH-Xx-cRx">
-                                                            <rect key="frame" x="174.5" y="36.5" width="170.5" height="27"/>
+                                                            <rect key="frame" x="178" y="36.5" width="167" height="27"/>
                                                             <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                                             <state key="normal">
                                                                 <color key="titleColor" red="0.68888300657272339" green="0.71366006135940552" blue="0.73448425531387329" alpha="1" colorSpace="calibratedRGB"/>

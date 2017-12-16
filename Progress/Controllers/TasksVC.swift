@@ -190,6 +190,14 @@ extension TasksVC: UITableViewDelegate, UITableViewDataSource, TableViewReorderD
         try! self.realm.commitWrite(withoutNotifying: [self.token!])
     }
     
+    func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
+        return
+    }
+    
+    func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
+        return true
+    }
+    
     //when user taps on cell to edit it
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let cell = self.tableView.cellForRow(at: indexPath) as! TaskCell
@@ -286,7 +294,7 @@ extension TasksVC: CustomTaskCellDelegate {
             cell.taskTitleLabel.text = title
             cell.progressBar.progressAppearance = DottedProgressBar.DottedProgressAppearance (
                 dotRadius: progressDotRadius,
-                dotsColor: UIColor.gray.withAlphaComponent(0.5),
+                dotsColor: color,
                 dotsProgressColor: color,
                 backColor: UIColor.clear
             )
@@ -378,6 +386,7 @@ extension TasksVC: CustomTaskCellDelegate {
         
         if let drawerVC = self.navigationController?.parent as? PulleyViewController {
             drawerVC.setDrawerPosition(position: .open, animated: true)
+            drawerVC.allowsUserDrawerPositionChange = false
         }
         
         editingCell.isBeingEdited = true
@@ -409,6 +418,10 @@ extension TasksVC: CustomTaskCellDelegate {
     }
     
     func cellDidEndEditing(editingCell: TaskCell) {
+        
+        if let drawerVC = self.navigationController?.parent as? PulleyViewController {
+            drawerVC.allowsUserDrawerPositionChange = true 
+        }
 
         editingCell.isBeingEdited = false
         
@@ -429,9 +442,10 @@ extension TasksVC: CustomTaskCellDelegate {
         editingCell.taskTitleLabel.isEnabled = false
         
         //mark new name in coredata
-        let newText = editingCell.taskTitleLabel.text!
-        if newText != "" {
-            self.updateTaskTitle(editingCell: editingCell, newTitle: newText)
+        let newText = editingCell.taskTitleLabel.text
+        let trimmedText = editingCell.taskTitleLabel.text!.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmedText.isEmpty == false {
+            self.updateTaskTitle(editingCell: editingCell, newTitle: newText!)
         } else {
             //delete new task if user did not give it title
             //deletes existing task if user removed its title
@@ -470,33 +484,14 @@ extension TasksVC: MGSwipeTableCellDelegate {
                 self.addTasktoToday(editingCell: modifiedCell)
             }
         }
+        
         if modifiedCell.isBeingEdited == true {
-            modifiedCell.customDelegate?.cellDidEndEditing(editingCell: modifiedCell)
+            modifiedCell.taskTitleLabel.resignFirstResponder()
         }
+        
         return true
     }
 }
-
-/*
-extension TasksVC: PulleyDrawerViewControllerDelegate {
-    
-    func collapsedDrawerHeight(bottomSafeArea: CGFloat) -> CGFloat {
-        return CGFloat(200)
-    }
-    
-    func partialRevealDrawerHeight(bottomSafeArea: CGFloat) -> CGFloat {
-        return CGFloat(500)
-    }
-    
-    func supportedDrawerPositions() -> [PulleyPosition] {
-        return [.partiallyRevealed, .open]
-    }
-    
-    func drawerDisplayModeDidChange(drawer: PulleyViewController) {
-       // self.fetchObjects()
-    }
-}
-*/
 
 extension TasksVC: DZNEmptyDataSetSource, DZNEmptyDataSetDelegate {
     
@@ -511,13 +506,9 @@ extension TasksVC: DZNEmptyDataSetSource, DZNEmptyDataSetDelegate {
     }
     
     func description(forEmptyDataSet scrollView: UIScrollView!) -> NSAttributedString! {
-        let str = "Looks like you have no pending tasks."
+        let str = "You have no pending tasks."
         let attrs = [NSAttributedStringKey.font: UIFont.preferredFont(forTextStyle: UIFontTextStyle.headline)]
         return NSAttributedString(string: str, attributes: attrs)
-    }
-    
-    func emptyDataSet(_ scrollView: UIScrollView!, didTap view: UIView!) {
-        self.createNewTask()
     }
     
     func verticalOffset(forEmptyDataSet scrollView: UIScrollView!) -> CGFloat {

@@ -111,7 +111,6 @@ private extension DottedProgressBar {
 
     func setup() {
         backgroundColor = progressAppearance.backColor
-
         for i in 0..<numberOfDots {
             let dot = UIView()
             dot.backgroundColor = i < currentProgress ? progressAppearance.dotsProgressColor :
@@ -174,7 +173,7 @@ private extension DottedProgressBar {
                     nextAnimation.value != numberOfDots {
                     animateNumberChange(animation: nextAnimation)
                 } else {
-                    print("DottedProgressBar - invalid setNumberOfDots \(nextAnimation.value)")
+                   // print("DottedProgressBar - invalid setNumberOfDots \(nextAnimation.value)")
                     self.performQueuedAnimations()
                 }
             } else {
@@ -183,7 +182,7 @@ private extension DottedProgressBar {
                     nextAnimation.value != currentProgress {
                     animateProgress(animation: nextAnimation)
                 } else {
-                    print("DottedProgressBar - invalid setProgress \(nextAnimation.value)")
+                  //  print("DottedProgressBar - invalid setProgress \(nextAnimation.value)")
                     self.performQueuedAnimations()
                 }
             }
@@ -294,21 +293,25 @@ private extension DottedProgressBar {
         let dotsRange: CountableClosedRange = currentProgress > previousProgress ?
             previousProgress...currentProgress - 1 :
             currentProgress...previousProgress - 1
-
-        for index in dotsRange {
-            UIView.animate(withDuration: 0.1,
-                           delay:
-                animation.animated ?
-                    progressChangeAnimationDuration * 0.7 *
-                        ((Double(index) - Double(previousProgress - 1)) / (Double(currentProgress - 1) -
-                            Double(previousProgress - 1))) : 0.0,
-                           options: .curveLinear,
-                           animations: {
-                            self.subviews[index].backgroundColor =
-                                self.currentProgress > self.previousProgress ?
-                                    self.progressAppearance.dotsProgressColor :
-                                self.progressAppearance.dotsColor
-            }, completion: nil)
+        
+        if self.subviews.count > 0 {
+            for index in dotsRange {
+                UIView.animate(withDuration: 0.1,
+                               delay:
+                    animation.animated ?
+                        progressChangeAnimationDuration * 0.7 *
+                            ((Double(index) - Double(previousProgress - 1)) / (Double(currentProgress - 1) -
+                                Double(previousProgress - 1))) : 0.0,
+                               options: .curveLinear,
+                               animations: {
+                                print(index)
+                                print(self.subviews.count)
+                                self.subviews[index].backgroundColor =
+                                    self.currentProgress > self.previousProgress ?
+                                        self.progressAppearance.dotsProgressColor :
+                                    self.progressAppearance.dotsColor
+                }, completion: nil)
+            }
         }
 
         if animation.animated {

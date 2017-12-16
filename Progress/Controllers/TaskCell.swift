@@ -59,7 +59,7 @@ extension TaskCell: UITextFieldDelegate {
     
     func textFieldDidEndEditing(_ textField: UITextField) {
         self.taskTitleLabel.text = textField.text!
-        if   self.customDelegate != nil && pickerSelected == false {
+        if self.customDelegate != nil && pickerSelected == false {
             self.customDelegate?.cellDidEndEditing(editingCell: self)
         }
     }

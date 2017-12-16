@@ -158,6 +158,15 @@ extension TodayVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return tasksList!.count
     }
+    
+    func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
+        return
+    }
+    
+    func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
+        return true
+    }
+
 }
 
 extension TodayVC: CustomTodayTaskCellDelegate {
@@ -181,7 +190,6 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         //due date button
         cell.dueDateBtn.setTitle("Choose Deadline", for: .highlighted)
         cell.dueDateBtn.setTitleColor(FlatPurple(), for: .highlighted)
-        cell.dueDateBtn.titleLabel?.font = UIFont(name: "SF Pro Text Regular" , size: 12)
 
         if date != nil {
             cell.dueDate = date
@@ -237,7 +245,7 @@ extension TodayVC: CustomTodayTaskCellDelegate {
             cell.taskTitleLabel.text = title
             cell.progressBar.progressAppearance = DottedProgressBar.DottedProgressAppearance (
                 dotRadius: progressDotRadius,
-                dotsColor: UIColor.gray.withAlphaComponent(0.5),
+                dotsColor: color,
                 dotsProgressColor: color,
                 backColor: UIColor.clear
             )
@@ -321,10 +329,17 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         }
     }
     
+    func incrementTaskPoint(editingCell: TodayTaskCell){
+         let selectedTask = (editingCell.taskObj)!
+         let currentPoints = selectedTask.points
+         try! self.realm.write {
+             selectedTask.points = currentPoints + 1
+        }
+    }
+    
     func taskDoneForToday(editingCell: TodayTaskCell) {
         let selectedTask = (editingCell.taskObj)!
         try! self.realm.write {
-            //selectedTask.points += 1
             selectedTask.isToday = false
         }        
     }
@@ -378,9 +393,10 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         editingCell.taskTitleLabel.isEnabled = false
         
         //mark new name in coredata
-        let newText = editingCell.taskTitleLabel.text!
-        if newText != "" {
-            self.updateTaskTitle(editingCell: editingCell, newTitle: newText)
+        let newText = editingCell.taskTitleLabel.text
+        let trimmedText = editingCell.taskTitleLabel.text!.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmedText.isEmpty == false {
+            self.updateTaskTitle(editingCell: editingCell, newTitle: newText!)
         } else {
             //delete new task if user did not give it title
             //deletes existing task if user removed its title
@@ -403,16 +419,18 @@ extension TodayVC: CustomTodayTaskCellDelegate {
 extension TodayVC: MGSwipeTableCellDelegate {
     
     func swipeTableCell(_ cell: MGSwipeTableCell, tappedButtonAt index: Int, direction: MGSwipeDirection, fromExpansion: Bool) -> Bool {
-       
+        
         let modifiedCell = cell as! TodayTaskCell
         if modifiedCell.isBeingEdited == true {
-            modifiedCell.customDelegate?.cellDidEndEditing(editingCell: modifiedCell)
+            modifiedCell.taskTitleLabel.resignFirstResponder()
         }
         
         if direction == .rightToLeft {
             if index == 0 {
                 //if user swipes to delete cell
-                self.deleteTask(editingCell: modifiedCell)
+                if modifiedCell.taskTitleLabel.text != "" {
+                    self.deleteTask(editingCell: modifiedCell)
+                }
             } else if index == 1 {
                 //if user swipes to remove cell from today
                 self.removeTaskfromToday(editingCell: modifiedCell)
@@ -421,9 +439,11 @@ extension TodayVC: MGSwipeTableCellDelegate {
         } else {
             if index == 0 {
                 //if user swipes to mark cell as done for today
+                self.incrementTaskPoint(editingCell: modifiedCell)
                 self.taskDoneForToday(editingCell: modifiedCell)
             }
         }
+        
         return true
     }
 }
@@ -440,7 +460,7 @@ extension TodayVC: DZNEmptyDataSetSource, DZNEmptyDataSetDelegate {
     
     func title(forEmptyDataSet scrollView: UIScrollView!) -> NSAttributedString! {
         if self.isAppAlreadyLaunchedOnce() == true {
-            let str = "Lucky you!"
+            let str = "Hallelujah!"
             let attrs = [NSAttributedStringKey.font: UIFont.preferredFont(forTextStyle: UIFontTextStyle.headline)]
             return NSAttributedString(string: str, attributes: attrs)
         } else {
@@ -452,26 +472,13 @@ extension TodayVC: DZNEmptyDataSetSource, DZNEmptyDataSetDelegate {
     
     func description(forEmptyDataSet scrollView: UIScrollView!) -> NSAttributedString! {
         if self.isAppAlreadyLaunchedOnce() == true {
-            let str = "Looks like you have no tasks planned for today."
+            let str = "You have no tasks left for today."
             let attrs = [NSAttributedStringKey.font: UIFont.preferredFont(forTextStyle: UIFontTextStyle.headline)]
             return NSAttributedString(string: str, attributes: attrs)
         } else {
             let str = "Drag the bottom drawer up to see all your tasks."
             let attrs = [NSAttributedStringKey.font: UIFont.preferredFont(forTextStyle: UIFontTextStyle.headline)]
             return NSAttributedString(string: str, attributes: attrs)
-        }
-    }
-    
-    func emptyDataSet(_ scrollView: UIScrollView!, didTap view: UIView!) {
-        if let drawerVC = self.navigationController?.parent as? PulleyViewController {
-            drawerVC.setDrawerPosition(position: .open, animated: true)
-        }
-       // Crashlytics.sharedInstance().crash()
-    }
-    
-    func emptyDataSet(_ scrollView: UIScrollView!, didTap button: UIButton!) {
-        if let drawerVC = self.navigationController?.parent as? PulleyViewController {
-            drawerVC.setDrawerPosition(position: .open, animated: true)
         }
     }
     
