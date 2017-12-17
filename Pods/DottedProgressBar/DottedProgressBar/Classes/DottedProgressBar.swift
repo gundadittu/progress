@@ -41,7 +41,7 @@ open class DottedProgressBar: UIView {
     /// Zoom increase of walking dot while animating progress.
     open var zoomIncreaseValueOnProgressAnimation: CGFloat = 1.5
 
-    fileprivate var numberOfDots: Int = 1
+    fileprivate var numberOfDots: Int = 0
     fileprivate var previousProgress: Int = 0
     fileprivate var currentProgress: Int = 0
 
@@ -173,7 +173,7 @@ private extension DottedProgressBar {
                     nextAnimation.value != numberOfDots {
                     animateNumberChange(animation: nextAnimation)
                 } else {
-                   // print("DottedProgressBar - invalid setNumberOfDots \(nextAnimation.value)")
+                    print("DottedProgressBar - invalid setNumberOfDots \(nextAnimation.value)")
                     self.performQueuedAnimations()
                 }
             } else {
@@ -182,7 +182,7 @@ private extension DottedProgressBar {
                     nextAnimation.value != currentProgress {
                     animateProgress(animation: nextAnimation)
                 } else {
-                  //  print("DottedProgressBar - invalid setProgress \(nextAnimation.value)")
+                    print("DottedProgressBar - invalid setProgress \(nextAnimation.value)")
                     self.performQueuedAnimations()
                 }
             }
@@ -294,7 +294,7 @@ private extension DottedProgressBar {
             previousProgress...currentProgress - 1 :
             currentProgress...previousProgress - 1
         
-        if self.subviews.count > 0 {
+        //if self.subviews.count > 0 {
             for index in dotsRange {
                 UIView.animate(withDuration: 0.1,
                                delay:
@@ -310,7 +310,7 @@ private extension DottedProgressBar {
                                     self.progressAppearance.dotsColor
                 }, completion: nil)
             }
-        }
+       // }
 
         if animation.animated {
             UIView.animate(withDuration: progressChangeAnimationDuration * 0.3,

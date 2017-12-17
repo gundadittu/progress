@@ -287,7 +287,6 @@ extension TasksVC: CustomTaskCellDelegate {
         } else {
             cell.progressBar.isHidden = false
             cell.progressBar.backgroundColor = bgColor
-            cell.taskTitleLabel.text = title
             cell.progressBar.progressAppearance = DottedProgressBar.DottedProgressAppearance (
                 dotRadius: progressDotRadius,
                 dotsColor: color,
@@ -295,7 +294,6 @@ extension TasksVC: CustomTaskCellDelegate {
                 backColor: UIColor.clear
             )
             cell.progressBar.setNumberOfDots(count, animated: false)
-            cell.progressBar.setProgress(count, animated: false)
         }
         
         //sliding options

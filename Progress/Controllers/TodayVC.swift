@@ -246,7 +246,6 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         } else {
             cell.progressBar.isHidden = false
             cell.progressBar.backgroundColor = bgColor
-            cell.taskTitleLabel.text = title
             cell.progressBar.progressAppearance = DottedProgressBar.DottedProgressAppearance (
                 dotRadius: progressDotRadius,
                 dotsColor: color,
@@ -254,7 +253,6 @@ extension TodayVC: CustomTodayTaskCellDelegate {
                 backColor: UIColor.clear
             )
             cell.progressBar.setNumberOfDots(count, animated: false)
-            cell.progressBar.setProgress(count, animated: false)
         }
         
         //sliding options
