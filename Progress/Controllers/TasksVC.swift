@@ -153,6 +153,7 @@ extension TasksVC: UITableViewDelegate, UITableViewDataSource, TableViewReorderD
         if selectedTask.isNewTask == true {
             self.realm.beginWrite()
             selectedTask.isNewTask = false
+            print(selectedTask.displayOrder)
             try! self.realm.commitWrite(withoutNotifying: [self.token!])
             cell.customDelegate?.cellDidBeginEditing(editingCell: cell)
         }

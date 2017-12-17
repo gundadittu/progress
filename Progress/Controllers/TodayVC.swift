@@ -36,7 +36,7 @@ class TodayVC: UIViewController , TableViewReorderDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.title = "Today"
+        self.title = "Your Day"
         self.navigationController?.navigationBar.prefersLargeTitles = true
         
   

@@ -18,15 +18,15 @@ class OnboardingVC: UIViewController, PaperOnboardingDataSource, PaperOnboarding
     @IBOutlet weak var skipBtn: UIButton!
     var titleSize = 20
     
-    
-    let items: [OnboardingItemInfo]  = [
-        (imageName: UIImage(named: "logo")!, title: "", description: "Swipe through to learn more.", iconName: UIImage(named: "logo")!, color: UIColor.clear, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont:  UIFont(name: "HelveticaNeue-Medium", size: CGFloat(20))! ,descriptionFont: UIFont(name: "HelveticaNeue", size: CGFloat(20))!),
-        (imageName: UIImage(named: "1")!, title: "", description: "Under Today, you'll find all the tasks you've planned to work on today. When you're done with the task for the day, just swipe right.", iconName: UIImage(named: "1")!, color: UIColor.clear, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont: UIFont(name: "HelveticaNeue-Medium", size: CGFloat(20))!,descriptionFont: UIFont(name: "HelveticaNeue", size: CGFloat(20))!),
-         (imageName: UIImage(named: "2")!, title: "", description: "Everytime you finish a task for the day, a purple dot appears to show your progress.", iconName: UIImage(named: "logo")!, color: UIColor.clear, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont:  UIFont(name: "HelveticaNeue-Medium", size: CGFloat(20))! ,descriptionFont: UIFont(name: "HelveticaNeue", size: CGFloat(20))!),
-        (imageName: UIImage(named: "3")!, title: "", description: "Slide up to go to all your tasks. Here you can add tasks to Today by swiping right.", iconName: UIImage(named: "2")!, color: UIColor.clear, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont: UIFont(name: "HelveticaNeue-Medium", size: CGFloat(20))!,descriptionFont: UIFont(name: "HelveticaNeue", size: CGFloat(20))!),
-        (imageName: UIImage(named: "4")!, title: "", description: "Whenever you complete a task, just tap the checkbox and watch it fade away.", iconName: UIImage(named: "3")!, color: UIColor.clear, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont: UIFont(name: "HelveticaNeue-Medium", size: CGFloat(20))!,descriptionFont: UIFont(name: "HelveticaNeue", size: CGFloat(20))!),
-        (imageName: UIImage(named: "5")!, title: "", description: "To report any issues, just shake your phone at anytime. Give it a shot now.", iconName: UIImage(named: "4")!, color: UIColor.clear, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont: UIFont(name: "HelveticaNeue-Medium", size: CGFloat(20))!,descriptionFont: UIFont(name: "HelveticaNeue", size: CGFloat(20))!)]
-    
+    let items: [OnboardingItemInfo] = [
+    (imageName: UIImage(named: "logo")!, title: "Swipe left to learn more.", description: "", iconName: UIImage(named: "logo")!, color: UIColor.clear, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont:  UIFont(name: "HelveticaNeue-Medium", size: CGFloat(20))! ,descriptionFont: UIFont(name: "HelveticaNeue", size: CGFloat(20))!),
+      (imageName: UIImage(named: "1")!, title: "To create a new task,", description: "click on the big purple plus button.", iconName: UIImage(named: "1")!, color: UIColor.clear, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont: UIFont(name: "HelveticaNeue-Medium", size: CGFloat(20))!,descriptionFont: UIFont(name: "HelveticaNeue", size: CGFloat(20))!),
+       (imageName: UIImage(named: "2")!, title: "Your new task will appear under All Tasks.", description: "You can add tasks to work on today by  swiping right.", iconName: UIImage(named: "2")!, color: UIColor.clear, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont: UIFont(name: "HelveticaNeue-Medium", size: CGFloat(20))!,descriptionFont: UIFont(name: "HelveticaNeue", size: CGFloat(20))!),
+    (imageName: UIImage(named: "3")!, title: "Your Day holds your tasks for the day.", description: "When you're done with a task for the day, just swipe right.", iconName: UIImage(named: "3")!, color: UIColor.clear, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont: UIFont(name: "HelveticaNeue-Medium", size: CGFloat(20))!,descriptionFont: UIFont(name: "HelveticaNeue", size: CGFloat(20))!),
+    (imageName: UIImage(named: "4")!, title: "Everytime you finish a task for the day,", description: "a purple dot is added under the task to mark your progress.", iconName: UIImage(named: "4")!, color: UIColor.clear, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont:  UIFont(name: "HelveticaNeue-Medium", size: CGFloat(20))! ,descriptionFont: UIFont(name: "HelveticaNeue", size: CGFloat(20))!),
+    (imageName: UIImage(named: "5")!, title: "Whenever you finally complete a task,", description: "just tap the checkbox and watch it fade away.", iconName: UIImage(named: "5")!, color: UIColor.clear, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont: UIFont(name: "HelveticaNeue-Medium", size: CGFloat(20))!,descriptionFont: UIFont(name: "HelveticaNeue", size: CGFloat(20))!)
+    ]
+
     override func viewDidLoad() {
         super.viewDidLoad()
         paperView.dataSource = self
@@ -35,11 +35,11 @@ class OnboardingVC: UIViewController, PaperOnboardingDataSource, PaperOnboarding
     }
 
     func onboardingItemAtIndex(_ index: Int) -> OnboardingItemInfo {
-        return items[index] 
+        return self.items[index]
     }
     
     func onboardingItemsCount() -> Int {
-        return items.count
+        return self.items.count
     }
     
     func onboardingDidTransitonToIndex(_ index: Int) {
@@ -47,7 +47,7 @@ class OnboardingVC: UIViewController, PaperOnboardingDataSource, PaperOnboarding
     }
     
     func onboardingWillTransitonToIndex(_ index: Int) {
-        if index == (items.count - 1) {
+        if index == (self.items.count - 1) {
             self.skipBtn.isHidden = true
             self.getStartedBtn.isHidden = false
         } else {
