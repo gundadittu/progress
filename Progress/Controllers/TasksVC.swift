@@ -17,6 +17,7 @@ import Pulley
 import Realm
 import RealmSwift
 import DZNEmptyDataSet
+import AudioToolbox
 
 class TasksVC: UIViewController, FloatyDelegate  {
     
@@ -29,7 +30,6 @@ class TasksVC: UIViewController, FloatyDelegate  {
     
     let realm = try! Realm()
     var tasksList: Results<SavedTask>?
-    var sectionNames = ["All Tasks", "Completed Tasks"]
     var token: NotificationToken?
     
     override func viewDidLoad() {
@@ -79,13 +79,12 @@ class TasksVC: UIViewController, FloatyDelegate  {
                 
                 tableView.beginUpdates()
                 
-                //re-order repos when new pushes happen
+                //re-order cells when new pushes happen
                 tableView.insertRows(at: insertions.map { IndexPath(row: $0, section: 0) },
-                                     with: .automatic)
+                                     with: .left)
                 tableView.deleteRows(at: deletions.map { IndexPath(row: $0, section: 0) },
-                                     with: .automatic)
-                
-                //flash cells when repo gets more stars
+                                     with: .left)
+
                 for row in modifications {
                     let indexPath = IndexPath(row: row, section: 0)
                     let selectedTask = results[indexPath.row]
@@ -113,7 +112,7 @@ class TasksVC: UIViewController, FloatyDelegate  {
     func updateArrayDisplayOrder(_ array: Results<SavedTask>){
         var i = 0
         for ro in array {
-            i+=1
+             i+=1
             try! self.realm.write {
                 ro.displayOrder = i
             }
@@ -127,16 +126,14 @@ class TasksVC: UIViewController, FloatyDelegate  {
     
     //Creates a new task
     func createNewTask(){
-        if currentlySelectedCell == nil {
-          //  Floaty.global.button.isHidden = true
-            if let drawerVC = self.navigationController?.parent as? PulleyViewController {
-                drawerVC.setDrawerPosition(position: .open, animated: true)
-            }
-            let newTask = SavedTask()
-            newTask.isNewTask = true
-            try! self.realm.write {
-                self.realm.add(newTask)
-            }
+        if let drawerVC = self.navigationController?.parent as? PulleyViewController {
+            drawerVC.setDrawerPosition(position: .open, animated: true)
+        }
+        let newTask = SavedTask()
+        newTask.isNewTask = true
+        newTask.displayOrder = 0
+        try! self.realm.write {
+            self.realm.add(newTask)
         }
     }
 }
@@ -150,11 +147,11 @@ extension TasksVC: UITableViewDelegate, UITableViewDataSource, TableViewReorderD
         let selectedTask = tasksList![indexPath.row]
         let cell = tableView.dequeueReusableCell(withIdentifier: "TaskCell", for: indexPath) as! TaskCell
         self.configure(cell: cell, with: selectedTask)
+        
         if selectedTask.isNewTask == true {
-            self.realm.beginWrite()
-            selectedTask.isNewTask = false
-            print(selectedTask.displayOrder)
-            try! self.realm.commitWrite(withoutNotifying: [self.token!])
+           // self.realm.beginWrite()
+           // selectedTask.isNewTask = false
+            //try! self.realm.commitWrite()
             cell.customDelegate?.cellDidBeginEditing(editingCell: cell)
         }
         return cell
@@ -222,6 +219,13 @@ extension TasksVC: CustomTaskCellDelegate {
         let date = cellTask.deadline
         let checked = cellTask.isCompleted
         let progressDotRadius = CGFloat(3.0)
+        let indWidth = (10+(2*Int(progressDotRadius)))
+        let width = indWidth * count
+        let frameWidth = Int(cell.progressBar.frame.width)
+        var modifiedCount = count
+        //let dotColorsArr = [FlatPurple(),FlatBlue(),FlatGreen(),FlatYellow(),FlatOrange(),FlatRed()]
+        //let colorIndex = ((width/indWidth)/(frameWidth/indWidth))%6
+        //let dotColor = dotColorsArr[colorIndex]
         
         //cell attributes
         cell.taskObj = cellTask
@@ -294,12 +298,16 @@ extension TasksVC: CustomTaskCellDelegate {
                 dotsProgressColor: color,
                 backColor: UIColor.clear
             )
-            cell.progressBar.setNumberOfDots(count, animated: false)
+            if width > frameWidth {
+                let remainder = (width/indWidth)%(frameWidth/indWidth)
+                modifiedCount = remainder
+            }
+            cell.progressBar.setNumberOfDots(modifiedCount, animated: false)
         }
         
         //sliding options
        
-        let leftButton1 = MGSwipeButton(title: "Add to Today", backgroundColor: FlatGreen())
+        let leftButton1 = MGSwipeButton(title: "Add to My Day", backgroundColor: FlatGreen())
         leftButton1.titleLabel?.font = UIFont(name: "SF Pro Text Regular" , size: 12)
         cell.leftButtons = [leftButton1]
         cell.leftSwipeSettings.transition = .drag
@@ -330,6 +338,7 @@ extension TasksVC: CustomTaskCellDelegate {
     
     //mark task as completed when checked
     func cellCheckBoxTapped(editingCell: TaskCell, checked: Bool) {
+        AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
         let selectedTask = editingCell.taskObj!
         try! self.realm.write {
             selectedTask.isCompleted = checked
@@ -366,6 +375,7 @@ extension TasksVC: CustomTaskCellDelegate {
     
     //add task to today
     func addTasktoToday(editingCell: TaskCell) {
+        AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
         let selectedTask = (editingCell.taskObj)!
         try! self.realm.write {
             selectedTask.isCompleted = false
@@ -390,8 +400,9 @@ extension TasksVC: CustomTaskCellDelegate {
         //makes due date button visible
         editingCell.dueDateBtn.isHidden = false
         
-        //Hide plus button
-        Floaty.global.button.isHidden = true
+        //Add padding to button when keyboard shows, so it isn't covered
+        Floaty.global.button.paddingY += 50
+       
         
         editingCell.taskTitleLabel.isEnabled = true
         if editingCell.pickerSelected == false {
@@ -413,6 +424,12 @@ extension TasksVC: CustomTaskCellDelegate {
     
     func cellDidEndEditing(editingCell: TaskCell) {
         
+        if editingCell.taskObj?.isNewTask == true {
+            try! self.realm.write {
+                editingCell.taskObj?.isNewTask = false
+            }
+        }
+        
         if let drawerVC = self.navigationController?.parent as? PulleyViewController {
             drawerVC.allowsUserDrawerPositionChange = true 
         }
@@ -428,8 +445,8 @@ extension TasksVC: CustomTaskCellDelegate {
             editingCell.dueDateBtn.isHidden = true
         }
         
-        //Show plus button
-        Floaty.global.button.isHidden = false
+        //Remove plus button padding
+        Floaty.global.button.paddingY -= 50
         
         
         editingCell.taskTitleLabel.isEnabled = false
@@ -456,6 +473,7 @@ extension TasksVC: CustomTaskCellDelegate {
             }, completion: { (Finished: Bool) -> Void in
             })
         }
+        
     }
 }
 

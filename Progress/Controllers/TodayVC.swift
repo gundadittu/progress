@@ -19,6 +19,7 @@ import RealmSwift
 import DZNEmptyDataSet
 import Crashlytics
 import Instabug
+import AudioToolbox
 
 class TodayVC: UIViewController , TableViewReorderDelegate {
 
@@ -70,9 +71,9 @@ class TodayVC: UIViewController , TableViewReorderDelegate {
                 tableView.beginUpdates()
                 
                 tableView.insertRows(at: insertions.map { IndexPath(row: $0, section: 0) },
-                                     with: .automatic)
+                                     with: .left)
                 tableView.deleteRows(at: deletions.map { IndexPath(row: $0, section: 0) },
-                                     with: .automatic)
+                                     with: .left)
 
                     for row in modifications {
                         let indexPath = IndexPath(row: row, section: 0)
@@ -181,6 +182,13 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         let date = cellTask.deadline
         let checked = cellTask.isCompleted
         let progressDotRadius = CGFloat(3.0)
+        let indWidth = (10+(2*Int(progressDotRadius)))
+        let width = indWidth * count
+        let frameWidth = Int(cell.progressBar.frame.width)
+        var modifiedCount = count
+        //let dotColors = [FlatPurple(),FlatBlue(),FlatGreen(),FlatYellow(),FlatOrange(),FlatRed()]
+        //let colorIndex = ((width/indWidth)/(frameWidth/indWidth))%6
+        //let dotColor = dotColors[colorIndex]
         
         //cell attributes
         cell.taskObj = cellTask
@@ -252,7 +260,11 @@ extension TodayVC: CustomTodayTaskCellDelegate {
                 dotsProgressColor: color,
                 backColor: UIColor.clear
             )
-            cell.progressBar.setNumberOfDots(count, animated: false)
+            if width > frameWidth {
+                let remainder = (width/indWidth)%(frameWidth/indWidth)
+                modifiedCount = remainder
+            }
+            cell.progressBar.setNumberOfDots(modifiedCount, animated: false)
         }
         
         //sliding options
@@ -264,7 +276,7 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         cell.leftExpansion.fillOnTrigger = true
         cell.leftExpansion.threshold = 2
         let rightButton1 = MGSwipeButton(title: "Delete", backgroundColor: FlatRed())
-        let rightButton2 = MGSwipeButton(title: "Remove from Today", backgroundColor: UIColor.gray)
+        let rightButton2 = MGSwipeButton(title: "Remove from My Day", backgroundColor: UIColor.gray)
         rightButton1.titleLabel?.font = UIFont(name: "SF Pro Text Regular" , size: 12)
         rightButton2.titleLabel?.font = UIFont(name: "SF Pro Text Regular" , size: 12)
         cell.rightButtons = [rightButton1, rightButton2]
@@ -289,6 +301,7 @@ extension TodayVC: CustomTodayTaskCellDelegate {
     
     //mark task as completed when checked
     func cellCheckBoxTapped(editingCell: TodayTaskCell, checked: Bool) {
+        AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
         let selectedTask = editingCell.taskObj!
         try! self.realm.write {
             selectedTask.isToday = false
@@ -340,6 +353,7 @@ extension TodayVC: CustomTodayTaskCellDelegate {
     }
     
     func taskDoneForToday(editingCell: TodayTaskCell) {
+        AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
         let selectedTask = (editingCell.taskObj)!
         try! self.realm.write {
             selectedTask.isToday = false
@@ -359,8 +373,8 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         //makes due date button visible
         editingCell.dueDateBtn.isHidden = false
         
-        //Hide plus button
-        Floaty.global.button.isHidden = true
+        //Add padding to button when keyboard shows, so it isn't covered
+        Floaty.global.button.paddingY += 50
         
         editingCell.taskTitleLabel.isEnabled = true
         if editingCell.pickerSelected == false {
@@ -392,8 +406,8 @@ extension TodayVC: CustomTodayTaskCellDelegate {
             editingCell.dueDateBtn.isHidden = true
         }
         
-        //Show plus button
-        Floaty.global.button.isHidden = false
+        //Remove plus button padding
+        Floaty.global.button.paddingY -= 50
         
         editingCell.taskTitleLabel.isEnabled = false
         editingCell.taskTitleLabel.isEnabled = false
@@ -448,8 +462,7 @@ extension TodayVC: MGSwipeTableCellDelegate {
                 self.incrementTaskPoint(editingCell: modifiedCell)
                 self.taskDoneForToday(editingCell: modifiedCell)
             }
-        }
-        
+        }        
         return true
     }
 }
@@ -457,48 +470,23 @@ extension TodayVC: MGSwipeTableCellDelegate {
 extension TodayVC: DZNEmptyDataSetSource, DZNEmptyDataSetDelegate {
     
     func image(forEmptyDataSet scrollView: UIScrollView!) -> UIImage! {
-        if self.isAppAlreadyLaunchedOnce() == true {
-            return  UIImage(named: "sunbed" )
-        } else {
-            return UIImage(named: "studying" )
-        }
+        return  UIImage(named: "sunbed" )
     }
     
     func title(forEmptyDataSet scrollView: UIScrollView!) -> NSAttributedString! {
-        if self.isAppAlreadyLaunchedOnce() == true {
-            let str = "Hallelujah!"
-            let attrs = [NSAttributedStringKey.font: UIFont.preferredFont(forTextStyle: UIFontTextStyle.headline)]
-            return NSAttributedString(string: str, attributes: attrs)
-        } else {
-            let str = "The tasks you want to work on today show up here."
-            let attrs = [NSAttributedStringKey.font: UIFont.preferredFont(forTextStyle: UIFontTextStyle.headline)]
-            return NSAttributedString(string: str, attributes: attrs)
-        }
+        let str = "Hallelujah!"
+        let attrs = [NSAttributedStringKey.font: UIFont.preferredFont(forTextStyle: UIFontTextStyle.headline)]
+        return NSAttributedString(string: str, attributes: attrs)
     }
     
     func description(forEmptyDataSet scrollView: UIScrollView!) -> NSAttributedString! {
-        if self.isAppAlreadyLaunchedOnce() == true {
-            let str = "You have no tasks left for today."
-            let attrs = [NSAttributedStringKey.font: UIFont.preferredFont(forTextStyle: UIFontTextStyle.headline)]
-            return NSAttributedString(string: str, attributes: attrs)
-        } else {
-            let str = "Drag the bottom drawer up to see all your tasks."
-            let attrs = [NSAttributedStringKey.font: UIFont.preferredFont(forTextStyle: UIFontTextStyle.headline)]
-            return NSAttributedString(string: str, attributes: attrs)
-        }
+        let str = "You have no tasks left for today."
+        let attrs = [NSAttributedStringKey.font: UIFont.preferredFont(forTextStyle: UIFontTextStyle.headline)]
+        return NSAttributedString(string: str, attributes: attrs)
     }
     
     func verticalOffset(forEmptyDataSet scrollView: UIScrollView!) -> CGFloat {
         return -((self.navigationController?.navigationBar.frame.size.height)!/2.0)
-    }
-    
-    func isAppAlreadyLaunchedOnce()->Bool{
-        let defaults = UserDefaults.standard
-        if  defaults.string(forKey: "isAppAlreadyLaunchedOnce") == nil{
-            defaults.set(true, forKey: "isAppAlreadyLaunchedOnce")
-            return false
-        }
-        return true
     }
 }
 

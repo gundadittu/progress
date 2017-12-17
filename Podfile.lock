@@ -56,7 +56,7 @@ DEPENDENCIES:
   - DZNEmptyDataSet
   - Fabric (~> 1.7.2)
   - Firebase/Core
-  - Floaty
+  - Floaty (~> 4.0.0)
   - Instabug
   - MGSwipeTableCell
   - paper-onboarding (from `git@github.com:MaTriXy/paper-onboarding`)
@@ -105,6 +105,6 @@ SPEC CHECKSUMS:
   SwiftDate: 7b56d42a221f582047287deb256b23fc5ed49a60
   SwiftReorder: 27d737099efd6125339d5e8cb090e46c67341143
 
-PODFILE CHECKSUM: e8844277de915474e15826382520b3e68a244b7e
+PODFILE CHECKSUM: e3228da07663640eea4c7e9e68c6bb7c317b8abf
 
 COCOAPODS: 1.4.0.beta.2
