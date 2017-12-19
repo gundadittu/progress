@@ -18,7 +18,7 @@ import Floaty
 class NotificationsController  {
     
     static let center = UNUserNotificationCenter.current()
-
+    static let defaults = UserDefaults.standard
 
     class func scheduleNotification(task: SavedTask) {
         
@@ -45,7 +45,6 @@ class NotificationsController  {
         content.title = title
         content.body = body
         content.sound = UNNotificationSound.default()
-        //content.userInfo = [AnyHashable("task") : task]
         content.categoryIdentifier = categoryID
         
         var dateComponents = DateComponents()
@@ -135,16 +134,20 @@ class NotificationsController  {
         })
     }
     
-    class func scheduleMorningNotification(hour: Int, minute: Int, active: Bool){
-        let title = "Good Morning!"
-        let body = "Let's get Your Day going by adding some tasks."
+    class func scheduleMorningNotification(){
+        let title = "Let's get Your Day started. Add some tasks."
+        let body = ""
         let category = "morningNotification"
 
         self.center.removePendingNotificationRequests(withIdentifiers: [category])
         
-        if active == false {
-            return 
-        }
+        guard let dailyNotificationsTime = self.defaults.value(forKey: "dailyNotificationTime") else { return }
+        
+        let string = dailyNotificationsTime as! String
+        let formatter = DateFormatter()
+        formatter.dateStyle = .none
+        formatter.timeStyle = .short
+        let date = formatter.date(from: string)
 
         let content = UNMutableNotificationContent()
         content.title = title
@@ -153,8 +156,8 @@ class NotificationsController  {
         content.sound = UNNotificationSound.default()
         
         var dateComponents = DateComponents()
-        dateComponents.hour = hour
-        dateComponents.minute = minute
+        dateComponents.hour = date?.hour
+        dateComponents.minute = date?.minute
         let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
         let n = UNNotificationRequest(identifier: category, content: content, trigger: trigger)
     

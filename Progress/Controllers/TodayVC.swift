@@ -35,7 +35,8 @@ class TodayVC: UIViewController , TableViewReorderDelegate {
     var tasksList: Results<SavedTask>?
     var token: NotificationToken?
     var firstOpening: Bool?
-    
+    let defaults = UserDefaults.standard
+
     override func viewDidLoad() {
         super.viewDidLoad()
         self.title = "Your Day"
@@ -111,9 +112,6 @@ class TodayVC: UIViewController , TableViewReorderDelegate {
                 ro.displayOrder = i
             }
         }
-    }
-    @IBAction func reportBtnTapped(_ sender: Any) {
-        Instabug.invoke()
     }
 }
 
@@ -312,7 +310,11 @@ extension TodayVC: CustomTodayTaskCellDelegate {
     
     //mark task as completed when checked
     func cellCheckBoxTapped(editingCell: TodayTaskCell, checked: Bool) {
-        AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
+        let hapticBool = self.defaults.value(forKey: "hapticFeedback") as! Bool
+        if hapticBool == true {
+            AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
+        }
+        
         let selectedTask = editingCell.taskObj!
         
         if checked == true {
@@ -428,7 +430,11 @@ extension TodayVC: CustomTodayTaskCellDelegate {
     }
     
     func taskDoneForToday(editingCell: TodayTaskCell) {
-        AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
+        let hapticBool = self.defaults.value(forKey: "hapticFeedback") as! Bool
+        if hapticBool == true {
+            AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
+        }
+        
         let selectedTask = (editingCell.taskObj)!
         
         Analytics.logEvent("task_done_for_today", parameters: [

@@ -126,18 +126,18 @@ extension TaskCell: DateTimePickerDelegate {
         picker.doneButtonTitle = "Set Deadline"
         picker.delegate = self
         picker.completionHandler = { date in
+            self.pickerSelected = false
             self.customDelegate?.cellDueDateChanged(editingCell: self, date: date)
             self.customDelegate?.cellDidEndEditing(editingCell: self)
-            self.pickerSelected = false
         }
         picker.cancelHandler = {
+            self.pickerSelected = false
             self.customDelegate?.cellDueDateChanged(editingCell: self, date: nil)
             self.customDelegate?.cellDidEndEditing(editingCell: self)
-            self.pickerSelected = false
         }
         picker.dismissHandler = {
-            self.customDelegate?.cellDidEndEditing(editingCell: self)
             self.pickerSelected = false
+            self.customDelegate?.cellDidEndEditing(editingCell: self)
         }
     }
     

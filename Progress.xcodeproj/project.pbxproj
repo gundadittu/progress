@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		040532211FDE377500E377AF /* TaskCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 040532201FDE377500E377AF /* TaskCell.swift */; };
-		041E50491FE5A3BE00CAEAF4 /* SettingsVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 041E50481FE5A3BE00CAEAF4 /* SettingsVC.swift */; };
 		043127191FDC5FD2002DEFA8 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 043127181FDC5FD2002DEFA8 /* AppDelegate.swift */; };
 		0431271B1FDC5FD2002DEFA8 /* MainVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0431271A1FDC5FD2002DEFA8 /* MainVC.swift */; };
 		0431271E1FDC5FD2002DEFA8 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0431271C1FDC5FD2002DEFA8 /* Main.storyboard */; };
@@ -17,8 +16,8 @@
 		044C24261FDC6AF200AD6B8D /* TodayVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 044C24251FDC6AF200AD6B8D /* TodayVC.swift */; };
 		044C24281FDC6B0F00AD6B8D /* TasksVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 044C24271FDC6B0F00AD6B8D /* TasksVC.swift */; };
 		044C24531FDC8E7A00AD6B8D /* TodayTaskCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 044C24521FDC8E7A00AD6B8D /* TodayTaskCell.swift */; };
-		049A38B91FE7D11400AC0F06 /* SettingsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 049A38B81FE7D11400AC0F06 /* SettingsCell.swift */; };
-		049A38BB1FE8921E00AC0F06 /* Notifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = 049A38BA1FE8921E00AC0F06 /* Notifications.swift */; };
+		049A38BB1FE8921E00AC0F06 /* NotificationsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 049A38BA1FE8921E00AC0F06 /* NotificationsController.swift */; };
+		049A38BF1FE90EA100AC0F06 /* SettingsTVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 049A38BE1FE90EA100AC0F06 /* SettingsTVC.swift */; };
 		04AFA01C1FE36AEB00887B4B /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 04AFA01B1FE36AEA00887B4B /* GoogleService-Info.plist */; };
 		04CBA1D11FE30CE20013AF20 /* RealmModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04CBA1D01FE30CE20013AF20 /* RealmModels.swift */; };
 		04FA66481FE5189D00CDD2B6 /* Onboarding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04FA66471FE5189D00CDD2B6 /* Onboarding.swift */; };
@@ -27,7 +26,6 @@
 
 /* Begin PBXFileReference section */
 		040532201FDE377500E377AF /* TaskCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskCell.swift; sourceTree = "<group>"; };
-		041E50481FE5A3BE00CAEAF4 /* SettingsVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsVC.swift; sourceTree = "<group>"; };
 		043127151FDC5FD2002DEFA8 /* Progress.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Progress.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		043127181FDC5FD2002DEFA8 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		0431271A1FDC5FD2002DEFA8 /* MainVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainVC.swift; sourceTree = "<group>"; };
@@ -38,8 +36,8 @@
 		044C24251FDC6AF200AD6B8D /* TodayVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayVC.swift; sourceTree = "<group>"; };
 		044C24271FDC6B0F00AD6B8D /* TasksVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TasksVC.swift; sourceTree = "<group>"; };
 		044C24521FDC8E7A00AD6B8D /* TodayTaskCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayTaskCell.swift; sourceTree = "<group>"; };
-		049A38B81FE7D11400AC0F06 /* SettingsCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsCell.swift; sourceTree = "<group>"; };
-		049A38BA1FE8921E00AC0F06 /* Notifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notifications.swift; sourceTree = "<group>"; };
+		049A38BA1FE8921E00AC0F06 /* NotificationsController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsController.swift; sourceTree = "<group>"; };
+		049A38BE1FE90EA100AC0F06 /* SettingsTVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsTVC.swift; sourceTree = "<group>"; };
 		04AFA01B1FE36AEA00887B4B /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		04CBA1D01FE30CE20013AF20 /* RealmModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmModels.swift; sourceTree = "<group>"; };
 		04FA66471FE5189D00CDD2B6 /* Onboarding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Onboarding.swift; sourceTree = "<group>"; };
@@ -101,10 +99,9 @@
 				044C24271FDC6B0F00AD6B8D /* TasksVC.swift */,
 				044C24521FDC8E7A00AD6B8D /* TodayTaskCell.swift */,
 				040532201FDE377500E377AF /* TaskCell.swift */,
-				041E50481FE5A3BE00CAEAF4 /* SettingsVC.swift */,
-				049A38B81FE7D11400AC0F06 /* SettingsCell.swift */,
+				049A38BE1FE90EA100AC0F06 /* SettingsTVC.swift */,
 				04FA66471FE5189D00CDD2B6 /* Onboarding.swift */,
-				049A38BA1FE8921E00AC0F06 /* Notifications.swift */,
+				049A38BA1FE8921E00AC0F06 /* NotificationsController.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -324,15 +321,14 @@
 			files = (
 				04CBA1D11FE30CE20013AF20 /* RealmModels.swift in Sources */,
 				0431271B1FDC5FD2002DEFA8 /* MainVC.swift in Sources */,
-				049A38BB1FE8921E00AC0F06 /* Notifications.swift in Sources */,
+				049A38BB1FE8921E00AC0F06 /* NotificationsController.swift in Sources */,
 				044C24281FDC6B0F00AD6B8D /* TasksVC.swift in Sources */,
 				044C24261FDC6AF200AD6B8D /* TodayVC.swift in Sources */,
+				049A38BF1FE90EA100AC0F06 /* SettingsTVC.swift in Sources */,
 				044C24531FDC8E7A00AD6B8D /* TodayTaskCell.swift in Sources */,
 				040532211FDE377500E377AF /* TaskCell.swift in Sources */,
 				04FA66481FE5189D00CDD2B6 /* Onboarding.swift in Sources */,
 				043127191FDC5FD2002DEFA8 /* AppDelegate.swift in Sources */,
-				049A38B91FE7D11400AC0F06 /* SettingsCell.swift in Sources */,
-				041E50491FE5A3BE00CAEAF4 /* SettingsVC.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

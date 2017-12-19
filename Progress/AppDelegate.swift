@@ -21,6 +21,7 @@ import UserNotifications
 class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     
     var window: UIWindow?
+    let defaults = UserDefaults.standard
         
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
@@ -30,10 +31,32 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         //Setting notification delegate 
         UNUserNotificationCenter.current().delegate = self
         
+        let badgeBool = defaults.value(forKey: "yourDayBadgeCount")
+        if badgeBool == nil {
+           defaults.set(true, forKey: "yourDayBadgeCount")
+        }
+        
+        let hapticBool = defaults.value(forKey: "hapticFeedback")
+        if hapticBool == nil {
+            defaults.set(true, forKey: "hapticFeedback")
+        }
+        
+        //set daily motivational notification to 9 AM
+        if defaults.value(forKey: "dailyNotificationTime") == nil {
+            var components = DateComponents()
+            components.hour = 9
+            components.minute = 0
+            let date = Calendar.current.date(from: components)
+            let formatter = DateFormatter()
+            formatter.dateStyle = .none
+            formatter.timeStyle = .short
+            let string = formatter.string(from: date!)
+            defaults.setValue(string, forKey: "dailyNotificationTime")
+            NotificationsController.scheduleMorningNotification()
+        }
+
         if self.isAppAlreadyLaunchedOnce() == false {
-            //set morning notification to 9 AM
-            NotificationsController.scheduleMorningNotification(hour: 9, minute: 00, active: true)
-            //load app introduction walkthrough 
+            //load app introduction walkthrough if first time launching app
             self.loadOnboarding()
         }
         return true
@@ -42,12 +65,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     func applicationWillResignActive(_ application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
         // Use this method to pause ongoing tasks, disable timers, and invalidate graphics rendering callbacks. Games should use this method to pause the game.
-        let realm = try! Realm()
-        let isTodayPredicate = NSPredicate(format: "isToday == %@",  Bool(booleanLiteral: true) as CVarArg)
-        let isNotCompletedPredicate = NSPredicate(format: "isCompleted == %@",  Bool(booleanLiteral: false) as CVarArg)
-        let andPredicate = NSCompoundPredicate(type: NSCompoundPredicate.LogicalType.and, subpredicates: [isNotCompletedPredicate, isTodayPredicate])
-        let list = realm.objects(SavedTask.self).filter(andPredicate)
-        application.applicationIconBadgeNumber = list.count
+        let badgeBool = defaults.value(forKey: "yourDayBadgeCount") as! Bool 
+        if badgeBool == true {
+            let realm = try! Realm()
+            let isTodayPredicate = NSPredicate(format: "isToday == %@",  Bool(booleanLiteral: true) as CVarArg)
+            let isNotCompletedPredicate = NSPredicate(format: "isCompleted == %@",  Bool(booleanLiteral: false) as CVarArg)
+            let andPredicate = NSCompoundPredicate(type: NSCompoundPredicate.LogicalType.and, subpredicates: [isNotCompletedPredicate, isTodayPredicate])
+            let list = realm.objects(SavedTask.self).filter(andPredicate)
+            application.applicationIconBadgeNumber = list.count
+        } else {
+             application.applicationIconBadgeNumber = 0
+        }
         
         //to make sure all empty title tasks are deleted if app randomly closes 
         self.window?.endEditing(true)
@@ -62,7 +90,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     }
     
     func isAppAlreadyLaunchedOnce()->Bool{
-        let defaults = UserDefaults.standard
         if  defaults.string(forKey: "isAppAlreadyLaunchedBefore") == nil{
             defaults.set(true, forKey: "isAppAlreadyLaunchedBefore")
             return false
