@@ -50,7 +50,7 @@ class SettingsTVC: UITableViewController {
             if string != "" {
                 self.dailyNotificationTimeBtn.setTitle(string, for: .normal)
             } else {
-                self.dailyNotificationTimeBtn.setTitle("Choose Time", for: .normal)
+                self.dailyNotificationTimeBtn.setTitle("Set", for: .normal)
             }
         }
         
@@ -147,7 +147,7 @@ class SettingsTVC: UITableViewController {
             NotificationsController.scheduleMorningNotification()
         }
         picker.cancelHandler = {
-             self.dailyNotificationTimeBtn.setTitle("Choose time", for: .normal)
+             self.dailyNotificationTimeBtn.setTitle("Set", for: .normal)
             self.defaults.setValue("", forKey: "dailyNotificationTime")
             NotificationsController.scheduleMorningNotification()
         }
@@ -168,6 +168,10 @@ class SettingsTVC: UITableViewController {
         if indexPath.section == 0 {
             if indexPath.row == 2 {
                 Instabug.invoke()
+            }
+            if indexPath.row == 3 {
+                let appD = UIApplication.shared.delegate as! AppDelegate
+                appD.loadOnboarding()
             }
         } else if indexPath.section == 2 {
             if indexPath.row == 0 {

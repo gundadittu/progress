@@ -281,7 +281,7 @@ import UIKit
         dateTitleLabel.textColor = darkColor
         dateTitleLabel.textAlignment = .center
         resetDateTitle()
-        titleView.addSubview(dateTitleLabel)
+        //titleView.addSubview(dateTitleLabel)
         
         cancelButton = UIButton(type: .system)
         cancelButton.setTitle(cancelButtonTitle, for: .normal)

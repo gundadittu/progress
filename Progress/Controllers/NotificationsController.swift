@@ -135,8 +135,8 @@ class NotificationsController  {
     }
     
     class func scheduleMorningNotification(){
-        let title = "Let's get Your Day started. Add some tasks."
-        let body = ""
+        let title = "What do you want to work on today?"
+        let body = "A good plan today is better than a perfect plan tomorrow. - Anonymous"
         let category = "morningNotification"
 
         self.center.removePendingNotificationRequests(withIdentifiers: [category])
