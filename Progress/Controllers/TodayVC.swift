@@ -20,6 +20,7 @@ import DZNEmptyDataSet
 import Crashlytics
 import Instabug
 import AudioToolbox
+import Firebase
 
 class TodayVC: UIViewController , TableViewReorderDelegate {
 
@@ -40,6 +41,7 @@ class TodayVC: UIViewController , TableViewReorderDelegate {
         self.title = "Your Day"
         self.navigationController?.navigationBar.prefersLargeTitles = true
         
+        Instabug.setIntroMessageEnabled(false)
   
         //table View Properties
         self.tableView.delegate = self
@@ -84,6 +86,8 @@ class TodayVC: UIViewController , TableViewReorderDelegate {
                 tableView.endUpdates()
                 break
             case .error(let error):
+                //log crashlytics error
+                Crashlytics.sharedInstance().recordError(error)
                 print(error)
                 break
             }
@@ -127,6 +131,13 @@ extension TodayVC: UITableViewDelegate, UITableViewDataSource {
     
     //when user reorders table cells
     func tableView(_ tableView: UITableView, reorderRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
+        
+        //log firebase analytics event
+        Analytics.logEvent("tasks_reordered", parameters: [
+            "name":"" as NSObject,
+            "full_text": "" as NSObject
+            ])
+        
         self.realm.beginWrite()
         let sourceObject = tasksList![sourceIndexPath.row]
         let destinationObject = tasksList![destinationIndexPath.row]
@@ -181,7 +192,7 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         let count = cellTask.points
         let date = cellTask.deadline
         let checked = cellTask.isCompleted
-        let progressDotRadius = CGFloat(3.0)
+        let progressDotRadius = CGFloat(4.0)
         let indWidth = (10+(2*Int(progressDotRadius)))
         let width = indWidth * count
         let frameWidth = Int(cell.progressBar.frame.width)
@@ -303,15 +314,53 @@ extension TodayVC: CustomTodayTaskCellDelegate {
     func cellCheckBoxTapped(editingCell: TodayTaskCell, checked: Bool) {
         AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
         let selectedTask = editingCell.taskObj!
+        
+        if checked == true {
+            //log firebase analytics event
+            Analytics.logEvent("task_completed", parameters: [
+                "name": selectedTask.title as NSObject,
+                "full_text": "" as NSObject
+                ])
+            
+            if selectedTask.deadline != nil {
+                NotificationsController.removeNotifications(task: selectedTask)
+            }
+        } else {
+            //log firebase analytics event
+            Analytics.logEvent("task_uncompleted", parameters: [
+                "name": selectedTask.title as NSObject,
+                "full_text": "" as NSObject
+                ])
+            
+            if selectedTask.deadline != nil {
+                NotificationsController.scheduleNotification(task: selectedTask)
+            }
+        }
+        
         try! self.realm.write {
+            selectedTask.isCompleted = checked
             selectedTask.isToday = false
-            selectedTask.isCompleted = checked 
         }
     }
     
     //update changed deadline
     func cellDueDateChanged(editingCell: TodayTaskCell, date: Date?) {
+        
+        //contextual prompt of asking user for permissions to add badges
+        NotificationsController.requestPermission()
+        
         let selectedTask = editingCell.taskObj!
+        
+        //log firebase analytics event
+        Analytics.logEvent("changed_deadline", parameters: [
+            "name": selectedTask.title as NSObject,
+            "full_text": "" as NSObject
+            ])
+        
+        if selectedTask.notificationIdentifier != "" {
+            NotificationsController.removeNotifications(task: selectedTask)
+        }
+        
         try! self.realm.write {
             if let unwrappedDate = date {
                 selectedTask.deadline = unwrappedDate
@@ -319,11 +368,23 @@ extension TodayVC: CustomTodayTaskCellDelegate {
                 selectedTask.deadline = nil
             }
         }
+        NotificationsController.scheduleNotification(task: selectedTask)
     }
     
     //delete task
     func deleteTask(editingCell: TodayTaskCell) {
         let selectedTask = (editingCell.taskObj)!
+        
+        //log firebase analytics event
+        Analytics.logEvent("delete_task", parameters: [
+            "name": selectedTask.title as NSObject,
+            "full_text": "" as NSObject
+            ])
+        
+        if selectedTask.notificationIdentifier != "" {
+            NotificationsController.removeNotifications(task: selectedTask)
+        }
+        
         try! self.realm.write {
             self.realm.delete(selectedTask)
         }
@@ -332,6 +393,13 @@ extension TodayVC: CustomTodayTaskCellDelegate {
     //update new task title
     func updateTaskTitle(editingCell: TodayTaskCell, newTitle: String) {
         let selectedTask = (editingCell.taskObj)!
+        
+        //log firebase analytics event
+        Analytics.logEvent("updated_task_title", parameters: [
+            "name": selectedTask.title as NSObject,
+            "full_text": "" as NSObject
+            ])
+        
         try! self.realm.write {
             selectedTask.title = newTitle
         }
@@ -339,6 +407,13 @@ extension TodayVC: CustomTodayTaskCellDelegate {
     
     func removeTaskfromToday(editingCell: TodayTaskCell){
         let selectedTask = (editingCell.taskObj)!
+        
+        //log firebase analytics event
+        Analytics.logEvent("remove_task_from_today", parameters: [
+            "name": selectedTask.title as NSObject,
+            "full_text": "" as NSObject
+            ])
+        
         try! self.realm.write {
             selectedTask.isToday = false
         }
@@ -355,6 +430,12 @@ extension TodayVC: CustomTodayTaskCellDelegate {
     func taskDoneForToday(editingCell: TodayTaskCell) {
         AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
         let selectedTask = (editingCell.taskObj)!
+        
+        Analytics.logEvent("task_done_for_today", parameters: [
+            "name": selectedTask.title as NSObject,
+            "full_text": "" as NSObject
+            ])
+        
         try! self.realm.write {
             selectedTask.isToday = false
         }        
@@ -373,13 +454,12 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         //makes due date button visible
         editingCell.dueDateBtn.isHidden = false
         
-        //Add padding to button when keyboard shows, so it isn't covered
-        Floaty.global.button.paddingY += 50
-        
         editingCell.taskTitleLabel.isEnabled = true
         if editingCell.pickerSelected == false {
             //triggers keyboard if picker is not the first responder
             editingCell.taskTitleLabel.becomeFirstResponder()
+        } else {
+            Floaty.global.button.isHidden = true
         }
         
         let editingOffset = self.tableView.contentOffset.y - editingCell.frame.origin.y as CGFloat
@@ -406,8 +486,10 @@ extension TodayVC: CustomTodayTaskCellDelegate {
             editingCell.dueDateBtn.isHidden = true
         }
         
-        //Remove plus button padding
-        Floaty.global.button.paddingY -= 50
+       //show Floaty again
+        if editingCell.pickerSelected == true {
+             Floaty.global.button.isHidden = false
+        }
         
         editingCell.taskTitleLabel.isEnabled = false
         editingCell.taskTitleLabel.isEnabled = false
@@ -420,6 +502,7 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         } else {
             //delete new task if user did not give it title
             //deletes existing task if user removed its title
+            editingCell.objectDeleted = true
             self.deleteTask(editingCell: editingCell)
         }
         
@@ -437,6 +520,13 @@ extension TodayVC: CustomTodayTaskCellDelegate {
 }
 
 extension TodayVC: MGSwipeTableCellDelegate {
+    
+    func swipeTableCellWillBeginSwiping(_ cell: MGSwipeTableCell) {
+        let uwCell = cell as! TodayTaskCell
+        if uwCell.isBeingEdited == true {
+            uwCell.endEditing(false)
+        }
+    }
     
     func swipeTableCell(_ cell: MGSwipeTableCell, tappedButtonAt index: Int, direction: MGSwipeDirection, fromExpansion: Bool) -> Bool {
         

@@ -289,29 +289,27 @@ private extension DottedProgressBar {
                                 self.zoomIncreaseValueOnProgressAnimation
             }, completion: nil)
         }
-
+        
         let dotsRange: CountableClosedRange = currentProgress > previousProgress ?
             previousProgress...currentProgress - 1 :
             currentProgress...previousProgress - 1
         
-        //if self.subviews.count > 0 {
-            for index in dotsRange {
-                UIView.animate(withDuration: 0.1,
-                               delay:
-                    animation.animated ?
-                        progressChangeAnimationDuration * 0.7 *
-                            ((Double(index) - Double(previousProgress - 1)) / (Double(currentProgress - 1) -
-                                Double(previousProgress - 1))) : 0.0,
-                               options: .curveLinear,
-                               animations: {
-                                self.subviews[index].backgroundColor =
-                                    self.currentProgress > self.previousProgress ?
-                                        self.progressAppearance.dotsProgressColor :
-                                    self.progressAppearance.dotsColor
-                }, completion: nil)
-            }
-       // }
-
+        for index in dotsRange {
+            UIView.animate(withDuration: 0.1,
+                           delay:
+                animation.animated ?
+                    progressChangeAnimationDuration * 0.7 *
+                        ((Double(index) - Double(previousProgress - 1)) / (Double(currentProgress - 1) -
+                            Double(previousProgress - 1))) : 0.0,
+                           options: .curveLinear,
+                           animations: {
+                            self.subviews[index].backgroundColor =
+                                self.currentProgress > self.previousProgress ?
+                                    self.progressAppearance.dotsProgressColor :
+                                self.progressAppearance.dotsColor
+            }, completion: nil)
+        }
+        
         if animation.animated {
             UIView.animate(withDuration: progressChangeAnimationDuration * 0.3,
                            delay: progressChangeAnimationDuration * 0.7,

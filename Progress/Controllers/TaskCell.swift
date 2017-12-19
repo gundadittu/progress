@@ -37,7 +37,8 @@ class TaskCell:  MGSwipeTableCell {
     var customDelegate: CustomTaskCellDelegate?
     var pickerSelected: Bool = false
     var isBeingEdited: Bool = false
-    var taskObj: SavedTask? 
+    var taskObj: SavedTask?
+    var objectDeleted = false
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -59,7 +60,7 @@ extension TaskCell: UITextFieldDelegate {
     
     func textFieldDidEndEditing(_ textField: UITextField) {
         self.taskTitleLabel.text = textField.text!
-        if self.customDelegate != nil && pickerSelected == false {
+        if self.customDelegate != nil {
             self.customDelegate?.cellDidEndEditing(editingCell: self)
         }
     }
@@ -86,12 +87,20 @@ extension TaskCell: BEMCheckBoxDelegate {
 extension TaskCell: DateTimePickerDelegate {
     
     @IBAction func dueDateBtnSelected(_ sender: UIButton) {
+        
+        //does not trigger textfield become first responded under cellDidBeginEditing
         self.pickerSelected = true
+        
+        //Resings textfield so cellDidBeginEditing is triggered - saves task title text
         if self.isBeingEdited == true {
             self.taskTitleLabel.resignFirstResponder()
-        } else {
-            self.customDelegate?.cellDidBeginEditing(editingCell: self)
         }
+        
+        //if taskk title is empty/ has been, do not want to trigger further action
+        if self.objectDeleted == true {
+            return 
+        }
+        
         var max: Date
         var selected: Date
         if self.dueDate != nil {
@@ -103,8 +112,12 @@ extension TaskCell: DateTimePickerDelegate {
         }
         
         let picker = DateTimePicker.show(selected: selected, maximumDate: max)
+        picker.becomeFirstResponder()
+        //trigger method - does not make textfield first responded since self.pickerSelected = true
+        self.customDelegate?.cellDidBeginEditing(editingCell: self)
+        
         picker.highlightColor = FlatPurple()
-        picker.isDatePickerOnly = true
+        picker.isDatePickerOnly = false
         picker.is12HourFormat = true
         picker.selectedDate = selected
         picker.doneBackgroundColor = FlatPurple()

@@ -18,6 +18,9 @@ import Realm
 import RealmSwift
 import DZNEmptyDataSet
 import AudioToolbox
+import UserNotifications
+import DispatchIntrospection
+import Firebase
 
 class TasksVC: UIViewController, FloatyDelegate  {
     
@@ -95,6 +98,8 @@ class TasksVC: UIViewController, FloatyDelegate  {
                 tableView.endUpdates()
                 break
             case .error(let error):
+                //log crashlytics error
+                Crashlytics.sharedInstance().recordError(error)
                 print(error)
                 break
             }
@@ -135,6 +140,17 @@ class TasksVC: UIViewController, FloatyDelegate  {
         try! self.realm.write {
             self.realm.add(newTask)
         }
+        //self.tableView.contentInset = UIEdgeInsetsMake(1, 0, 0, 0)
+        let deadlineTime = DispatchTime.now() + .seconds(1)
+
+        let visibleCells = self.tableView.indexPathsForVisibleRows
+        if visibleCells?.contains(IndexPath(row: 0, section: 0)) == true {
+            return
+        }
+        self.tableView.contentInset = UIEdgeInsetsMake(20, 0, 0, 0)
+        DispatchQueue.main.asyncAfter(deadline: deadlineTime) {
+            self.tableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: true)
+        }
     }
 }
 
@@ -149,9 +165,6 @@ extension TasksVC: UITableViewDelegate, UITableViewDataSource, TableViewReorderD
         self.configure(cell: cell, with: selectedTask)
         
         if selectedTask.isNewTask == true {
-           // self.realm.beginWrite()
-           // selectedTask.isNewTask = false
-            //try! self.realm.commitWrite()
             cell.customDelegate?.cellDidBeginEditing(editingCell: cell)
         }
         return cell
@@ -159,7 +172,15 @@ extension TasksVC: UITableViewDelegate, UITableViewDataSource, TableViewReorderD
     
     //when user reorders table cells
     func tableView(_ tableView: UITableView, reorderRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
+        
+        //log firebase analytics event
+        Analytics.logEvent("tasks_reordered", parameters: [
+            "name":"" as NSObject,
+            "full_text": "" as NSObject
+            ])
+        
         self.realm.beginWrite()
+        
         let sourceObject = tasksList![sourceIndexPath.row]
         let destinationObject = tasksList![destinationIndexPath.row]
         
@@ -184,6 +205,7 @@ extension TasksVC: UITableViewDelegate, UITableViewDataSource, TableViewReorderD
             }
         }
         sourceObject.displayOrder = destinationObjectOrder
+        
         try! self.realm.commitWrite(withoutNotifying: [self.token!])
     }
     
@@ -218,7 +240,7 @@ extension TasksVC: CustomTaskCellDelegate {
         let count = cellTask.points
         let date = cellTask.deadline
         let checked = cellTask.isCompleted
-        let progressDotRadius = CGFloat(3.0)
+        let progressDotRadius = CGFloat(4.0)
         let indWidth = (10+(2*Int(progressDotRadius)))
         let width = indWidth * count
         let frameWidth = Int(cell.progressBar.frame.width)
@@ -306,7 +328,6 @@ extension TasksVC: CustomTaskCellDelegate {
         }
         
         //sliding options
-       
         let leftButton1 = MGSwipeButton(title: "Add to My Day", backgroundColor: FlatGreen())
         leftButton1.titleLabel?.font = UIFont(name: "SF Pro Text Regular" , size: 12)
         cell.leftButtons = [leftButton1]
@@ -340,14 +361,52 @@ extension TasksVC: CustomTaskCellDelegate {
     func cellCheckBoxTapped(editingCell: TaskCell, checked: Bool) {
         AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
         let selectedTask = editingCell.taskObj!
+        
+        if checked == true {
+            //log firebase analytics event
+            Analytics.logEvent("task_completed", parameters: [
+                "name": selectedTask.title as NSObject,
+                "full_text": "" as NSObject
+                ])
+            
+            if selectedTask.deadline != nil {
+                NotificationsController.removeNotifications(task: selectedTask)
+            }
+        } else {
+            //log firebase analytics event
+            Analytics.logEvent("task_uncompleted", parameters: [
+                "name": selectedTask.title as NSObject,
+                "full_text": "" as NSObject
+                ])
+            
+            if selectedTask.deadline != nil {
+                NotificationsController.scheduleNotification(task: selectedTask)
+            }
+        }
+        
         try! self.realm.write {
             selectedTask.isCompleted = checked
         }
     }
     
-    //update changed deadline - core data
+    //update changed deadline
     func cellDueDateChanged(editingCell: TaskCell, date: Date?) {
+        
+        //contextual prompt of asking user for permissions to add badges
+        NotificationsController.requestPermission()
+        
         let selectedTask = editingCell.taskObj!
+        
+        //log firebase analytics event
+        Analytics.logEvent("changed_deadline", parameters: [
+            "name": selectedTask.title as NSObject,
+            "full_text": "" as NSObject
+            ])
+        
+        if selectedTask.notificationIdentifier != "" {
+            NotificationsController.removeNotifications(task: selectedTask)
+        }
+        
         try! self.realm.write {
             if let unwrappedDate = date {
                 selectedTask.deadline = unwrappedDate
@@ -355,11 +414,24 @@ extension TasksVC: CustomTaskCellDelegate {
                 selectedTask.deadline = nil
             }
         }
+        
+         NotificationsController.scheduleNotification(task: selectedTask)
     }
     
     //delete task - core data
     func deleteTask(editingCell: TaskCell) {
         let selectedTask = (editingCell.taskObj)!
+        
+        //log firebase analytics event
+        Analytics.logEvent("delete_task", parameters: [
+            "name": selectedTask.title as NSObject,
+            "full_text": "" as NSObject
+            ])
+        
+        if selectedTask.notificationIdentifier != "" {
+            NotificationsController.removeNotifications(task: selectedTask)
+        }
+        
         try! self.realm.write {
             self.realm.delete(selectedTask)
         }
@@ -368,6 +440,13 @@ extension TasksVC: CustomTaskCellDelegate {
     //update new task title
     func updateTaskTitle(editingCell: TaskCell, newTitle: String) {
         let selectedTask = (editingCell.taskObj)!
+        
+        //log firebase analytics event
+        Analytics.logEvent("updated_task_title", parameters: [
+            "name": selectedTask.title as NSObject,
+            "full_text": "" as NSObject
+            ])
+        
         try! self.realm.write {
             selectedTask.title = newTitle
         }
@@ -377,6 +456,13 @@ extension TasksVC: CustomTaskCellDelegate {
     func addTasktoToday(editingCell: TaskCell) {
         AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
         let selectedTask = (editingCell.taskObj)!
+        
+        //log firebase analytics event
+        Analytics.logEvent("add_task_to_your_day", parameters: [
+            "name": selectedTask.title as NSObject,
+            "full_text": "" as NSObject
+            ])
+        
         try! self.realm.write {
             selectedTask.isCompleted = false
             selectedTask.isToday = true
@@ -400,14 +486,14 @@ extension TasksVC: CustomTaskCellDelegate {
         //makes due date button visible
         editingCell.dueDateBtn.isHidden = false
         
-        //Add padding to button when keyboard shows, so it isn't covered
-        Floaty.global.button.paddingY += 50
-       
-        
+        //Hide Button if datepicker is selected
+        ///Show keyboard if datepicker is not selected
         editingCell.taskTitleLabel.isEnabled = true
         if editingCell.pickerSelected == false {
             //triggers keyboard if picker is not the first responder
             editingCell.taskTitleLabel.becomeFirstResponder()
+        } else {
+            Floaty.global.button.isHidden = true
         }
         
         let editingOffset = self.tableView.contentOffset.y - editingCell.frame.origin.y as CGFloat
@@ -424,10 +510,18 @@ extension TasksVC: CustomTaskCellDelegate {
     
     func cellDidEndEditing(editingCell: TaskCell) {
         
+        self.tableView.contentInset = UIEdgeInsetsMake(0, 0, 0, 0)
+
         if editingCell.taskObj?.isNewTask == true {
             try! self.realm.write {
                 editingCell.taskObj?.isNewTask = false
             }
+            
+            //log firebase analytics event for creating new task
+            Analytics.logEvent("create_task", parameters: [
+                "name": (editingCell.taskObj?.title)! as NSObject,
+                "full_text": "" as NSObject
+                ])
         }
         
         if let drawerVC = self.navigationController?.parent as? PulleyViewController {
@@ -445,8 +539,9 @@ extension TasksVC: CustomTaskCellDelegate {
             editingCell.dueDateBtn.isHidden = true
         }
         
-        //Remove plus button padding
-        Floaty.global.button.paddingY -= 50
+        if editingCell.pickerSelected == true {
+            Floaty.global.button.isHidden = false 
+        }
         
         
         editingCell.taskTitleLabel.isEnabled = false
@@ -460,6 +555,7 @@ extension TasksVC: CustomTaskCellDelegate {
         } else {
             //delete new task if user did not give it title
             //deletes existing task if user removed its title
+            editingCell.objectDeleted = true 
             self.deleteTask(editingCell: editingCell)
         }
         
@@ -475,9 +571,17 @@ extension TasksVC: CustomTaskCellDelegate {
         }
         
     }
+    
 }
 
 extension TasksVC: MGSwipeTableCellDelegate {
+    
+    func swipeTableCellWillBeginSwiping(_ cell: MGSwipeTableCell) {
+        let uwCell = cell as! TaskCell
+        if uwCell.isBeingEdited == true {
+            uwCell.endEditing(false)
+        }
+    }
     
     func swipeTableCell(_ cell: MGSwipeTableCell, tappedButtonAt index: Int, direction: MGSwipeDirection, fromExpansion: Bool) -> Bool {
        
@@ -494,6 +598,9 @@ extension TasksVC: MGSwipeTableCellDelegate {
             if index == 0 {
                 //if user swipes to add task to today
                 self.addTasktoToday(editingCell: modifiedCell)
+                
+                //contextual prompt of asking user for permissions to add badges
+                NotificationsController.requestPermission()
             }
         }
         
@@ -527,4 +634,49 @@ extension TasksVC: DZNEmptyDataSetSource, DZNEmptyDataSetDelegate {
         return -((self.navigationController?.navigationBar.frame.size.height)!/2.0)
     }
 }
+
+/*
+extension TasksVC: UNUserNotificationCenterDelegate  {
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        switch response.actionIdentifier {
+        case UNNotificationDismissActionIdentifier:
+            //log firebase analytics event
+            Analytics.logEvent("dismissed_deadline_notification", parameters: [
+                "name": "" as NSObject,
+                "full_text": "" as NSObject
+                ])
+            completionHandler()
+            break
+        case UNNotificationDefaultActionIdentifier:
+            //log firebase analytics event
+            Analytics.logEvent("opened_deadline_notification", parameters: [
+                "name": "" as NSObject,
+                "full_text": "" as NSObject
+                ])
+            completionHandler()
+            break
+        /*case "deleteAction":
+            /*let userInfo = response.notification.request.content.userInfo
+            let task = userInfo["task"] as! SavedTask
+            let realm = try! Realm()
+            try! realm.write {
+                realm.delete(task)
+            }*/
+            break
+        case "completeAction":
+            /*let userInfo = response.notification.request.content.userInfo
+            let task = userInfo["task"] as! SavedTask
+            let realm = try! Realm()
+            try! realm.write {
+                task.isCompleted = true
+                task.isToday = false
+            }*/
+            break*/
+        default:
+            completionHandler()
+            break
+        }
+    }
+}
+ */
 

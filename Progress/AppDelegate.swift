@@ -26,18 +26,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         FirebaseApp.configure()
         Instabug.start(withToken: "14c94ce365f8079a4edad9fb61c9cf4a", invocationEvent: .shake)
         
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { (granted, error) in
-            if error != nil {
-                return
-            }
-        }
-        
         if self.isAppAlreadyLaunchedOnce() == false {
-            Floaty.global.button.isHidden = true
-            let storyboard = UIStoryboard(name: "Main", bundle: Bundle.main)
-            let onboardVC = storyboard.instantiateViewController(withIdentifier: "onboarding")
-            self.window?.makeKeyAndVisible()
-            self.window?.rootViewController?.present(onboardVC, animated: true, completion: nil)
+            self.loadOnboarding()
         }
         return true
     }
@@ -51,30 +41,26 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let andPredicate = NSCompoundPredicate(type: NSCompoundPredicate.LogicalType.and, subpredicates: [isNotCompletedPredicate, isTodayPredicate])
         let list = realm.objects(SavedTask.self).filter(andPredicate)
         application.applicationIconBadgeNumber = list.count
+        
+        //set morning notification
+        //NotificationsController.scheduleMorningNotification(hour: 9, minute: 00, active: true)
+        
+        //to make sure all empty title tasks are deleted if app randomly closes 
+        self.window?.endEditing(true)
     }
     
-    func applicationDidEnterBackground(_ application: UIApplication) {
-        // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
-        // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
-    }
-    
-    func applicationWillEnterForeground(_ application: UIApplication) {
-        // Called as part of the transition from the background to the active state; here you can undo many of the changes made on entering the background.
-    }
-    
-    func applicationDidBecomeActive(_ application: UIApplication) {
-        // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
-    }
-    
-    func applicationWillTerminate(_ application: UIApplication) {
-        // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
-        // Saves changes in the application's managed object context before the application terminates.
+     func loadOnboarding(){
+        Floaty.global.button.isHidden = true
+        let storyboard = UIStoryboard(name: "Main", bundle: Bundle.main)
+        let onboardVC = storyboard.instantiateViewController(withIdentifier: "onboarding")
+        self.window?.makeKeyAndVisible()
+        self.window?.rootViewController?.present(onboardVC, animated: true, completion: nil)
     }
     
     func isAppAlreadyLaunchedOnce()->Bool{
         let defaults = UserDefaults.standard
-        if  defaults.string(forKey: "isAppAlreadyLaunchedOnce") == nil{
-            defaults.set(true, forKey: "isAppAlreadyLaunchedOnce")
+        if  defaults.string(forKey: "isAppAlreadyLaunchedBefore") == nil{
+            defaults.set(true, forKey: "isAppAlreadyLaunchedBefore")
             return false
         }
         return true
