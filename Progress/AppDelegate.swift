@@ -17,7 +17,8 @@ import RealmSwift
 import UserNotifications
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
+
+class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     
     var window: UIWindow?
         
@@ -26,7 +27,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         FirebaseApp.configure()
         Instabug.start(withToken: "14c94ce365f8079a4edad9fb61c9cf4a", invocationEvent: .shake)
         
+        //Setting notification delegate 
+        UNUserNotificationCenter.current().delegate = self
+        
         if self.isAppAlreadyLaunchedOnce() == false {
+            //set morning notification to 9 AM
+            NotificationsController.scheduleMorningNotification(hour: 9, minute: 00, active: true)
+            //load app introduction walkthrough 
             self.loadOnboarding()
         }
         return true
@@ -42,14 +49,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let list = realm.objects(SavedTask.self).filter(andPredicate)
         application.applicationIconBadgeNumber = list.count
         
-        //set morning notification
-        //NotificationsController.scheduleMorningNotification(hour: 9, minute: 00, active: true)
-        
         //to make sure all empty title tasks are deleted if app randomly closes 
         self.window?.endEditing(true)
     }
     
-     func loadOnboarding(){
+    func loadOnboarding(){
         Floaty.global.button.isHidden = true
         let storyboard = UIStoryboard(name: "Main", bundle: Bundle.main)
         let onboardVC = storyboard.instantiateViewController(withIdentifier: "onboarding")
@@ -65,5 +69,66 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
         return true
     }
+    
+    //Handle incoming notifications
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        switch response.actionIdentifier {
+        case UNNotificationDismissActionIdentifier:
+            //log firebase analytics event
+            Analytics.logEvent("dismissed_deadline_notification", parameters: [
+                "name": "" as NSObject,
+                "full_text": "" as NSObject
+                ])
+            completionHandler()
+            break
+        case UNNotificationDefaultActionIdentifier:
+            //log firebase analytics event
+            Analytics.logEvent("opened_deadline_notification", parameters: [
+                "name": "" as NSObject,
+                "full_text": "" as NSObject
+                ])
+            completionHandler()
+            break
+        case "deleteAction":
+            //log firebase analytics event
+            Analytics.logEvent("deleteTask_deadline_notification", parameters: [
+                "name": "" as NSObject,
+                "full_text": "" as NSObject
+                ])
+            let id = response.notification.request.identifier
+            let realm = try! Realm()
+            let idPredicate = NSPredicate(format: "notificationIdentifier == %@",  id)
+            if let task = realm.objects(SavedTask.self).filter(idPredicate).first {
+                try! realm.write {
+                    realm.delete(task)
+                }
+            }
+            completionHandler()
+            break
+        case "completeAction":
+            //log firebase analytics event
+            Analytics.logEvent("completeTask_deadline_notification", parameters: [
+                "name": "" as NSObject,
+                "full_text": "" as NSObject
+                ])
+            
+            let id = response.notification.request.identifier
+            let realm = try! Realm()
+            let idPredicate = NSPredicate(format: "notificationIdentifier == %@",  id)
+            if let task = realm.objects(SavedTask.self).filter(idPredicate).first {
+                try! realm.write {
+                    task.isCompleted = true
+                    task.isToday = false
+                }
+            }
+            completionHandler()
+            break
+        default:
+            completionHandler()
+            break
+        }
+    }
+    
 }
+
 

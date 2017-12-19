@@ -15,7 +15,10 @@ import CFAlertViewController
 import ChameleonFramework
 import Floaty
 
-class NotificationsController {    
+class NotificationsController  {
+    
+    static let center = UNUserNotificationCenter.current()
+
 
     class func scheduleNotification(task: SavedTask) {
         
@@ -28,8 +31,7 @@ class NotificationsController {
         let categoryID = "deadline"
         let date = task.deadline!
         
-        let center = UNUserNotificationCenter.current()
-        /*
+        
         let completeAction = UNNotificationAction(identifier: "completeAction",
                                                   title: "Mark as Completed", options: [])
         let deleteAction = UNNotificationAction(identifier: "deleteAction",
@@ -37,14 +39,13 @@ class NotificationsController {
         let category = UNNotificationCategory(identifier: categoryID,
                                               actions: [completeAction, deleteAction],
                                               intentIdentifiers: [], options: [])
-        center.setNotificationCategories([category])
-        */
+        self.center.setNotificationCategories([category])
         
         let content = UNMutableNotificationContent()
         content.title = title
         content.body = body
         content.sound = UNNotificationSound.default()
-        //content.userInfo = ["task" : task]
+        //content.userInfo = [AnyHashable("task") : task]
         content.categoryIdentifier = categoryID
         
         var dateComponents = DateComponents()
@@ -66,8 +67,7 @@ class NotificationsController {
     
     class func removeNotifications(task: SavedTask) {
         let identifier = task.notificationIdentifier
-        let center = UNUserNotificationCenter.current()
-        center.removePendingNotificationRequests(withIdentifiers: [identifier])
+        self.center.removePendingNotificationRequests(withIdentifiers: [identifier])
         let realm = try! Realm()
         try! realm.write {
             task.notificationIdentifier = ""
@@ -123,8 +123,7 @@ class NotificationsController {
 
         alertController.shouldDismissOnBackgroundTap = false
         
-         let center = UNUserNotificationCenter.current()
-        center.getNotificationSettings(completionHandler: { (settings) in
+        self.center.getNotificationSettings(completionHandler: { (settings) in
             let status = settings.authorizationStatus
             if status == .notDetermined {
                 DispatchQueue.main.async {
@@ -141,8 +140,7 @@ class NotificationsController {
         let body = "Let's get Your Day going by adding some tasks."
         let category = "morningNotification"
 
-        let center = UNUserNotificationCenter.current()
-        center.removePendingNotificationRequests(withIdentifiers: [category])
+        self.center.removePendingNotificationRequests(withIdentifiers: [category])
         
         if active == false {
             return 
@@ -160,7 +158,7 @@ class NotificationsController {
         let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
         let n = UNNotificationRequest(identifier: category, content: content, trigger: trigger)
     
-        center.add(n)
+        self.center.add(n)
     }
 }
 
