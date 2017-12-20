@@ -14,12 +14,15 @@ import Firebase
 import CFAlertViewController
 import ChameleonFramework
 import Floaty
+import Alamofire
+import SwiftyJSON
 
 class NotificationsController  {
     
     static let center = UNUserNotificationCenter.current()
     static let defaults = UserDefaults.standard
-
+    static let quotesAPIURL = "http://api.forismatic.com/api/1.0/"
+    
     class func scheduleNotification(task: SavedTask) {
         
         if task.deadline == nil {
@@ -74,7 +77,7 @@ class NotificationsController  {
     }
     
     class func requestPermission(){
-        let alertController = CFAlertViewController(title: "👋👋 We need your permission to send you notifications! 👋👋",
+        let alertController = CFAlertViewController(title: "👋 We need your permission to send you notifications! ",
                                                     message: "Nothing annoying. Just so we can remind you in the morning to get Your Day started, place an app badge count of tasks left under Your Day, and remind you of tasks due today.",
                                                     textAlignment: .left,
                                                     preferredStyle: .alert,
@@ -90,13 +93,13 @@ class NotificationsController  {
                                             UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { (granted, error) in
                                                 if granted == true {
                                                     //log firebase analytics event
-                                                    Analytics.logEvent("notifications_permission_granted", parameters: [
+                                                    Analytics.logEvent(notificationPermissionGrantedEvent, parameters: [
                                                         "name":"" as NSObject,
                                                         "full_text": "" as NSObject
                                                         ])
                                                 } else {
                                                     //log firebase analytics event
-                                                    Analytics.logEvent("notifications_permission_denied", parameters: [
+                                                    Analytics.logEvent(notificationPermissionDeniedEvent, parameters: [
                                                         "name":"" as NSObject,
                                                         "full_text": "" as NSObject
                                                         ])
@@ -136,32 +139,47 @@ class NotificationsController  {
     
     class func scheduleMorningNotification(){
         let title = "What do you want to work on today?"
-        let body = "A good plan today is better than a perfect plan tomorrow. - Anonymous"
+        var body = "A good plan today is better than a perfect plan tomorrow. - Anonymous"
         let category = "morningNotification"
-
+    
         self.center.removePendingNotificationRequests(withIdentifiers: [category])
         
         guard let dailyNotificationsTime = self.defaults.value(forKey: "dailyNotificationTime") else { return }
         
-        let string = dailyNotificationsTime as! String
-        let formatter = DateFormatter()
-        formatter.dateStyle = .none
-        formatter.timeStyle = .short
-        let date = formatter.date(from: string)
-
-        let content = UNMutableNotificationContent()
-        content.title = title
-        content.body = body
-        content.categoryIdentifier = category
-        content.sound = UNNotificationSound.default()
-        
-        var dateComponents = DateComponents()
-        dateComponents.hour = date?.hour
-        dateComponents.minute = date?.minute
-        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
-        let n = UNNotificationRequest(identifier: category, content: content, trigger: trigger)
+        let parameters: [String : Any] = ["method": "getQuote", "format" : "json", "key" : 4, "lang" : "en"]
+        Alamofire.request(quotesAPIURL, parameters: parameters).responseJSON { (response) in
+            switch response.result {
+            case .success(let value):
+                let json = JSON(value).dictionaryObject!
+                let quote = json["quoteText"] as! String
+                let author = json["quoteAuthor"] as! String
+                body = "\(String(describing: quote))- \(String(describing: author))"
+                break
+            case .failure(let error):
+                print(error.localizedDescription)
+                break
+            }
+            let string = dailyNotificationsTime as! String
+            let formatter = DateFormatter()
+            formatter.dateStyle = .none
+            formatter.timeStyle = .short
+            let date = formatter.date(from: string)
+            
+            let content = UNMutableNotificationContent()
+            content.title = title
+            content.body = body
+            content.categoryIdentifier = category
+            content.sound = UNNotificationSound.default()
+            
+            var dateComponents = DateComponents()
+            dateComponents.hour = date?.hour
+            dateComponents.minute = date?.minute
+            let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+            let n = UNNotificationRequest(identifier: category, content: content, trigger: trigger)
+            
+            self.center.add(n)
+        }
     
-        self.center.add(n)
     }
 }
 

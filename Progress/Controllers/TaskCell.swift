@@ -54,10 +54,6 @@ class TaskCell:  MGSwipeTableCell {
 
 extension TaskCell: UITextFieldDelegate {
     
-    func textFieldDidBeginEditing(_ textField: UITextField) {
-        return
-    }
-    
     func textFieldDidEndEditing(_ textField: UITextField) {
         self.taskTitleLabel.text = textField.text!
         if self.customDelegate != nil {
@@ -116,11 +112,11 @@ extension TaskCell: DateTimePickerDelegate {
         //trigger method - does not make textfield first responded since self.pickerSelected = true
         self.customDelegate?.cellDidBeginEditing(editingCell: self)
         
-        picker.highlightColor = FlatPurple()
+        picker.highlightColor = mainAppColor
         picker.isDatePickerOnly = false
         picker.is12HourFormat = true
         picker.selectedDate = selected
-        picker.doneBackgroundColor = FlatPurple()
+        picker.doneBackgroundColor = mainAppColor
         picker.includeMonth = true
         picker.cancelButtonTitle = "Clear"
         picker.doneButtonTitle = "Set Deadline"

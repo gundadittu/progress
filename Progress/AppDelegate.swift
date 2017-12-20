@@ -46,14 +46,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         //Setting notification delegate 
         UNUserNotificationCenter.current().delegate = self
         
-        let badgeBool = defaults.value(forKey: "yourDayBadgeCount")
-        if badgeBool == nil {
+        let ydBadgeBool = defaults.value(forKey: "yourDayBadgeCount")
+        if ydBadgeBool == nil {
            defaults.set(true, forKey: "yourDayBadgeCount")
         }
         
         let hapticBool = defaults.value(forKey: "hapticFeedback")
         if hapticBool == nil {
             defaults.set(true, forKey: "hapticFeedback")
+        }
+        
+        let dtBadgeBool = defaults.value(forKey: "dueTodayBadgeCount")
+        if dtBadgeBool == nil {
+             defaults.set(true, forKey: "dueTodayBadgeCount")
         }
         
         //set daily motivational notification to 9 AM
@@ -67,8 +72,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             formatter.timeStyle = .short
             let string = formatter.string(from: date!)
             defaults.setValue(string, forKey: "dailyNotificationTime")
-            NotificationsController.scheduleMorningNotification()
         }
+        //Schedule anyways to change quote 
+        NotificationsController.scheduleMorningNotification()
 
         if self.isAppAlreadyLaunchedOnce() == false {
             //load app introduction walkthrough if first time launching app
@@ -80,14 +86,43 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     func applicationWillResignActive(_ application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
         // Use this method to pause ongoing tasks, disable timers, and invalidate graphics rendering callbacks. Games should use this method to pause the game.
-        let badgeBool = defaults.value(forKey: "yourDayBadgeCount") as! Bool 
-        if badgeBool == true {
+        let badgeBool = defaults.value(forKey: "yourDayBadgeCount") as! Bool
+        let dueTodayBool = defaults.value(forKey: "dueTodayBadgeCount") as! Bool
+        if badgeBool == true || dueTodayBool == true{
+            var total = 0
+            
             let realm = try! Realm()
-            let isTodayPredicate = NSPredicate(format: "isToday == %@",  Bool(booleanLiteral: true) as CVarArg)
+            // Get the current calendar with local time zone
+            var calendar = Calendar.current
+            calendar.timeZone = NSTimeZone.local
+            // Get today's beginning & end
+            let dateFrom = calendar.startOfDay(for: Date()) // eg. 2016-10-10 00:00:00
+            var components = calendar.dateComponents([.year, .month, .day, .hour, .minute],from: dateFrom)
+            components.day! += 1
+            let dateTo = calendar.date(from: components)! // eg. 2016-10-11 00:00:00
+            // Note: Times are printed in UTC. Depending on where you live it won't print 00:00:00 but it will work with UTC times which can be converted to local time
+            // Set predicate as date being today's date
+            let datePredicate = NSPredicate(format: "(%@ <= deadline) AND (deadline < %@)", argumentArray: [dateFrom, dateTo])
             let isNotCompletedPredicate = NSPredicate(format: "isCompleted == %@",  Bool(booleanLiteral: false) as CVarArg)
-            let andPredicate = NSCompoundPredicate(type: NSCompoundPredicate.LogicalType.and, subpredicates: [isNotCompletedPredicate, isTodayPredicate])
-            let list = realm.objects(SavedTask.self).filter(andPredicate)
-            application.applicationIconBadgeNumber = list.count
+            let isTodayPredicate = NSPredicate(format: "isToday == %@",  Bool(booleanLiteral: true) as CVarArg)
+            
+            if badgeBool == true {
+                let andPredicate = NSCompoundPredicate(type: NSCompoundPredicate.LogicalType.and, subpredicates: [isNotCompletedPredicate, isTodayPredicate])
+                let list = realm.objects(SavedTask.self).filter(andPredicate)
+                total += list.count
+            }
+            if dueTodayBool == true {
+                let andPredicate = NSCompoundPredicate(type: NSCompoundPredicate.LogicalType.and, subpredicates: [isNotCompletedPredicate, datePredicate])
+                let list = realm.objects(SavedTask.self).filter(andPredicate)
+                total += list.count
+            }
+            //remove duplicates
+            if badgeBool == true && dueTodayBool == true {
+                let andPredicate = NSCompoundPredicate(type: NSCompoundPredicate.LogicalType.and, subpredicates: [isNotCompletedPredicate, isTodayPredicate, datePredicate])
+                let list = realm.objects(SavedTask.self).filter(andPredicate)
+                total -= list.count
+            }
+            application.applicationIconBadgeNumber = total
         } else {
              application.applicationIconBadgeNumber = 0
         }
@@ -117,15 +152,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         switch response.actionIdentifier {
         case UNNotificationDismissActionIdentifier:
             //log firebase analytics event
-            Analytics.logEvent("dismissed_deadline_notification", parameters: [
+            Analytics.logEvent(dismissedDeadlineNotificationEvent, parameters: [
                 "name": "" as NSObject,
                 "full_text": "" as NSObject
                 ])
             completionHandler()
             break
         case UNNotificationDefaultActionIdentifier:
+            
             //log firebase analytics event
-            Analytics.logEvent("opened_deadline_notification", parameters: [
+            Analytics.logEvent(openedNotificationEvent, parameters: [
                 "name": "" as NSObject,
                 "full_text": "" as NSObject
                 ])
@@ -133,7 +169,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             break
         case "deleteAction":
             //log firebase analytics event
-            Analytics.logEvent("deleteTask_deadline_notification", parameters: [
+            Analytics.logEvent(deleteTaskDeadlineNotificationEvent, parameters: [
                 "name": "" as NSObject,
                 "full_text": "" as NSObject
                 ])
@@ -149,7 +185,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             break
         case "completeAction":
             //log firebase analytics event
-            Analytics.logEvent("completeTask_deadline_notification", parameters: [
+            Analytics.logEvent(completeTaskDeadlineNotificationEvent, parameters: [
                 "name": "" as NSObject,
                 "full_text": "" as NSObject
                 ])

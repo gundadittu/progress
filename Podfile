@@ -25,5 +25,7 @@ pod 'Crashlytics', '~> 3.9.3'
 pod 'Instabug'
 pod 'paper-onboarding', :git => 'git@github.com:MaTriXy/paper-onboarding'
 pod 'CFAlertViewController'
+pod 'Alamofire'
+pod 'SwiftyJSON'
 
 end

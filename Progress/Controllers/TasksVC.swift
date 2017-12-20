@@ -27,7 +27,7 @@ class TasksVC: UIViewController, FloatyDelegate  {
     
     @IBOutlet weak var tableView: UITableView!
     
-    let color = FlatPurple()
+    let color = mainAppColor
     let bgColor = UIColor.white
     var currentlySelectedCell: TaskCell? = nil
     
@@ -70,8 +70,10 @@ class TasksVC: UIViewController, FloatyDelegate  {
         self.tableView.emptyDataSetSource = self
         self.tableView.emptyDataSetDelegate = self
         
+        //Fetch data from database
         self.fetchObjects()
         
+        //Responds to changes in realm to rearrange tableview
         token = self.tasksList?.observe {[weak self] (changes: RealmCollectionChange) in
             guard let tableView = self?.tableView else { return }
             
@@ -101,12 +103,12 @@ class TasksVC: UIViewController, FloatyDelegate  {
             case .error(let error):
                 //log crashlytics error
                 Crashlytics.sharedInstance().recordError(error)
-                print(error)
                 break
             }
         }
     }
     
+    //fetches objects from realm
     func fetchObjects(){
         let isNotTodayPredicate = NSPredicate(format: "isToday == %@",  Bool(booleanLiteral: false) as CVarArg)
         let list = self.realm.objects(SavedTask.self).filter(isNotTodayPredicate)
@@ -115,6 +117,7 @@ class TasksVC: UIViewController, FloatyDelegate  {
         self.updateArrayDisplayOrder(self.tasksList!)
     }
     
+    //assigns display order attribute to objects. Note: displayOrder attribute help save user defined order of tasks
     func updateArrayDisplayOrder(_ array: Results<SavedTask>){
         var i = 0
         for ro in array {
@@ -132,25 +135,30 @@ class TasksVC: UIViewController, FloatyDelegate  {
     
     //Creates a new task
     func createNewTask(){
+        
+        //Pull drawer up if task is being created
         if let drawerVC = self.navigationController?.parent as? PulleyViewController {
             drawerVC.setDrawerPosition(position: .open, animated: true)
         }
+        
         let newTask = SavedTask()
         newTask.isNewTask = true
         newTask.displayOrder = 0
         try! self.realm.write {
             self.realm.add(newTask)
         }
-        //self.tableView.contentInset = UIEdgeInsetsMake(1, 0, 0, 0)
-        let deadlineTime = DispatchTime.now() + .seconds(1)
-
+        
+        //if top of tableview is visible on screen, no need to execute code below that scrolls up
         let visibleCells = self.tableView.indexPathsForVisibleRows
         if visibleCells?.contains(IndexPath(row: 0, section: 0)) == true {
             return
         }
-        self.tableView.contentInset = UIEdgeInsetsMake(20, 0, 0, 0)
+        
+        //scrolls to top of tableview
+        self.tableView.contentInset = UIEdgeInsetsMake(20, 0, 0, 0) //inset so that the programattic scroll below doesn't hide the new task cell
+        let deadlineTime = DispatchTime.now() + .seconds(1) //delay needed due to some bug
         DispatchQueue.main.asyncAfter(deadline: deadlineTime) {
-            self.tableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: true)
+            self.tableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: true) //scrolls up to new task if top of table view is not visible when new task is created
         }
     }
 }
@@ -158,13 +166,16 @@ class TasksVC: UIViewController, FloatyDelegate  {
 extension TasksVC: UITableViewDelegate, UITableViewDataSource, TableViewReorderDelegate {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        //spacer for reordering cells
         if let spacer = tableView.reorder.spacerCell(for: indexPath) {
             return spacer
         }
+        
         let selectedTask = tasksList![indexPath.row]
         let cell = tableView.dequeueReusableCell(withIdentifier: "TaskCell", for: indexPath) as! TaskCell
         self.configure(cell: cell, with: selectedTask)
         
+        //if it is new task created, automatically focuses on task to get user input on task title, etc.
         if selectedTask.isNewTask == true {
             cell.customDelegate?.cellDidBeginEditing(editingCell: cell)
         }
@@ -180,20 +191,16 @@ extension TasksVC: UITableViewDelegate, UITableViewDataSource, TableViewReorderD
             "full_text": "" as NSObject
             ])
         
+        //adjusts displayOrder attributes for all cells without notifying Realm so that tableview is not updated again (user's actions already updated it)
         self.realm.beginWrite()
-        
         let sourceObject = tasksList![sourceIndexPath.row]
         let destinationObject = tasksList![destinationIndexPath.row]
-        
         let sourceStatus = sourceObject.isCompleted
         let destinationStatus = destinationObject.isCompleted
-        
         if sourceStatus != destinationStatus {
             sourceObject.isCompleted = destinationStatus
         }
-        
         let destinationObjectOrder = destinationObject.displayOrder
-        
         if sourceIndexPath.row < destinationIndexPath.row {
             for index in sourceIndexPath.row...destinationIndexPath.row {
                 let object = tasksList![index]
@@ -206,21 +213,24 @@ extension TasksVC: UITableViewDelegate, UITableViewDataSource, TableViewReorderD
             }
         }
         sourceObject.displayOrder = destinationObjectOrder
-        
         try! self.realm.commitWrite(withoutNotifying: [self.token!])
     }
     
+    //Ned these two to avoid some warnings
     func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
         return
     }
-    
     func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
         return true
     }
     
-    //when user taps on cell to edit it
+    //Handles user clicking on cell - triggers editing
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let cell = self.tableView.cellForRow(at: indexPath) as! TaskCell
+        //Ensures only one cell is being edited at a time
+        if self.currentlySelectedCell != nil {
+            self.currentlySelectedCell?.customDelegate?.cellDidEndEditing(editingCell: cell)
+        }
         cell.customDelegate?.cellDidBeginEditing(editingCell: cell)
     }
     
@@ -235,6 +245,7 @@ extension TasksVC: UITableViewDelegate, UITableViewDataSource, TableViewReorderD
 
 extension TasksVC: CustomTaskCellDelegate {
     
+    //configures dequeued tableview cell
     func configure(cell: TaskCell, with savedTask: SavedTask) {
         let cellTask = savedTask
         let title = cellTask.title
@@ -248,21 +259,18 @@ extension TasksVC: CustomTaskCellDelegate {
         var modifiedCount = count
         //let dotColorsArr = [FlatPurple(),FlatBlue(),FlatGreen(),FlatYellow(),FlatOrange(),FlatRed()]
         //let colorIndex = ((width/indWidth)/(frameWidth/indWidth))%6
-        //let dotColor = dotColorsArr[colorIndex]
+        let dotColor = mainAppColor //dotColorsArr[colorIndex]
         
         //cell attributes
         cell.taskObj = cellTask
-        cell.selectionStyle = .none
-        cell.delegate = self
-        cell.customDelegate = self
+        cell.selectionStyle = .none //no highlighting of cell when clicked on
+        cell.delegate = self //for MGSwiping
+        cell.customDelegate = self //for custom functions to notify this VC of cell actions - protocol CustomTaskCellDelegate
         cell.contentView.backgroundColor = bgColor
-        cell.taskTitleLabel.isEnabled = false
+        cell.taskTitleLabel.isEnabled = false //so that user clicking on textfield is not confused with clicking on cell
         cell.taskTitleLabel.text = title
         
-        //due date button
-        cell.dueDateBtn.setTitle("Choose Deadline", for: .highlighted)
-        cell.dueDateBtn.setTitleColor(FlatPurple(), for: .highlighted)
-
+        //due date btn
         if date != nil {
             cell.dueDate = date
             cell.dueDateBtn.isHidden = false
@@ -303,6 +311,7 @@ extension TasksVC: CustomTaskCellDelegate {
                 }
             }
         } else {
+            //if there is not deadline
             cell.dueDateBtn.setTitle("Add Deadline", for: .normal)
             cell.dueDateBtn.setTitleColor(FlatGray(), for: .normal)
             cell.dueDate = nil
@@ -319,11 +328,13 @@ extension TasksVC: CustomTaskCellDelegate {
             cell.progressBar.isHidden = false
             cell.progressBar.backgroundColor = bgColor
             cell.progressBar.progressAppearance = DottedProgressBar.DottedProgressAppearance (
-                dotRadius: progressDotRadius,
-                dotsColor: color,
-                dotsProgressColor: color,
+                dotRadius: globalProgressDotRadius,
+                dotsColor: dotColor,
+                dotsProgressColor: dotColor,
                 backColor: UIColor.clear
             )
+            
+            //checks if # of dots is greater than what can fit on screen size - displays remainder instead
             if width > frameWidth {
                 let remainder = (width/indWidth)%(frameWidth/indWidth)
                 modifiedCount = remainder
@@ -332,15 +343,13 @@ extension TasksVC: CustomTaskCellDelegate {
         }
         
         //sliding options
-        let leftButton1 = MGSwipeButton(title: "Add to My Day", backgroundColor: FlatGreen())
-        leftButton1.titleLabel?.font = UIFont(name: "SF Pro Text Regular" , size: 12)
+        let leftButton1 = MGSwipeButton(title: "Add to Your Day", backgroundColor: FlatGreen())
         cell.leftButtons = [leftButton1]
         cell.leftSwipeSettings.transition = .drag
         cell.leftExpansion.buttonIndex = 0
         cell.leftExpansion.fillOnTrigger = true
         cell.leftExpansion.threshold = 2
         let rightButton1 = MGSwipeButton(title: "Delete", backgroundColor: FlatRed())
-        rightButton1.titleLabel?.font = UIFont(name: "SF Pro Text Regular" , size: 12)
         cell.rightButtons = [ rightButton1]
         cell.rightSwipeSettings.transition = .drag
         cell.rightExpansion.buttonIndex = 0
@@ -363,6 +372,8 @@ extension TasksVC: CustomTaskCellDelegate {
     
     //mark task as completed when checked
     func cellCheckBoxTapped(editingCell: TaskCell, checked: Bool) {
+        
+        //play vibration if user allows
         let hapticBool = self.defaults.value(forKey: "hapticFeedback") as! Bool
         if hapticBool == true {
             AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
@@ -371,7 +382,7 @@ extension TasksVC: CustomTaskCellDelegate {
         
         if checked == true {
             //log firebase analytics event
-            Analytics.logEvent("task_completed", parameters: [
+            Analytics.logEvent(taskCheckedEvent, parameters: [
                 "name": selectedTask.title as NSObject,
                 "full_text": "" as NSObject
                 ])
@@ -381,7 +392,7 @@ extension TasksVC: CustomTaskCellDelegate {
             }
         } else {
             //log firebase analytics event
-            Analytics.logEvent("task_uncompleted", parameters: [
+            Analytics.logEvent(taskUncheckedEvent, parameters: [
                 "name": selectedTask.title as NSObject,
                 "full_text": "" as NSObject
                 ])
@@ -405,15 +416,17 @@ extension TasksVC: CustomTaskCellDelegate {
         let selectedTask = editingCell.taskObj!
         
         //log firebase analytics event
-        Analytics.logEvent("changed_deadline", parameters: [
+        Analytics.logEvent(deadlineChangedEvent, parameters: [
             "name": selectedTask.title as NSObject,
             "full_text": "" as NSObject
             ])
         
+        //clears scheduled notification identifier
         if selectedTask.notificationIdentifier != "" {
             NotificationsController.removeNotifications(task: selectedTask)
         }
         
+        //updates database
         try! self.realm.write {
             if let unwrappedDate = date {
                 selectedTask.deadline = unwrappedDate
@@ -422,23 +435,26 @@ extension TasksVC: CustomTaskCellDelegate {
             }
         }
         
+        //Schedules notification if there is a new deadline
          NotificationsController.scheduleNotification(task: selectedTask)
     }
     
-    //delete task - core data
+    //delete task
     func deleteTask(editingCell: TaskCell) {
         let selectedTask = (editingCell.taskObj)!
         
         //log firebase analytics event
-        Analytics.logEvent("delete_task", parameters: [
+        Analytics.logEvent(taskDeletedEvent, parameters: [
             "name": selectedTask.title as NSObject,
             "full_text": "" as NSObject
             ])
         
+        ///Removes scheduled notification since task is being deleted
         if selectedTask.notificationIdentifier != "" {
             NotificationsController.removeNotifications(task: selectedTask)
         }
         
+        //update database
         try! self.realm.write {
             self.realm.delete(selectedTask)
         }
@@ -449,7 +465,7 @@ extension TasksVC: CustomTaskCellDelegate {
         let selectedTask = (editingCell.taskObj)!
         
         //log firebase analytics event
-        Analytics.logEvent("updated_task_title", parameters: [
+        Analytics.logEvent(updatedTaskTitleEvent, parameters: [
             "name": selectedTask.title as NSObject,
             "full_text": "" as NSObject
             ])
@@ -461,7 +477,8 @@ extension TasksVC: CustomTaskCellDelegate {
     
     //add task to today
     func addTasktoToday(editingCell: TaskCell) {
-        //plays vibration
+        
+        //plays vibration if user allows 
         let hapticBool = self.defaults.value(forKey: "hapticFeedback") as! Bool
         if hapticBool == true {
             AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
@@ -470,7 +487,7 @@ extension TasksVC: CustomTaskCellDelegate {
         let selectedTask = (editingCell.taskObj)!
         
         //log firebase analytics event
-        Analytics.logEvent("add_task_to_your_day", parameters: [
+        Analytics.logEvent(addTaskToYourDayEvent, parameters: [
             "name": selectedTask.title as NSObject,
             "full_text": "" as NSObject
             ])
@@ -543,7 +560,7 @@ extension TasksVC: CustomTaskCellDelegate {
             }
             
             //log firebase analytics event for creating new task
-            Analytics.logEvent("create_task", parameters: [
+            Analytics.logEvent(createTaskEvent, parameters: [
                 "name": (editingCell.taskObj?.title)! as NSObject,
                 "full_text": "" as NSObject
                 ])
@@ -605,23 +622,22 @@ extension TasksVC: CustomTaskCellDelegate {
 
 extension TasksVC: MGSwipeTableCellDelegate {
     
-    func swipeTableCellWillBeginSwiping(_ cell: MGSwipeTableCell) {
-        let uwCell = cell as! TaskCell
-        if uwCell.isBeingEdited == true {
-            uwCell.endEditing(false)
+    //Prevents swiping if a cell is being edited
+    func swipeTableCell(_ cell: MGSwipeTableCell, canSwipe direction: MGSwipeDirection, from point: CGPoint) -> Bool {
+        if self.currentlySelectedCell != nil {
+            return false
         }
+        return true
     }
     
+    //Handles user swipe inputs 
     func swipeTableCell(_ cell: MGSwipeTableCell, tappedButtonAt index: Int, direction: MGSwipeDirection, fromExpansion: Bool) -> Bool {
-       
         let modifiedCell = cell as! TaskCell
         
         if direction == .rightToLeft {
             if index == 0 {
                 //if user swipes to delete cell
-                if modifiedCell.taskObj?.title != "" || (modifiedCell.isBeingEdited == false && modifiedCell.taskObj?.title == "") {
-                    self.deleteTask(editingCell: modifiedCell)
-                }
+                self.deleteTask(editingCell: modifiedCell)
             }
         } else {
             if index == 0 {
@@ -641,6 +657,7 @@ extension TasksVC: MGSwipeTableCellDelegate {
     }
 }
 
+//tableview empty state data 
 extension TasksVC: DZNEmptyDataSetSource, DZNEmptyDataSetDelegate {
     
     func image(forEmptyDataSet scrollView: UIScrollView!) -> UIImage! {

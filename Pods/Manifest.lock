@@ -1,4 +1,5 @@
 PODS:
+  - Alamofire (4.6.0)
   - BEMCheckBox (1.4.1)
   - CFAlertViewController (3.0)
   - ChameleonFramework/Default (2.1.0)
@@ -63,8 +64,10 @@ PODS:
     - Realm (= 3.0.2)
   - SwiftDate (4.5.1)
   - SwiftReorder (3.2.0)
+  - SwiftyJSON (4.0.0)
 
 DEPENDENCIES:
+  - Alamofire
   - BEMCheckBox
   - CFAlertViewController
   - ChameleonFramework/Swift (from `https://github.com/ViccAlexander/Chameleon.git`)
@@ -84,6 +87,7 @@ DEPENDENCIES:
   - RealmSwift
   - SwiftDate (~> 4.5.0)
   - SwiftReorder
+  - SwiftyJSON
 
 EXTERNAL SOURCES:
   ChameleonFramework:
@@ -100,6 +104,7 @@ CHECKOUT OPTIONS:
     :git: git@github.com:MaTriXy/paper-onboarding
 
 SPEC CHECKSUMS:
+  Alamofire: f41a599bd63041760b26d393ec1069d9d7b917f4
   BEMCheckBox: 5ba6e37ade3d3657b36caecc35c8b75c6c2b1a4e
   CFAlertViewController: 460bb12b42b500bb0838e5595ca144a18344765f
   ChameleonFramework: d21a3cc247abfe5e37609a283a8238b03575cf64
@@ -128,7 +133,8 @@ SPEC CHECKSUMS:
   RealmSwift: 695393add1b8f9d5fa75dd16e6355cf3935f71e2
   SwiftDate: 7b56d42a221f582047287deb256b23fc5ed49a60
   SwiftReorder: 27d737099efd6125339d5e8cb090e46c67341143
+  SwiftyJSON: 070dabdcb1beb81b247c65ffa3a79dbbfb3b48aa
 
-PODFILE CHECKSUM: 8e27aab3cdb26afb4ed0e179280fb140ff56e01f
+PODFILE CHECKSUM: a1d2afa40831d9ed4d5081c409078e5d19217b36
 
 COCOAPODS: 1.4.0.beta.2

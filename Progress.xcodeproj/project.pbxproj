@@ -9,13 +9,13 @@
 /* Begin PBXBuildFile section */
 		040532211FDE377500E377AF /* TaskCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 040532201FDE377500E377AF /* TaskCell.swift */; };
 		043127191FDC5FD2002DEFA8 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 043127181FDC5FD2002DEFA8 /* AppDelegate.swift */; };
-		0431271B1FDC5FD2002DEFA8 /* MainVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0431271A1FDC5FD2002DEFA8 /* MainVC.swift */; };
 		0431271E1FDC5FD2002DEFA8 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0431271C1FDC5FD2002DEFA8 /* Main.storyboard */; };
 		043127231FDC5FD2002DEFA8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 043127221FDC5FD2002DEFA8 /* Assets.xcassets */; };
 		043127261FDC5FD2002DEFA8 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 043127241FDC5FD2002DEFA8 /* LaunchScreen.storyboard */; };
 		044C24261FDC6AF200AD6B8D /* TodayVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 044C24251FDC6AF200AD6B8D /* TodayVC.swift */; };
 		044C24281FDC6B0F00AD6B8D /* TasksVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 044C24271FDC6B0F00AD6B8D /* TasksVC.swift */; };
 		044C24531FDC8E7A00AD6B8D /* TodayTaskCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 044C24521FDC8E7A00AD6B8D /* TodayTaskCell.swift */; };
+		048662321FE9F4BD00E3CDFC /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 048662311FE9F4BD00E3CDFC /* Constants.swift */; };
 		049A38BB1FE8921E00AC0F06 /* NotificationsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 049A38BA1FE8921E00AC0F06 /* NotificationsController.swift */; };
 		049A38BF1FE90EA100AC0F06 /* SettingsTVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 049A38BE1FE90EA100AC0F06 /* SettingsTVC.swift */; };
 		04AFA01C1FE36AEB00887B4B /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 04AFA01B1FE36AEA00887B4B /* GoogleService-Info.plist */; };
@@ -28,7 +28,6 @@
 		040532201FDE377500E377AF /* TaskCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskCell.swift; sourceTree = "<group>"; };
 		043127151FDC5FD2002DEFA8 /* Progress.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Progress.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		043127181FDC5FD2002DEFA8 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		0431271A1FDC5FD2002DEFA8 /* MainVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainVC.swift; sourceTree = "<group>"; };
 		0431271D1FDC5FD2002DEFA8 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		043127221FDC5FD2002DEFA8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		043127251FDC5FD2002DEFA8 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -36,6 +35,7 @@
 		044C24251FDC6AF200AD6B8D /* TodayVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayVC.swift; sourceTree = "<group>"; };
 		044C24271FDC6B0F00AD6B8D /* TasksVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TasksVC.swift; sourceTree = "<group>"; };
 		044C24521FDC8E7A00AD6B8D /* TodayTaskCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayTaskCell.swift; sourceTree = "<group>"; };
+		048662311FE9F4BD00E3CDFC /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		049A38BA1FE8921E00AC0F06 /* NotificationsController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsController.swift; sourceTree = "<group>"; };
 		049A38BE1FE90EA100AC0F06 /* SettingsTVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsTVC.swift; sourceTree = "<group>"; };
 		04AFA01B1FE36AEA00887B4B /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
@@ -94,7 +94,6 @@
 		04E38BA31FDCA0D20092D664 /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
-				0431271A1FDC5FD2002DEFA8 /* MainVC.swift */,
 				044C24251FDC6AF200AD6B8D /* TodayVC.swift */,
 				044C24271FDC6B0F00AD6B8D /* TasksVC.swift */,
 				044C24521FDC8E7A00AD6B8D /* TodayTaskCell.swift */,
@@ -110,6 +109,7 @@
 			isa = PBXGroup;
 			children = (
 				04CBA1D01FE30CE20013AF20 /* RealmModels.swift */,
+				048662311FE9F4BD00E3CDFC /* Constants.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -224,6 +224,7 @@
 			);
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-Progress/Pods-Progress-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/Alamofire/Alamofire.framework",
 				"${BUILT_PRODUCTS_DIR}/BEMCheckBox/BEMCheckBox.framework",
 				"${BUILT_PRODUCTS_DIR}/CFAlertViewController/CFAlertViewController.framework",
 				"${BUILT_PRODUCTS_DIR}/ChameleonFramework/ChameleonFramework.framework",
@@ -245,11 +246,13 @@
 				"${BUILT_PRODUCTS_DIR}/RealmSwift/RealmSwift.framework",
 				"${BUILT_PRODUCTS_DIR}/SwiftDate/SwiftDate.framework",
 				"${BUILT_PRODUCTS_DIR}/SwiftReorder/SwiftReorder.framework",
+				"${BUILT_PRODUCTS_DIR}/SwiftyJSON/SwiftyJSON.framework",
 				"${BUILT_PRODUCTS_DIR}/nanopb/nanopb.framework",
 				"${BUILT_PRODUCTS_DIR}/paper-onboarding/paper_onboarding.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Alamofire.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/BEMCheckBox.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/CFAlertViewController.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/ChameleonFramework.framework",
@@ -271,6 +274,7 @@
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RealmSwift.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SwiftDate.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SwiftReorder.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SwiftyJSON.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/nanopb.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/paper_onboarding.framework",
 			);
@@ -320,11 +324,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				04CBA1D11FE30CE20013AF20 /* RealmModels.swift in Sources */,
-				0431271B1FDC5FD2002DEFA8 /* MainVC.swift in Sources */,
 				049A38BB1FE8921E00AC0F06 /* NotificationsController.swift in Sources */,
 				044C24281FDC6B0F00AD6B8D /* TasksVC.swift in Sources */,
 				044C24261FDC6AF200AD6B8D /* TodayVC.swift in Sources */,
 				049A38BF1FE90EA100AC0F06 /* SettingsTVC.swift in Sources */,
+				048662321FE9F4BD00E3CDFC /* Constants.swift in Sources */,
 				044C24531FDC8E7A00AD6B8D /* TodayTaskCell.swift in Sources */,
 				040532211FDE377500E377AF /* TaskCell.swift in Sources */,
 				04FA66481FE5189D00CDD2B6 /* Onboarding.swift in Sources */,

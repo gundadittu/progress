@@ -54,10 +54,7 @@ class TodayTaskCell:  MGSwipeTableCell {
 
 extension TodayTaskCell: UITextFieldDelegate {
     
-    func textFieldDidBeginEditing(_ textField: UITextField) {
-        return
-    }
-    
+    //calls custom delegate function to trigger action in TodayVC
     func textFieldDidEndEditing(_ textField: UITextField) {
         self.taskTitleLabel.text = textField.text!
         if   self.customDelegate != nil && pickerSelected == false {
@@ -74,6 +71,7 @@ extension TodayTaskCell: UITextFieldDelegate {
 
 extension TodayTaskCell: BEMCheckBoxDelegate {
     
+    //Checkbox tapped - calls custom delegate function to trigger action in TodayVC
     func animationDidStop(for checkBox: BEMCheckBox) {
         if self.customDelegate != nil {
             if checkBox.on == true {
@@ -87,6 +85,7 @@ extension TodayTaskCell: BEMCheckBoxDelegate {
 
 extension TodayTaskCell: DateTimePickerDelegate {
     
+    //calls custom delegate function to trigger action in TodayVC
     @IBAction func dueDateBtnSelected(_ sender: UIButton) {
         //does not trigger textfield become first responded under cellDidBeginEditing
         self.pickerSelected = true
@@ -96,7 +95,7 @@ extension TodayTaskCell: DateTimePickerDelegate {
             self.taskTitleLabel.resignFirstResponder()
         }
         
-        //if taskk title is empty/ has been, do not want to trigger further action
+        //if taskk title is empty/has been, do not want to trigger further action (will be deleted)
         if self.objectDeleted == true {
             return
         }
@@ -115,11 +114,11 @@ extension TodayTaskCell: DateTimePickerDelegate {
         picker.becomeFirstResponder()
         //trigger method - does not make textfield first responded since self.pickerSelected = true
         self.customDelegate?.cellDidBeginEditing(editingCell: self)
-        picker.highlightColor = FlatPurple()
+        picker.highlightColor = mainAppColor
         picker.isDatePickerOnly = false
         picker.is12HourFormat = true
         picker.selectedDate = selected
-        picker.doneBackgroundColor = FlatPurple()
+        picker.doneBackgroundColor = mainAppColor
         picker.includeMonth = true
         picker.cancelButtonTitle = "Clear"
         picker.doneButtonTitle = "Set Deadline"

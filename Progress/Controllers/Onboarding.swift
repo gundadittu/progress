@@ -22,7 +22,7 @@ class OnboardingVC: UIViewController, PaperOnboardingDataSource, PaperOnboarding
     
     let items: [OnboardingItemInfo] = [
     (imageName: UIImage(named: "logo")!, title: "Swipe left to get started.", description: "", iconName: UIImage(named: "logo")!, color: UIColor.clear, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont:  UIFont(name: "HelveticaNeue-Medium", size: CGFloat(20))! ,descriptionFont: UIFont(name: "HelveticaNeue", size: CGFloat(20))!),
-      (imageName: UIImage(named: "1")!, title: "To create a new task,", description: "look for the purple plus button.", iconName: UIImage(named: "1")!, color: UIColor.clear, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont: UIFont(name: "HelveticaNeue-Medium", size: CGFloat(20))!,descriptionFont: UIFont(name: "HelveticaNeue", size: CGFloat(20))!),
+      (imageName: UIImage(named: "1")!, title: "To create a new task,", description: "look for the plus button.", iconName: UIImage(named: "1")!, color: UIColor.clear, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont: UIFont(name: "HelveticaNeue-Medium", size: CGFloat(20))!,descriptionFont: UIFont(name: "HelveticaNeue", size: CGFloat(20))!),
        (imageName: UIImage(named: "2")!, title: "Your tasks are under All Tasks.", description: "You can add tasks to Your Day by swiping right.", iconName: UIImage(named: "2")!, color: UIColor.clear, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont: UIFont(name: "HelveticaNeue-Medium", size: CGFloat(20))!,descriptionFont: UIFont(name: "HelveticaNeue", size: CGFloat(20))!),
     (imageName: UIImage(named: "3")!, title: "Your Day holds today's tasks.", description: "When you're done with a task for today, just swipe right.", iconName: UIImage(named: "3")!, color: UIColor.clear, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont: UIFont(name: "HelveticaNeue-Medium", size: CGFloat(20))!,descriptionFont: UIFont(name: "HelveticaNeue", size: CGFloat(20))!),
     (imageName: UIImage(named: "4")!, title: "When you finish a task for the day,", description: "a dot is added under the task to mark your progress.", iconName: UIImage(named: "4")!, color: UIColor.clear, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont:  UIFont(name: "HelveticaNeue-Medium", size: CGFloat(20))! ,descriptionFont: UIFont(name: "HelveticaNeue", size: CGFloat(20))!),
@@ -70,7 +70,7 @@ class OnboardingVC: UIViewController, PaperOnboardingDataSource, PaperOnboarding
     @IBAction func getStartedBtnHandler(_ sender: Any) {
         
         //log firebase analytics event
-        Analytics.logEvent("finished_walkthrough", parameters: [
+        Analytics.logEvent(finishedWalkthroughEvent, parameters: [
             "name":"" as NSObject,
             "full_text": "" as NSObject
             ])
@@ -81,7 +81,7 @@ class OnboardingVC: UIViewController, PaperOnboardingDataSource, PaperOnboarding
     @IBAction func skipBtnHandler(_ sender: Any) {
         
         //log firebase analytics event
-        Analytics.logEvent("skipped_walkthrough", parameters: [
+        Analytics.logEvent(skippedWalkthroughEvent, parameters: [
             "name":"" as NSObject,
             "full_text": "" as NSObject
             ])
