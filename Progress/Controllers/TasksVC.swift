@@ -21,6 +21,7 @@ import AudioToolbox
 import UserNotifications
 import DispatchIntrospection
 import Firebase
+import Whisper
 
 class TasksVC: UIViewController, FloatyDelegate  {
     
@@ -35,6 +36,19 @@ class TasksVC: UIViewController, FloatyDelegate  {
     var tasksList: Results<SavedTask>?
     var token: NotificationToken?
     let defaults = UserDefaults.standard
+    var contentOffset: CGPoint?
+    
+    override func viewWillAppear(_ animated: Bool) {
+        if let contentOffset = contentOffset
+        {
+            tableView.contentInset = UIEdgeInsetsMake(0, 0, 0, 0)
+            tableView.contentOffset = contentOffset
+        }
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        contentOffset = tableView.contentOffset
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -71,6 +85,9 @@ class TasksVC: UIViewController, FloatyDelegate  {
         self.tableView.reorder.shadowRadius = 20
         
         //Fetch data from database
+        if isTasksVCAlreadyLaunchedOnce() == false {
+            self.addWelcomeTasks()
+        }
         self.fetchObjects()
         
         //Responds to changes in realm to rearrange tableview
@@ -149,7 +166,7 @@ class TasksVC: UIViewController, FloatyDelegate  {
         
         //if top of tableview is visible on screen, no need to execute code below that scrolls up
         let visibleCells = self.tableView.indexPathsForVisibleRows
-        if visibleCells?.contains(IndexPath(row: 0, section: 0)) == true {
+        if visibleCells?.contains(IndexPath(row: 0, section: 0)) == true || visibleCells?.count == 0{
             return
         }
         
@@ -158,6 +175,61 @@ class TasksVC: UIViewController, FloatyDelegate  {
         let delayTime = DispatchTime.now() + .seconds(1) //delay needed due to some bug
         DispatchQueue.main.asyncAfter(deadline: delayTime) {
             self.tableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: true) //scrolls up to new task if top of table view is not visible when new task is created
+        }
+    }
+    
+    func isTasksVCAlreadyLaunchedOnce()->Bool{
+        if  defaults.string(forKey: "isTasksVCAlreadyLaunchedBefore") == nil{
+            defaults.set(true, forKey: "isTasksVCAlreadyLaunchedBefore")
+            return false
+        }
+        return true
+    }
+    
+    func addWelcomeTasks() {
+        
+        if let drawerVC = self.navigationController?.parent as? PulleyViewController {
+            drawerVC.initialDrawerPosition = .open
+        }
+        
+        var introTasks = [SavedTask]()
+        let introTask1 = SavedTask()
+        introTask1.displayOrder = 0
+        introTask1.title = "Tap the checkbox to complete me."
+        introTasks.append(introTask1)
+        
+        let introTask2 = SavedTask()
+        introTask2.displayOrder = 1
+        introTask2.title = "Swipe left to delete me."
+        introTasks.append(introTask2)
+        
+        let introTask3 = SavedTask()
+        introTask3.displayOrder = 2
+        introTask3.title = "Keep me pressed to pick me up."
+        introTasks.append(introTask3)
+        
+        let introTask4 = SavedTask()
+        introTask4.displayOrder = 3
+        introTask4.title = "Tap to edit my title and add a deadline."
+        introTasks.append(introTask4)
+        
+        let introTask5 = SavedTask()
+        introTask5.displayOrder = 4
+        introTask5.title = "Click on the plus to create a new task"
+        introTasks.append(introTask5)
+        
+        let introTask6 = SavedTask()
+        introTask6.displayOrder = 5
+        introTask6.title = "Swipe right to add me to Your Day."
+        introTasks.append(introTask6)
+        
+        let introTask7 = SavedTask()
+        introTask7.displayOrder = 6
+        introTask7.title = "Pull down to go to Your Day."
+        introTasks.append(introTask7)
+        
+        try! self.realm.write {
+            self.realm.add(introTasks)
         }
     }
 }
@@ -349,7 +421,7 @@ extension TasksVC: CustomTaskCellDelegate {
         }
         
         //sliding options
-        let leftButton1 = MGSwipeButton(title: "Add to Your Day", backgroundColor: FlatGreen())
+        let leftButton1 = MGSwipeButton(title: "Add to Your Day", backgroundColor: FlatPurple())
         cell.leftButtons = [leftButton1]
         cell.leftSwipeSettings.transition = .drag
         cell.leftExpansion.buttonIndex = 0
@@ -387,6 +459,11 @@ extension TasksVC: CustomTaskCellDelegate {
         let selectedTask = editingCell.taskObj!
         
         if checked == true {
+            
+            let taskTitle = selectedTask.title
+            let message = Message(title: "You completed \"\(taskTitle)\".", backgroundColor: FlatGreen())
+            Whisper.show(whisper: message, to: self.navigationController!, action: .show)
+            
             //log firebase analytics event
             Analytics.logEvent(taskCheckedEvent, parameters: [
                 "name": selectedTask.title as NSObject,
@@ -444,6 +521,11 @@ extension TasksVC: CustomTaskCellDelegate {
         
         //Schedules notification if there is a new deadline
          NotificationsController.scheduleNotification(task: selectedTask)
+    }
+    
+    func userTriedAddingDateToEmptyTask() {
+        let message = Message(title: "Give your task a name to add a deadline.", backgroundColor: FlatRed())
+        Whisper.show(whisper: message, to: self.navigationController!, action: .show)
     }
     
     //delete task
@@ -515,11 +597,9 @@ extension TasksVC: CustomTaskCellDelegate {
         }
         
         //Updates currently being edited information
-        editingCell.isBeingEdited = true
         self.currentlySelectedCell = editingCell
         
-        //Brings drawer up if it is not already up
-        //Makes sure user can not move drawer while editing.
+        //Brings drawer up if it is not already up + Makes sure user can not move drawer while editing.
         if let drawerVC = self.navigationController?.parent as? PulleyViewController {
             drawerVC.setDrawerPosition(position: .open, animated: true)
             drawerVC.allowsUserDrawerPositionChange = false
@@ -527,16 +607,9 @@ extension TasksVC: CustomTaskCellDelegate {
         
         //makes due date button visible so user can choose deadline
         editingCell.dueDateBtn.isHidden = false
-        
      
         editingCell.taskTitleLabel.isEnabled = true//to allow user input
-        
-        if editingCell.pickerSelected == false {
-            //triggers keyboard if picker is not the first responder
-            editingCell.taskTitleLabel.becomeFirstResponder()
-        } else {
-            Floaty.global.button.isHidden = true //So that the button does to overlap with datepicker
-        }
+        editingCell.taskTitleLabel.becomeFirstResponder()
         
         //animate cells up
         let editingOffset = self.tableView.contentOffset.y - editingCell.frame.origin.y as CGFloat
@@ -557,7 +630,6 @@ extension TasksVC: CustomTaskCellDelegate {
         
         self.tableView.contentInset = UIEdgeInsetsMake(0, 0, 0, 0) //readjusts insets, because they are changed when new task is created
 
-
         //Updates isNewTask attribute
         if editingCell.taskObj?.isNewTask == true {
             try! self.realm.write {
@@ -573,11 +645,6 @@ extension TasksVC: CustomTaskCellDelegate {
             drawerVC.allowsUserDrawerPositionChange = true 
         }
 
-        //Updates currently editing info
-        //doesnt change isbeingedited if picker is selected because cell is still being edited (case applies when user selects date picker while keyboard is active)
-        
-        editingCell.isBeingEdited = false
-
         //self.currentlySelectedCell might be another cell that the user clicked on, which caused this cell to resign and end editing
         if self.currentlySelectedCell == editingCell{
             self.currentlySelectedCell = nil
@@ -588,12 +655,7 @@ extension TasksVC: CustomTaskCellDelegate {
             editingCell.dueDateBtn.isHidden = true
         }
         
-        Floaty.global.button.isHidden = false //Shows floaty button because it is hidden when date picker is selected
-        
-        editingCell.dueDateBtn.isSelected = false //means user is not editing deadline
-        
         editingCell.taskTitleLabel.isEnabled = false //Disables textfield again, so that selecting cell is not confused with selecting textfield
-
         
         //save updated task title, delete if new title is empty
         let newText = editingCell.taskTitleLabel.text
@@ -601,9 +663,10 @@ extension TasksVC: CustomTaskCellDelegate {
         if trimmedText.isEmpty == false {
             self.updateTaskTitle(editingCell: editingCell, newTitle: newText!)
         } else {
+            let message = Message(title: "Your task was deleted because it had no name.", backgroundColor: FlatRed())
+            Whisper.show(whisper: message, to: self.navigationController!, action: .show)
+            
             //delete new task if user did not give it title or deletes existing task if user removed its title
-            editingCell.objectDeleted = true
-            editingCell.pickerSelected = false //important for edge case where user clicks on add deadline when creating new task, but task title is empty 
             self.deleteTask(editingCell: editingCell)
         }
         
@@ -650,9 +713,9 @@ extension TasksVC: MGSwipeTableCellDelegate {
             }
         }
         
-        if modifiedCell.isBeingEdited == true {
+       /* if modifiedCell.isBeingEdited == true {
             modifiedCell.taskTitleLabel.resignFirstResponder()
-        }
+        }*/
         
         return true
     }

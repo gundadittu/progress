@@ -85,7 +85,7 @@ class NotificationsController  {
                 let count = defaults.value(forKey: "notificationRequestCount") as! Int
                 let newCount = count + 1
                 defaults.setValue(newCount, forKey: "notificationRequestCount")
-                if newCount%3 != 0 {
+                if newCount%5 != 3 {
                     return
                 }
             }

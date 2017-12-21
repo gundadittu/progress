@@ -9,13 +9,12 @@
 import UIKit
 import ChameleonFramework
 import CFAlertViewController
-import DateTimePicker
 import Floaty
 import Realm
 import RealmSwift
-import Instabug
 import Pulley
 import Firebase
+import DatePickerDialog
 
 class SettingsTVC: UITableViewController {
 
@@ -72,6 +71,13 @@ class SettingsTVC: UITableViewController {
         }
     }
     
+    override func viewWillDisappear(_ animated: Bool) {
+        Floaty.global.button.isHidden = false
+        if let drawerVC = self.navigationController?.parent as? PulleyViewController {
+            drawerVC.setDrawerPosition(position: .collapsed, animated: true)
+        }
+    }
+    
     func clearCompletedTasks() {
         let alertController = CFAlertViewController(title: "Are you sure you want to clear all your completed tasks?",
                                                     message: "",
@@ -81,7 +87,7 @@ class SettingsTVC: UITableViewController {
         let clearAction = CFAlertAction(title: "Clear Completed Tasks",
                                         style: .Destructive,
                                         alignment: .justified,
-                                        backgroundColor: FlatGreen(),
+                                        backgroundColor: FlatRed(),
                                         textColor: nil,
                                         handler: { (action) in
                                             
@@ -103,10 +109,17 @@ class SettingsTVC: UITableViewController {
                                          alignment: .justified,
                                          backgroundColor: FlatWhiteDark(),
                                          textColor: nil,
-                                         handler: { (action) in return })
+                                         handler: nil)
+        
         alertController.addAction(clearAction)
         alertController.addAction(cancelAction)
-        self.present(alertController, animated: true, completion: nil)
+        self.present(alertController, animated: true) {
+            //Causes view to disappear and thus makes both show, need to courteract this
+            Floaty.global.button.isHidden = true
+            if let drawerVC = self.navigationController?.parent as? PulleyViewController {
+                drawerVC.setDrawerPosition(position: .closed, animated: true)
+            }
+        }
     }
     
     func deleteAllTasks() {
@@ -138,10 +151,17 @@ class SettingsTVC: UITableViewController {
                                          alignment: .justified,
                                          backgroundColor: FlatWhiteDark(),
                                          textColor: nil,
-                                         handler: { (action) in return })
+                                         handler: nil)
+        
         alertController.addAction(deleteAction)
         alertController.addAction(cancelAction)
-        self.present(alertController, animated: true, completion: nil)
+        self.present(alertController, animated: true) {
+            //Causes view to disappear and thus makes both show, need to courteract this
+            Floaty.global.button.isHidden = true
+            if let drawerVC = self.navigationController?.parent as? PulleyViewController {
+                drawerVC.setDrawerPosition(position: .closed, animated: true)
+            }
+        }
     }
 
     @IBAction func badgeCountSwitchToggled(_ sender: Any) {
@@ -183,47 +203,41 @@ class SettingsTVC: UITableViewController {
     
     @IBAction func dailyNotificationTimeBtnTapped(_ sender: Any) {
         
-        let picker = DateTimePicker.show(selected: nil, minimumDate: Date()-1, maximumDate: nil)
-        picker.becomeFirstResponder()
-        picker.todayButtonTitle = ""
-        picker.highlightColor = mainAppColor
-        picker.isTimePickerOnly = true
-        picker.is12HourFormat = true
-        picker.doneBackgroundColor = mainAppColor
-        picker.cancelButtonTitle = "Clear"
-        picker.doneButtonTitle = "Set Time"
-        picker.completionHandler = { date in
-            
-            let formatter = DateFormatter()
-            formatter.dateStyle = .none
-            formatter.timeStyle = .short
-            let formattedDate = formatter.string(from: date)
-            self.defaults.setValue(formattedDate, forKey: "dailyNotificationTime")
-            self.dailyNotificationTimeBtn.setTitle(formattedDate, for: .normal)
-            NotificationsController.scheduleMorningNotification()
-            
-            ///log firebase analytics event
-            Analytics.logEvent(dailyNotificationTimeChangedEvent, parameters: [
-                "name":"\(formattedDate)" as NSObject,
-                "full_text": "" as NSObject
-                ])
-        }
-        
-        picker.cancelHandler = {
-            ///log firebase analytics event
-            Analytics.logEvent(dailyNotificationOffEvent, parameters: [
-                "name":"" as NSObject,
-                "full_text": "" as NSObject
-                ])
-            
-            self.dailyNotificationTimeBtn.setTitle("Set", for: .normal)
-            self.defaults.setValue("", forKey: "dailyNotificationTime")
-            
-            NotificationsController.scheduleMorningNotification()
-        }
-        
-        picker.dismissHandler = {
-            return
+        let picker = DatePickerDialog(buttonColor: mainAppColor, font: UIFont(name: "HelveticaNeue-Medium", size: CGFloat(50))!)
+        picker.show("Set Deadline", doneButtonTitle: "Done", cancelButtonTitle: "Remove", defaultDate: Date(), datePickerMode: .time) {
+            (date) -> Void in
+            if date != nil {
+                
+                let formatter = DateFormatter()
+                let formattedDate = formatter.string(from: date!)
+                let formatter2 = DateFormatter()
+                formatter2.dateStyle = .none
+                formatter2.timeStyle = .short
+                let formattedDate2 = formatter2.string(from: date!)
+                
+                
+                self.defaults.setValue(formattedDate, forKey: "dailyNotificationTime")
+                self.dailyNotificationTimeBtn.setTitle(formattedDate2, for: .normal)
+                
+                NotificationsController.scheduleMorningNotification()
+                
+                ///log firebase analytics event
+                Analytics.logEvent(dailyNotificationTimeChangedEvent, parameters: [
+                    "name":"\(formattedDate)" as NSObject,
+                    "full_text": "" as NSObject
+                    ])
+            } else {
+                self.dailyNotificationTimeBtn.setTitle("Set", for: .normal)
+                self.defaults.setValue("", forKey: "dailyNotificationTime")
+                
+                NotificationsController.scheduleMorningNotification()
+                
+                ///log firebase analytics event
+                Analytics.logEvent(dailyNotificationOffEvent, parameters: [
+                    "name":"" as NSObject,
+                    "full_text": "" as NSObject
+                    ])
+            }
         }
     }
 
@@ -253,7 +267,6 @@ class SettingsTVC: UITableViewController {
                     "name":"" as NSObject,
                     "full_text": "" as NSObject
                     ])
-                Instabug.invoke()
             }
             if indexPath.row == 3 {
                 ///log firebase analytics event
@@ -262,10 +275,11 @@ class SettingsTVC: UITableViewController {
                     "full_text": "" as NSObject
                     ])
                 
-                let appD = UIApplication.shared.delegate as! AppDelegate
-                appD.loadOnboarding()
+                let storyboard: UIStoryboard = UIStoryboard.init(name: "Main",bundle: nil)
+                let vc: TodayVC = storyboard.instantiateViewController(withIdentifier: "PrimaryContentViewController") as! TodayVC
+                vc.loadOnboarding()
             }
-        } else if indexPath.section == 2 {
+        } else if indexPath.section == 3 {
             if indexPath.row == 0 {
                 self.clearCompletedTasks()
             }

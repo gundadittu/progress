@@ -18,13 +18,14 @@ import Realm
 import RealmSwift
 import DZNEmptyDataSet
 import Crashlytics
-import Instabug
 import AudioToolbox
 import Firebase
 import Alamofire
 import SwiftyJSON
+import Whisper
+import AlertOnboarding
 
-class TodayVC: UIViewController , TableViewReorderDelegate {
+class TodayVC: UIViewController, TableViewReorderDelegate {
 
     
     @IBOutlet weak var tableView: UITableView!
@@ -37,14 +38,16 @@ class TodayVC: UIViewController , TableViewReorderDelegate {
     var tasksList: Results<SavedTask>?
     var token: NotificationToken?
     let defaults = UserDefaults.standard
+    
+    override func viewWillAppear(_ animated: Bool) {
+        self.tableView.contentInset = UIEdgeInsetsMake(0, 0, 0, 0)
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         self.title = "Your Day"
         self.navigationController?.navigationBar.prefersLargeTitles = true
-        
-        Instabug.setIntroMessageEnabled(false)
-  
+          
         //table View Properties
         self.tableView.delegate = self
         self.tableView.dataSource = self
@@ -62,6 +65,9 @@ class TodayVC: UIViewController , TableViewReorderDelegate {
         self.tableView.reorder.shadowRadius = 20
         
         //Fetch data from database
+        if isTodayVCAlreadyLaunchedOnce() == false {
+            self.addWelcomeTasks()
+        }
         self.fetchObjects()
         
         //Responds to changes in realm to rearrange tableview
@@ -95,14 +101,6 @@ class TodayVC: UIViewController , TableViewReorderDelegate {
             }
         }
     }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        Floaty.global.button.isHidden = false
-        if let drawerVC = self.navigationController?.parent as? PulleyViewController {
-            drawerVC.setDrawerPosition(position: .collapsed, animated: true)
-        }
-    }
-    
     //fetches objects from realm
     func fetchObjects(){
         let isTodayPredicate = NSPredicate(format: "isToday == %@",  Bool(booleanLiteral: true) as CVarArg)
@@ -123,6 +121,47 @@ class TodayVC: UIViewController , TableViewReorderDelegate {
             try! self.realm.write {
                 ro.displayOrder = i
             }
+        }
+    }
+    
+    func isTodayVCAlreadyLaunchedOnce()->Bool{
+        if  defaults.string(forKey: "isTodayVCAlreadyLaunchedBefore") == nil{
+            defaults.set(true, forKey: "isTodayVCAlreadyLaunchedBefore")
+            return false
+        }
+        return true
+    }
+    
+    func addWelcomeTasks() {
+        
+        var introTasks = [SavedTask]()
+        
+        let introTask2 = SavedTask()
+        introTask2.displayOrder = 1
+        introTask2.isToday = true
+        introTask2.title = "Done for today? Swipe right on me."
+        introTasks.append(introTask2)
+        
+        let introTask3 = SavedTask()
+        introTask3.displayOrder = 2
+        introTask3.isToday = true
+        introTask3.title = "The task goes back to All Tasks."
+        introTasks.append(introTask3)
+        
+        let introTask4 = SavedTask()
+        introTask4.displayOrder = 3
+        introTask4.isToday = true
+        introTask4.title = "A progress dot is added underneath it."
+        introTasks.append(introTask4)
+        
+        let introTask6 = SavedTask()
+        introTask6.displayOrder = 5
+        introTask6.isToday = true
+        introTask6.title = "Tip: Delete all these instructional tasks easily in settings."
+        introTasks.append(introTask6)
+        
+        try! self.realm.write {
+            self.realm.add(introTasks)
         }
     }
 }
@@ -230,9 +269,6 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         cell.taskTitleLabel.text = title
         
         //due date btn
-        cell.dueDateBtn.setTitleColor(UIColor.black, for: .selected)
-        cell.dueDateBtn.tintColor = mainAppColor
-        
         if date != nil {
             cell.dueDate = date //cell attribute
             cell.dueDateBtn.isHidden = false
@@ -302,14 +338,14 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         }
         
             //sliding options
-            let leftButton1 = MGSwipeButton(title: "Done for Today", backgroundColor: FlatGreen())
+            let leftButton1 = MGSwipeButton(title: "Done for Today", backgroundColor: FlatPurple())
             cell.leftButtons = [leftButton1]
             cell.leftSwipeSettings.transition = .drag
             cell.leftExpansion.buttonIndex = 0
             cell.leftExpansion.fillOnTrigger = true
             cell.leftExpansion.threshold = 2
             let rightButton1 = MGSwipeButton(title: "Delete", backgroundColor: FlatRed())
-            let rightButton2 = MGSwipeButton(title: "Remove from Your Day", backgroundColor: UIColor.gray)
+            let rightButton2 = MGSwipeButton(title: "Remove", backgroundColor: UIColor.gray)
             cell.rightButtons = [rightButton1, rightButton2]
             cell.rightSwipeSettings.transition = .drag
             cell.rightExpansion.buttonIndex = 0
@@ -342,6 +378,11 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         let selectedTask = editingCell.taskObj!
         
         if checked == true {
+            
+            let taskTitle = selectedTask.title
+            let message = Message(title: "You completed \"\(taskTitle)\".", backgroundColor: FlatGreen())
+            Whisper.show(whisper: message, to: self.navigationController!, action: .show)
+            
             //log firebase analytics event
             Analytics.logEvent(taskCheckedEvent, parameters: [
                 "name": selectedTask.title as NSObject,
@@ -405,6 +446,11 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         
         //Schedules notification if there is a new deadline
         NotificationsController.scheduleNotification(task: selectedTask)
+    }
+
+    func userTriedAddingDateToEmptyTask() {
+        let message = Message(title: "Give your task a name to add a deadline.", backgroundColor: FlatRed())
+        Whisper.show(whisper: message, to: self.navigationController!, action: .show)
     }
     
     //delete task
@@ -480,6 +526,10 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         
         let selectedTask = (editingCell.taskObj)!
         
+        let taskTitle = selectedTask.title
+        let message = Message(title: "You made progress on \"\(taskTitle)\".", backgroundColor: FlatPurple())
+        Whisper.show(whisper: message, to: self.navigationController!, action: .show)
+        
         //log firebase analytics event
         Analytics.logEvent(taskDoneForTodayEvent, parameters: [
             "name": selectedTask.title as NSObject,
@@ -500,20 +550,13 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         }
     
         //update attributes
-        editingCell.isBeingEdited = true
         self.currentlySelectedCell = editingCell
         
         editingCell.dueDateBtn.isHidden = false //makes due date button visible so user can select deadline
-
         
         editingCell.taskTitleLabel.isEnabled = true //Enable textfield again for user inout
-        
-        if editingCell.pickerSelected == false {
-            editingCell.taskTitleLabel.becomeFirstResponder() //triggers keyboard if picker is not the first responder
-        } else {
-            Floaty.global.button.isHidden = true //otherwise hides Floaty so that it does not overlap with date picker
-        }
-        
+        editingCell.taskTitleLabel.becomeFirstResponder() //triggers keyboard if picker is not the first responder
+     
         //animate cells up
         let editingOffset = self.tableView.contentOffset.y - editingCell.frame.origin.y as CGFloat
         let visibleCells = self.tableView.visibleCells as! [TodayTaskCell]
@@ -529,30 +572,7 @@ extension TodayVC: CustomTodayTaskCellDelegate {
     }
     
     func cellDidEndEditing(editingCell: TodayTaskCell) {
-        
-       /* self.tableView.contentInset = UIEdgeInsetsMake(0, 0, 0, 0) //readjusts insets, because they are changed when new task is created
-    
-        //Updates isNewTask attribute
-        if editingCell.taskObj?.isNewTask == true {
-            try! self.realm.write {
-                editingCell.taskObj?.isNewTask = false
-            }
-            
-            //log firebase analytics event for creating new task
-            Analytics.logEvent(createTaskEvent, parameters: [ "name": (editingCell.taskObj?.title)! as NSObject, "full_text": "" as NSObject ])
-        }
-        
-        //Allows user to now more drawer again
-        if let drawerVC = self.navigationController?.parent as? PulleyViewController {
-            drawerVC.allowsUserDrawerPositionChange = true
-        }*/
-        
-        //Updates currently editing info
-        //doesnt change isbeingedited if picker is selected because cell is still being edited (case applies when user selects date picker while keyboard is active)
-        if editingCell.pickerSelected == false {
-            editingCell.isBeingEdited = false
-        }
-        
+
         //self.currentlySelectedCell might be another cell that the user clicked on, which caused this cell to resign and end editing
         if self.currentlySelectedCell == editingCell{
             self.currentlySelectedCell = nil
@@ -563,12 +583,7 @@ extension TodayVC: CustomTodayTaskCellDelegate {
             editingCell.dueDateBtn.isHidden = true
         }
         
-        Floaty.global.button.isHidden = false //Shows floaty button because it is hidden when date picker is selected
-        
-        editingCell.dueDateBtn.isSelected = false //means user is not editing deadline
-        
         editingCell.taskTitleLabel.isEnabled = false //Disables textfield again, so that selecting cell is not confused with selecting textfield
-        
         
         //save updated task title, delete if new title is empty
         let newText = editingCell.taskTitleLabel.text
@@ -577,8 +592,6 @@ extension TodayVC: CustomTodayTaskCellDelegate {
             self.updateTaskTitle(editingCell: editingCell, newTitle: newText!)
         } else {
             //delete new task if user did not give it title or deletes existing task if user removed its title
-            editingCell.objectDeleted = true
-            editingCell.pickerSelected = false //important for edge case where user clicks on add deadline when creating new task, but task title is empty
             self.deleteTask(editingCell: editingCell)
         }
         
@@ -653,6 +666,61 @@ extension TodayVC: DZNEmptyDataSetSource, DZNEmptyDataSetDelegate {
     
     func verticalOffset(forEmptyDataSet scrollView: UIScrollView!) -> CGFloat {
         return -((self.navigationController?.navigationBar.frame.size.height)!/2.0)
+    }
+}
+
+extension TodayVC {
+    
+    override func viewDidAppear(_ animated: Bool) {
+        if self.isAppAlreadyLaunchedOnce() == false {
+            self.loadOnboarding() //load app introduction walkthrough if first time launching app
+        }
+    }
+    
+    func loadOnboarding(){
+        
+        //First, declare datas
+        let arrayOfImage = ["1","2","3"]
+        let arrayOfTitle = ["CREATE ACCOUNT", "CHOOSE THE PLANET", "DEPARTURE"]
+        let arrayOfDescription = ["In your profile, you can view the statistics of its operations and the recommandations of friends",
+                                  "Purchase tickets on hot tours to your favorite planet and fly to the most comfortable intergalactic spaceships of best companies",
+                                  "In the process of flight you will be in cryogenic sleep and supply the body with all the necessary things for life"]
+        //Simply call AlertOnboarding...
+        let alertView = AlertOnboarding(arrayOfImage: arrayOfImage, arrayOfTitle: arrayOfTitle, arrayOfDescription: arrayOfDescription)
+        
+        //Modify background color of AlertOnboarding
+        alertView.colorForAlertViewBackground = UIColor.white //UIColor(red: 173/255, green: 206/255, blue: 183/255, alpha: 1.0)
+        
+        //Modify colors of AlertOnboarding's button
+        alertView.colorButtonText = UIColor.white
+        alertView.colorButtonBottomBackground = FlatPurple()
+        
+        //Modify colors of labels
+        alertView.colorTitleLabel = UIColor.black
+        alertView.colorDescriptionLabel = UIColor.black
+        
+        //Modify colors of page indicator
+        alertView.colorPageIndicator = FlatWhiteDark()
+        alertView.colorCurrentPageIndicator = FlatPurple()
+        
+        //Modify size of alertview (Purcentage of screen height and width)
+        alertView.percentageRatioHeight = 0.75
+        alertView.percentageRatioWidth = 0.75
+        
+        //Modify labels
+        alertView.titleSkipButton = "SKIP"
+        alertView.titleGotItButton = "GET STARTED!"
+        
+        //... and show it !
+        alertView.show()
+    }
+    
+    func isAppAlreadyLaunchedOnce()->Bool{
+        if  defaults.string(forKey: "isAppAlreadyLaunchedBefore") == nil{
+            defaults.set(true, forKey: "isAppAlreadyLaunchedBefore")
+            return false
+        }
+        return true
     }
 }
 

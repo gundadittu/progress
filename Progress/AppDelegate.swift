@@ -1,3 +1,4 @@
+
 //
 //  AppDelegate.swift
 //  Progress
@@ -8,10 +9,8 @@
 
 import UIKit
 import Firebase
-import Instabug
 import ChameleonFramework
 import Floaty
-import paper_onboarding
 import Realm
 import RealmSwift
 import UserNotifications
@@ -24,31 +23,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     let defaults = UserDefaults.standard
         
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
-        FirebaseApp.configure()
-        Instabug.start(withToken: "14c94ce365f8079a4edad9fb61c9cf4a", invocationEvent: .shake)
         
-        //Realm migration 
-        let config = Realm.Configuration(
-            // Set the new schema version. This must be greater than the previously used
-            // version (if you've never set a schema version before, the version is 0).
-            schemaVersion: 0,
-            migrationBlock: { migration, oldSchemaVersion in
-                // We haven’t migrated anything yet, so oldSchemaVersion == 0
-                if (oldSchemaVersion < 0) {
-                    // Nothing to do! - Realm will automatically detect new properties and removed properties - And will update the schema on disk automatically
-                }
-        })
+        FirebaseApp.configure() //configure for Fireabase services
         
-        // Tell Realm to use this new configuration object for the default Realm
-        Realm.Configuration.defaultConfiguration = config
+        UNUserNotificationCenter.current().delegate = self //Setting notification delegate
         
-        //Setting notification delegate 
-        UNUserNotificationCenter.current().delegate = self
+        NotificationsController.scheduleMorningNotification() //Schedule anyways to change quote
         
         let ydBadgeBool = defaults.value(forKey: "yourDayBadgeCount")
         if ydBadgeBool == nil {
-           defaults.set(true, forKey: "yourDayBadgeCount")
+            defaults.set(true, forKey: "yourDayBadgeCount")
         }
         
         let hapticBool = defaults.value(forKey: "hapticFeedback")
@@ -58,7 +42,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         
         let dtBadgeBool = defaults.value(forKey: "dueTodayBadgeCount")
         if dtBadgeBool == nil {
-             defaults.set(true, forKey: "dueTodayBadgeCount")
+            defaults.set(true, forKey: "dueTodayBadgeCount")
         }
         
         //set daily motivational notification to 9 AM
@@ -73,25 +57,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             let string = formatter.string(from: date!)
             defaults.setValue(string, forKey: "dailyNotificationTime")
         }
-        //Schedule anyways to change quote 
-        NotificationsController.scheduleMorningNotification()
-
-        if self.isAppAlreadyLaunchedOnce() == false {
-            //load app introduction walkthrough if first time launching app
-            self.loadOnboarding()
-        }
+        
         return true
     }
     
     func applicationWillResignActive(_ application: UIApplication) {
-        // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
-        // Use this method to pause ongoing tasks, disable timers, and invalidate graphics rendering callbacks. Games should use this method to pause the game.
+        let realm = try! Realm()
+
         let badgeBool = defaults.value(forKey: "yourDayBadgeCount") as! Bool
         let dueTodayBool = defaults.value(forKey: "dueTodayBadgeCount") as! Bool
         if badgeBool == true || dueTodayBool == true{
             var total = 0
-            
-            let realm = try! Realm()
             // Get the current calendar with local time zone
             var calendar = Calendar.current
             calendar.timeZone = NSTimeZone.local
@@ -129,22 +105,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         
         //to make sure all empty title tasks are deleted if app randomly closes 
         self.window?.endEditing(true)
-    }
-    
-    func loadOnboarding(){
-        let storyboard = UIStoryboard(name: "Main", bundle: Bundle.main)
-        let onboardVC = storyboard.instantiateViewController(withIdentifier: "onboarding")
-        self.window?.makeKeyAndVisible()
-        self.window?.rootViewController?.present(onboardVC, animated: true, completion: nil)
-        Floaty.global.button.isHidden = true
-    }
-    
-    func isAppAlreadyLaunchedOnce()->Bool{
-        if  defaults.string(forKey: "isAppAlreadyLaunchedBefore") == nil{
-            defaults.set(true, forKey: "isAppAlreadyLaunchedBefore")
-            return false
-        }
-        return true
     }
     
     //Handle incoming notifications

@@ -11,8 +11,10 @@ import DottedProgressBar
 import ChameleonFramework
 import BEMCheckBox
 import MGSwipeTableCell
-import DateTimePicker
 import SwiftDate
+import DatePickerDialog
+import Floaty
+import Pulley
 
 protocol CustomTaskCellDelegate {
     // Indicates that the edit process has begun for the given cell
@@ -24,6 +26,9 @@ protocol CustomTaskCellDelegate {
     func cellCheckBoxTapped(editingCell: TaskCell, checked: Bool)
     //Indicates that the due date for the cell was changed
     func cellDueDateChanged(editingCell: TaskCell, date: Date?)
+    
+    //Indicates that user tried adding a deadline to empty cell
+    func userTriedAddingDateToEmptyTask()
 }
 
 
@@ -35,10 +40,7 @@ class TaskCell:  MGSwipeTableCell {
     
     var dueDate: Date?
     var customDelegate: CustomTaskCellDelegate?
-    var pickerSelected: Bool = false
-    var isBeingEdited: Bool = false
     var taskObj: SavedTask?
-    var objectDeleted = false
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -57,7 +59,7 @@ extension TaskCell: UITextFieldDelegate {
     //calls custom delegate function to trigger action in TaskVC
     func textFieldDidEndEditing(_ textField: UITextField) {
         self.taskTitleLabel.text = textField.text!
-        if self.customDelegate != nil {
+        if self.customDelegate != nil  {
             self.customDelegate?.cellDidEndEditing(editingCell: self)
         }
     }
@@ -82,72 +84,34 @@ extension TaskCell: BEMCheckBoxDelegate {
     }
 }
 
-extension TaskCell: DateTimePickerDelegate {
+extension TaskCell {
     
     @IBAction func dueDateBtnSelected(_ sender: UIButton) {
-        //does not trigger textfield become first responded under cellDidBeginEditing
         
-        //Resings textfield so cellDidBeginEditing is triggered - saves task title text
-        if self.isBeingEdited == true {
-            self.taskTitleLabel.resignFirstResponder()
+        let newText = self.taskTitleLabel.text
+        let trimmedText = newText?.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmedText?.isEmpty == true {
+            self.customDelegate?.userTriedAddingDateToEmptyTask()
+            return
         }
         
-        var max: Date
-        var selected: Date
+        Floaty.global.button.isHidden = true
+        let picker = DatePickerDialog(buttonColor: mainAppColor, font: UIFont(name: "HelveticaNeue-Bold", size: CGFloat(100))!)
+        
+        var defaultDate = Date()
         if self.dueDate != nil {
-            max = (self.dueDate?.addingTimeInterval(60 * 60 * 24 * 100))!
-            selected = self.dueDate!
-        } else {
-            max = Date().addingTimeInterval(60 * 60 * 24 * 100)
-            selected = Date()
+            defaultDate = self.dueDate!
         }
         
-        let delayTime = DispatchTime.now() +  .microseconds(500000)
-        DispatchQueue.main.asyncAfter(deadline: delayTime) {
-            
-            //if taskk title is empty/ has been, do not want to trigger further action
-            if self.objectDeleted == true {
-                self.objectDeleted = false 
-                return
-            }
-            
-            self.pickerSelected = true
-            
-            self.dueDateBtn.isSelected = true //means user is editing deadline
-
-            let picker = DateTimePicker.show(selected: selected, maximumDate: max)
-            picker.becomeFirstResponder() //trigger method - does not make textfield first responded since self.pickerSelected = true
-            
-            self.customDelegate?.cellDidBeginEditing(editingCell: self)
-            
-            picker.highlightColor = mainAppColor
-            picker.isDatePickerOnly = false
-            picker.is12HourFormat = true
-            picker.selectedDate = selected
-            picker.doneBackgroundColor = mainAppColor
-            picker.includeMonth = true
-            picker.cancelButtonTitle = "Clear"
-            picker.doneButtonTitle = "Set Deadline"
-            picker.delegate = self
-            picker.completionHandler = { date in
+        picker.show("Set Deadline", doneButtonTitle: "Done", cancelButtonTitle: "Remove", defaultDate: defaultDate, datePickerMode: .dateAndTime) {
+            (date) -> Void in
+            if date != nil {
                 self.customDelegate?.cellDueDateChanged(editingCell: self, date: date)
-                self.customDelegate?.cellDidEndEditing(editingCell: self)
-                self.pickerSelected = false
-            }
-            picker.cancelHandler = {
+            } else {
                 self.customDelegate?.cellDueDateChanged(editingCell: self, date: nil)
-                self.customDelegate?.cellDidEndEditing(editingCell: self)
-                self.pickerSelected = false
             }
-            picker.dismissHandler = {
-                self.customDelegate?.cellDidEndEditing(editingCell: self)
-                self.pickerSelected = false
-            }
+            Floaty.global.button.isHidden = false
         }
-    }
-    
-    func dateTimePicker(_ picker: DateTimePicker, didSelectDate: Date) {
-        return
     }
 }
-    
+
