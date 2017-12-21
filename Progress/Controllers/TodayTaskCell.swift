@@ -57,7 +57,7 @@ extension TodayTaskCell: UITextFieldDelegate {
     //calls custom delegate function to trigger action in TodayVC
     func textFieldDidEndEditing(_ textField: UITextField) {
         self.taskTitleLabel.text = textField.text!
-        if   self.customDelegate != nil && pickerSelected == false {
+        if   self.customDelegate != nil {
             self.customDelegate?.cellDidEndEditing(editingCell: self)
         }
     }
@@ -88,16 +88,10 @@ extension TodayTaskCell: DateTimePickerDelegate {
     //calls custom delegate function to trigger action in TodayVC
     @IBAction func dueDateBtnSelected(_ sender: UIButton) {
         //does not trigger textfield become first responded under cellDidBeginEditing
-        self.pickerSelected = true
         
         //Resings textfield so cellDidBeginEditing is triggered - saves task title text
         if self.isBeingEdited == true {
             self.taskTitleLabel.resignFirstResponder()
-        }
-        
-        //if taskk title is empty/has been, do not want to trigger further action (will be deleted)
-        if self.objectDeleted == true {
-            return
         }
         
         var max: Date
@@ -110,32 +104,45 @@ extension TodayTaskCell: DateTimePickerDelegate {
             selected = Date()
         }
         
-        let picker = DateTimePicker.show(selected: selected, maximumDate: max)
-        picker.becomeFirstResponder()
-        //trigger method - does not make textfield first responded since self.pickerSelected = true
-        self.customDelegate?.cellDidBeginEditing(editingCell: self)
-        picker.highlightColor = mainAppColor
-        picker.isDatePickerOnly = false
-        picker.is12HourFormat = true
-        picker.selectedDate = selected
-        picker.doneBackgroundColor = mainAppColor
-        picker.includeMonth = true
-        picker.cancelButtonTitle = "Clear"
-        picker.doneButtonTitle = "Set Deadline"
-        picker.delegate = self
-        picker.completionHandler = { date in
-            self.customDelegate?.cellDueDateChanged(editingCell: self, date: date)
-            self.customDelegate?.cellDidEndEditing(editingCell: self)
-            self.pickerSelected = false
-        }
-        picker.cancelHandler = {
-            self.customDelegate?.cellDueDateChanged(editingCell: self, date: nil)
-            self.customDelegate?.cellDidEndEditing(editingCell: self)
-            self.pickerSelected = false
-        }
-        picker.dismissHandler = {
-            self.customDelegate?.cellDidEndEditing(editingCell: self)
-            self.pickerSelected = false
+        let delayTime = DispatchTime.now() +  .microseconds(10000)
+        DispatchQueue.main.asyncAfter(deadline: delayTime) {
+            self.pickerSelected = true
+            
+            //Resings textfield so cellDidBeginEditing is triggered - saves task title text
+            if self.objectDeleted == true {
+                return
+            }
+            
+            self.dueDateBtn.isSelected = true //means user is editing deadline
+            
+            let picker = DateTimePicker.show(selected: selected, maximumDate: max)
+            picker.becomeFirstResponder() //trigger method - does not make textfield first responded since self.pickerSelected = true
+            
+            self.customDelegate?.cellDidBeginEditing(editingCell: self)
+            
+            picker.highlightColor = mainAppColor
+            picker.isDatePickerOnly = false
+            picker.is12HourFormat = true
+            picker.selectedDate = selected
+            picker.doneBackgroundColor = mainAppColor
+            picker.includeMonth = true
+            picker.cancelButtonTitle = "Clear"
+            picker.doneButtonTitle = "Set Deadline"
+            picker.delegate = self
+            picker.completionHandler = { date in
+                self.pickerSelected = false
+                self.customDelegate?.cellDueDateChanged(editingCell: self, date: date)
+                self.customDelegate?.cellDidEndEditing(editingCell: self)
+            }
+            picker.cancelHandler = {
+                self.pickerSelected = false
+                self.customDelegate?.cellDueDateChanged(editingCell: self, date: nil)
+                self.customDelegate?.cellDidEndEditing(editingCell: self)
+            }
+            picker.dismissHandler = {
+                self.pickerSelected = false
+                self.customDelegate?.cellDidEndEditing(editingCell: self)
+            }
         }
     }
     

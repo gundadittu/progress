@@ -95,8 +95,8 @@
 			isa = PBXGroup;
 			children = (
 				044C24251FDC6AF200AD6B8D /* TodayVC.swift */,
-				044C24271FDC6B0F00AD6B8D /* TasksVC.swift */,
 				044C24521FDC8E7A00AD6B8D /* TodayTaskCell.swift */,
+				044C24271FDC6B0F00AD6B8D /* TasksVC.swift */,
 				040532201FDE377500E377AF /* TaskCell.swift */,
 				049A38BE1FE90EA100AC0F06 /* SettingsTVC.swift */,
 				04FA66471FE5189D00CDD2B6 /* Onboarding.swift */,

@@ -72,13 +72,6 @@ class SettingsTVC: UITableViewController {
         }
     }
     
-    override func viewWillDisappear(_ animated: Bool) {
-        Floaty.global.button.isHidden = false
-        if let drawerVC = self.navigationController?.parent as? PulleyViewController {
-            drawerVC.setDrawerPosition(position: .collapsed, animated: true)
-        }
-    }
-    
     func clearCompletedTasks() {
         let alertController = CFAlertViewController(title: "Are you sure you want to clear all your completed tasks?",
                                                     message: "",
@@ -190,17 +183,16 @@ class SettingsTVC: UITableViewController {
     
     @IBAction func dailyNotificationTimeBtnTapped(_ sender: Any) {
         
-        let picker = DateTimePicker.show(selected: nil, maximumDate: nil)
+        let picker = DateTimePicker.show(selected: nil, minimumDate: Date()-1, maximumDate: nil)
         picker.becomeFirstResponder()
         picker.todayButtonTitle = ""
         picker.highlightColor = mainAppColor
         picker.isTimePickerOnly = true
         picker.is12HourFormat = true
         picker.doneBackgroundColor = mainAppColor
-        picker.cancelButtonTitle = "Remove"
+        picker.cancelButtonTitle = "Clear"
         picker.doneButtonTitle = "Set Time"
         picker.completionHandler = { date in
-        
             
             let formatter = DateFormatter()
             formatter.dateStyle = .none
@@ -216,6 +208,7 @@ class SettingsTVC: UITableViewController {
                 "full_text": "" as NSObject
                 ])
         }
+        
         picker.cancelHandler = {
             ///log firebase analytics event
             Analytics.logEvent(dailyNotificationOffEvent, parameters: [
@@ -228,6 +221,7 @@ class SettingsTVC: UITableViewController {
             
             NotificationsController.scheduleMorningNotification()
         }
+        
         picker.dismissHandler = {
             return
         }

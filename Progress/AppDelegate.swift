@@ -132,11 +132,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     }
     
     func loadOnboarding(){
-        Floaty.global.button.isHidden = true
         let storyboard = UIStoryboard(name: "Main", bundle: Bundle.main)
         let onboardVC = storyboard.instantiateViewController(withIdentifier: "onboarding")
         self.window?.makeKeyAndVisible()
         self.window?.rootViewController?.present(onboardVC, animated: true, completion: nil)
+        Floaty.global.button.isHidden = true
     }
     
     func isAppAlreadyLaunchedOnce()->Bool{

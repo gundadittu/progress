@@ -76,59 +76,74 @@ class NotificationsController  {
         }
     }
     
-    class func requestPermission(){
-        let alertController = CFAlertViewController(title: "👋 We need your permission to send you notifications! ",
-                                                    message: "Nothing annoying. Just so we can remind you in the morning to get Your Day started, place an app badge count of tasks left under Your Day, and remind you of tasks due today.",
-                                                    textAlignment: .left,
-                                                    preferredStyle: .alert,
-                                                    didDismissAlertHandler: nil)
+    class func requestPermission(_ override: Bool = false){
         
-        let grantedAction = CFAlertAction(title: "Sounds Good",
-                                          style: .Default,
-                                          alignment: .justified,
-                                          backgroundColor: FlatGreen(),
-                                          textColor: nil,
-                                          handler: { (action) in
-                                            Floaty.global.button.isHidden = false
-                                            UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { (granted, error) in
-                                                if granted == true {
-                                                    //log firebase analytics event
-                                                    Analytics.logEvent(notificationPermissionGrantedEvent, parameters: [
-                                                        "name":"" as NSObject,
-                                                        "full_text": "" as NSObject
-                                                        ])
-                                                } else {
-                                                    //log firebase analytics event
-                                                    Analytics.logEvent(notificationPermissionDeniedEvent, parameters: [
-                                                        "name":"" as NSObject,
-                                                        "full_text": "" as NSObject
-                                                        ])
-                                                }
-                                                
-                                                if error != nil {
-                                                    //log crashlytics error
-                                                    Crashlytics.sharedInstance().recordError(error!)
-                                                    return
-                                                }
-                                            }
-                                            
-        })
-        
-        let laterAction = CFAlertAction(title: "Not Now",
-                                          style: .Cancel,
-                                          alignment: .justified,
-                                          backgroundColor: FlatWhiteDark(),
-                                          textColor: nil,
-                                          handler: { (action) in Floaty.global.button.isHidden = false })
-        alertController.addAction(laterAction)
-        alertController.addAction(grantedAction)
-
-        alertController.shouldDismissOnBackgroundTap = false
+        if override != true {
+            if defaults.value(forKey: "notificationRequestCount") == nil {
+                    defaults.setValue(0, forKey: "notificationRequestCount")
+            } else {
+                let count = defaults.value(forKey: "notificationRequestCount") as! Int
+                let newCount = count + 1
+                defaults.setValue(newCount, forKey: "notificationRequestCount")
+                if newCount%3 != 0 {
+                    return
+                }
+            }
+        }
         
         self.center.getNotificationSettings(completionHandler: { (settings) in
             let status = settings.authorizationStatus
             if status == .notDetermined {
                 DispatchQueue.main.async {
+                    
+                    let alertController = CFAlertViewController(title: "👋 We need your permission to send you notifications! ",
+                                                                message: "Nothing annoying. Just so we can remind you in the morning to get Your Day started, place an app badge count of tasks left under Your Day, and remind you of tasks due today.",
+                                                                textAlignment: .left,
+                                                                preferredStyle: .alert,
+                                                                didDismissAlertHandler: nil)
+                    
+                    let grantedAction = CFAlertAction(title: "Ask me Now",
+                                                      style: .Default,
+                                                      alignment: .justified,
+                                                      backgroundColor: FlatGreen(),
+                                                      textColor: nil,
+                                                      handler: { (action) in
+                                                        Floaty.global.button.isHidden = false
+                                                        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { (granted, error) in
+                                                            if granted == true {
+                                                                //log firebase analytics event
+                                                                Analytics.logEvent(notificationPermissionGrantedEvent, parameters: [
+                                                                    "name":"" as NSObject,
+                                                                    "full_text": "" as NSObject
+                                                                    ])
+                                                            } else {
+                                                                //log firebase analytics event
+                                                                Analytics.logEvent(notificationPermissionDeniedEvent, parameters: [
+                                                                    "name":"" as NSObject,
+                                                                    "full_text": "" as NSObject
+                                                                    ])
+                                                            }
+                                                            
+                                                            if error != nil {
+                                                                //log crashlytics error
+                                                                Crashlytics.sharedInstance().recordError(error!)
+                                                                return
+                                                            }
+                                                        }
+                                                        
+                    })
+                    
+                    let laterAction = CFAlertAction(title: "Decide Later",
+                                                    style: .Cancel,
+                                                    alignment: .justified,
+                                                    backgroundColor: FlatWhiteDark(),
+                                                    textColor: nil,
+                                                    handler: { (action) in Floaty.global.button.isHidden = false })
+                    alertController.addAction(grantedAction)
+                    alertController.addAction(laterAction)
+                    
+                    alertController.shouldDismissOnBackgroundTap = false
+                    
                     Floaty.global.button.isHidden = true
                     let vc = UIApplication.topViewController()
                     vc?.present(alertController, animated: true, completion: nil)
@@ -153,7 +168,10 @@ class NotificationsController  {
                 let json = JSON(value).dictionaryObject!
                 let quote = json["quoteText"] as! String
                 let author = json["quoteAuthor"] as! String
-                body = "\(String(describing: quote))- \(String(describing: author))"
+                body = "\(String(describing: quote))"
+                if author != "" {
+                    body += "- \(String(describing: author))"
+                }
                 break
             case .failure(let error):
                 print(error.localizedDescription)

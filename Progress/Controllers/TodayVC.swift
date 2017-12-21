@@ -52,15 +52,15 @@ class TodayVC: UIViewController , TableViewReorderDelegate {
         self.tableView.sectionHeaderHeight = 0
         
         //empty state data
-        self.tableView.emptyDataSetSource = self;
-        self.tableView.emptyDataSetDelegate = self;
+        self.tableView.emptyDataSetSource = self
+        self.tableView.emptyDataSetDelegate = self
         
         //table Cell Reordering
         self.tableView.reorder.delegate = self
-        tableView.reorder.cellScale = 1.05
-        tableView.reorder.shadowOpacity = 0.3
-        tableView.reorder.shadowRadius = 20
-    
+        self.tableView.reorder.cellScale = 1.05
+        self.tableView.reorder.shadowOpacity = 0.3
+        self.tableView.reorder.shadowRadius = 20
+        
         //Fetch data from database
         self.fetchObjects()
         
@@ -90,10 +90,16 @@ class TodayVC: UIViewController , TableViewReorderDelegate {
                 tableView.endUpdates()
                 break
             case .error(let error):
-                //log crashlytics error
-                Crashlytics.sharedInstance().recordError(error)
+                Crashlytics.sharedInstance().recordError(error) //log crashlytics error
                 break
             }
+        }
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        Floaty.global.button.isHidden = false
+        if let drawerVC = self.navigationController?.parent as? PulleyViewController {
+            drawerVC.setDrawerPosition(position: .collapsed, animated: true)
         }
     }
     
@@ -168,8 +174,11 @@ extension TodayVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let cell = self.tableView.cellForRow(at: indexPath) as! TodayTaskCell
         //Ensures only one cell is being edited at a time
-        if self.currentlySelectedCell != nil {
+        if self.currentlySelectedCell != nil && self.currentlySelectedCell != cell {
             self.currentlySelectedCell?.customDelegate?.cellDidEndEditing(editingCell: cell)
+        }
+        if self.currentlySelectedCell == cell {
+            return
         }
         cell.customDelegate?.cellDidBeginEditing(editingCell: cell)
     }
@@ -221,6 +230,9 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         cell.taskTitleLabel.text = title
         
         //due date btn
+        cell.dueDateBtn.setTitleColor(UIColor.black, for: .selected)
+        cell.dueDateBtn.tintColor = mainAppColor
+        
         if date != nil {
             cell.dueDate = date //cell attribute
             cell.dueDateBtn.isHidden = false
@@ -365,8 +377,9 @@ extension TodayVC: CustomTodayTaskCellDelegate {
     //update changed deadline
     func cellDueDateChanged(editingCell: TodayTaskCell, date: Date?) {
         
-        //contextual prompt of asking user for permissions to add badges
-        NotificationsController.requestPermission()
+        if date != nil { //contextual prompt of asking user for permissions to add badges
+            NotificationsController.requestPermission()
+        }
         
         let selectedTask = editingCell.taskObj!
         
@@ -497,7 +510,6 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         
         if editingCell.pickerSelected == false {
             editingCell.taskTitleLabel.becomeFirstResponder() //triggers keyboard if picker is not the first responder
-
         } else {
             Floaty.global.button.isHidden = true //otherwise hides Floaty so that it does not overlap with date picker
         }
@@ -509,6 +521,7 @@ extension TodayVC: CustomTodayTaskCellDelegate {
             UIView.animate(withDuration: 0.3, animations: { () -> Void in
                 cell.transform = CGAffineTransform(translationX: 0, y: editingOffset)
                 if cell != editingCell {
+                    cell.dueDateBtn.isEnabled = false //so user can not trigger date picker of another cell
                     cell.alpha = 0.3
                 }
             })
@@ -517,30 +530,55 @@ extension TodayVC: CustomTodayTaskCellDelegate {
     
     func cellDidEndEditing(editingCell: TodayTaskCell) {
         
-        editingCell.isBeingEdited = false //update attribute
+       /* self.tableView.contentInset = UIEdgeInsetsMake(0, 0, 0, 0) //readjusts insets, because they are changed when new task is created
+    
+        //Updates isNewTask attribute
+        if editingCell.taskObj?.isNewTask == true {
+            try! self.realm.write {
+                editingCell.taskObj?.isNewTask = false
+            }
+            
+            //log firebase analytics event for creating new task
+            Analytics.logEvent(createTaskEvent, parameters: [ "name": (editingCell.taskObj?.title)! as NSObject, "full_text": "" as NSObject ])
+        }
         
+        //Allows user to now more drawer again
+        if let drawerVC = self.navigationController?.parent as? PulleyViewController {
+            drawerVC.allowsUserDrawerPositionChange = true
+        }*/
+        
+        //Updates currently editing info
+        //doesnt change isbeingedited if picker is selected because cell is still being edited (case applies when user selects date picker while keyboard is active)
+        if editingCell.pickerSelected == false {
+            editingCell.isBeingEdited = false
+        }
+        
+        //self.currentlySelectedCell might be another cell that the user clicked on, which caused this cell to resign and end editing
         if self.currentlySelectedCell == editingCell{
-            self.currentlySelectedCell = nil //doesn't clear if different cell is being edited, as it would mess up other processes
+            self.currentlySelectedCell = nil
         }
         
+        //hides due date btn if there is no assigned deadline
         if editingCell.dueDate == nil {
-            editingCell.dueDateBtn.isHidden = true //hides due date btn if user ha not selected a deadline
+            editingCell.dueDateBtn.isHidden = true
         }
         
-        if editingCell.pickerSelected == true {
-             Floaty.global.button.isHidden = false //show Floaty, only hidden when date picker is selected
-        }
+        Floaty.global.button.isHidden = false //Shows floaty button because it is hidden when date picker is selected
         
-        editingCell.taskTitleLabel.isEnabled = false //disables textfied again to prevent confusion between seelcting cell and textfield
+        editingCell.dueDateBtn.isSelected = false //means user is not editing deadline
         
-        //update new task title from textfield
+        editingCell.taskTitleLabel.isEnabled = false //Disables textfield again, so that selecting cell is not confused with selecting textfield
+        
+        
+        //save updated task title, delete if new title is empty
         let newText = editingCell.taskTitleLabel.text
         let trimmedText = editingCell.taskTitleLabel.text!.trimmingCharacters(in: .whitespacesAndNewlines)
         if trimmedText.isEmpty == false {
-            self.updateTaskTitle(editingCell: editingCell, newTitle: newText!) //updates title if it is not empty
+            self.updateTaskTitle(editingCell: editingCell, newTitle: newText!)
         } else {
             //delete new task if user did not give it title or deletes existing task if user removed its title
             editingCell.objectDeleted = true
+            editingCell.pickerSelected = false //important for edge case where user clicks on add deadline when creating new task, but task title is empty
             self.deleteTask(editingCell: editingCell)
         }
         
@@ -550,10 +588,10 @@ extension TodayVC: CustomTodayTaskCellDelegate {
             UIView.animate(withDuration: 0.2, animations: { () -> Void in
                 cell.transform = CGAffineTransform.identity
                 if cell != editingCell {
+                    cell.dueDateBtn.isEnabled = true //diabled before so user can not trigger date picker of another cell
                     cell.alpha = 1.0
                 }
-            }, completion: { (Finished: Bool) -> Void in
-            })
+            }, completion: { (Finished: Bool) -> Void in return })
         }
     }
 }

@@ -191,10 +191,10 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="KIH-zR-rjY">
-                                                    <rect key="frame" x="15" y="0.0" width="345" height="99.5"/>
+                                                    <rect key="frame" x="15" y="0.0" width="345" height="89"/>
                                                     <subviews>
                                                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="kFn-qz-0ox" customClass="BEMCheckBox">
-                                                            <rect key="frame" x="0.0" y="40" width="20" height="20"/>
+                                                            <rect key="frame" x="0.0" y="34.5" width="20" height="20"/>
                                                             <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                             <constraints>
                                                                 <constraint firstAttribute="width" constant="20" id="OV8-rL-Xdu"/>
@@ -202,22 +202,21 @@
                                                             </constraints>
                                                         </view>
                                                         <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" alignment="top" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="inb-C7-ydt">
-                                                            <rect key="frame" x="30" y="0.0" width="220" height="99.5"/>
+                                                            <rect key="frame" x="30" y="0.0" width="220" height="89"/>
                                                             <subviews>
                                                                 <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="yBc-1c-8w8">
-                                                                    <rect key="frame" x="0.0" y="0.0" width="220" height="47.5"/>
+                                                                    <rect key="frame" x="0.0" y="0.0" width="220" height="42"/>
                                                                     <nil key="textColor"/>
                                                                     <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="17"/>
                                                                     <textInputTraits key="textInputTraits"/>
                                                                 </textField>
                                                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sA9-4r-TGL" customClass="DottedProgressBar" customModule="DottedProgressBar">
-                                                                    <rect key="frame" x="0.0" y="52.5" width="220" height="47"/>
+                                                                    <rect key="frame" x="0.0" y="47" width="220" height="42"/>
                                                                     <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                                 </view>
                                                             </subviews>
                                                             <constraints>
                                                                 <constraint firstAttribute="trailing" secondItem="yBc-1c-8w8" secondAttribute="trailing" id="2JA-y8-bbg"/>
-                                                                <constraint firstItem="yBc-1c-8w8" firstAttribute="top" secondItem="inb-C7-ydt" secondAttribute="top" id="P6h-NJ-66t"/>
                                                                 <constraint firstAttribute="trailing" secondItem="sA9-4r-TGL" secondAttribute="trailing" id="VA7-HH-n5V"/>
                                                                 <constraint firstItem="yBc-1c-8w8" firstAttribute="leading" secondItem="inb-C7-ydt" secondAttribute="leading" id="jMb-9i-W3u"/>
                                                                 <constraint firstAttribute="bottom" secondItem="sA9-4r-TGL" secondAttribute="bottom" id="jOM-HO-nx8"/>
@@ -225,8 +224,9 @@
                                                             </constraints>
                                                         </stackView>
                                                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="right" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="mEH-Xx-cRx">
-                                                            <rect key="frame" x="260" y="37" width="85" height="26"/>
+                                                            <rect key="frame" x="260" y="31.5" width="85" height="26"/>
                                                             <constraints>
+                                                                <constraint firstAttribute="height" constant="26" id="YbS-5G-eM8"/>
                                                                 <constraint firstAttribute="width" constant="85" id="poj-OY-Hrb"/>
                                                             </constraints>
                                                             <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="12"/>
@@ -241,7 +241,7 @@
                                                 </stackView>
                                             </subviews>
                                             <constraints>
-                                                <constraint firstAttribute="bottom" secondItem="KIH-zR-rjY" secondAttribute="bottom" id="jlD-eH-Pec"/>
+                                                <constraint firstAttribute="bottomMargin" secondItem="KIH-zR-rjY" secondAttribute="bottom" id="jlD-eH-Pec"/>
                                                 <constraint firstAttribute="trailing" secondItem="KIH-zR-rjY" secondAttribute="trailing" constant="15" id="v8f-Rp-P43"/>
                                                 <constraint firstItem="KIH-zR-rjY" firstAttribute="top" secondItem="N6W-qx-mTO" secondAttribute="top" id="wUV-zz-m6P"/>
                                                 <constraint firstItem="KIH-zR-rjY" firstAttribute="leading" secondItem="N6W-qx-mTO" secondAttribute="leading" constant="15" id="xft-lj-PjM"/>

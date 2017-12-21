@@ -60,15 +60,15 @@ class TasksVC: UIViewController, FloatyDelegate  {
         self.tableView.separatorStyle = .none
         self.tableView.sectionHeaderHeight = 0
         
+        //empty state data
+        self.tableView.emptyDataSetSource = self
+        self.tableView.emptyDataSetDelegate = self
+        
         //Table Cell Reordering
         self.tableView.reorder.delegate = self
         self.tableView.reorder.cellScale = 1.05
         self.tableView.reorder.shadowOpacity = 0.3
         self.tableView.reorder.shadowRadius = 20
-        
-        //empty state data
-        self.tableView.emptyDataSetSource = self
-        self.tableView.emptyDataSetDelegate = self
         
         //Fetch data from database
         self.fetchObjects()
@@ -101,8 +101,7 @@ class TasksVC: UIViewController, FloatyDelegate  {
                 tableView.endUpdates()
                 break
             case .error(let error):
-                //log crashlytics error
-                Crashlytics.sharedInstance().recordError(error)
+                Crashlytics.sharedInstance().recordError(error) //log crashlytics error
                 break
             }
         }
@@ -156,8 +155,8 @@ class TasksVC: UIViewController, FloatyDelegate  {
         
         //scrolls to top of tableview
         self.tableView.contentInset = UIEdgeInsetsMake(20, 0, 0, 0) //inset so that the programattic scroll below doesn't hide the new task cell
-        let deadlineTime = DispatchTime.now() + .seconds(1) //delay needed due to some bug
-        DispatchQueue.main.asyncAfter(deadline: deadlineTime) {
+        let delayTime = DispatchTime.now() + .seconds(1) //delay needed due to some bug
+        DispatchQueue.main.asyncAfter(deadline: delayTime) {
             self.tableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: true) //scrolls up to new task if top of table view is not visible when new task is created
         }
     }
@@ -166,6 +165,7 @@ class TasksVC: UIViewController, FloatyDelegate  {
 extension TasksVC: UITableViewDelegate, UITableViewDataSource, TableViewReorderDelegate {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
         //spacer for reordering cells
         if let spacer = tableView.reorder.spacerCell(for: indexPath) {
             return spacer
@@ -186,10 +186,7 @@ extension TasksVC: UITableViewDelegate, UITableViewDataSource, TableViewReorderD
     func tableView(_ tableView: UITableView, reorderRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
         
         //log firebase analytics event
-        Analytics.logEvent("tasks_reordered", parameters: [
-            "name":"" as NSObject,
-            "full_text": "" as NSObject
-            ])
+        Analytics.logEvent("tasks_reordered", parameters: [ "name":"" as NSObject, "full_text": "" as NSObject ])
         
         //adjusts displayOrder attributes for all cells without notifying Realm so that tableview is not updated again (user's actions already updated it)
         self.realm.beginWrite()
@@ -216,20 +213,15 @@ extension TasksVC: UITableViewDelegate, UITableViewDataSource, TableViewReorderD
         try! self.realm.commitWrite(withoutNotifying: [self.token!])
     }
     
-    //Ned these two to avoid some warnings
-    func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
-        return
-    }
-    func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
-        return true
-    }
-    
     //Handles user clicking on cell - triggers editing
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let cell = self.tableView.cellForRow(at: indexPath) as! TaskCell
         //Ensures only one cell is being edited at a time
-        if self.currentlySelectedCell != nil {
+        if self.currentlySelectedCell != nil && self.currentlySelectedCell != cell {
             self.currentlySelectedCell?.customDelegate?.cellDidEndEditing(editingCell: cell)
+        }
+        if self.currentlySelectedCell == cell {
+            return
         }
         cell.customDelegate?.cellDidBeginEditing(editingCell: cell)
     }
@@ -240,6 +232,14 @@ extension TasksVC: UITableViewDelegate, UITableViewDataSource, TableViewReorderD
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return tasksList!.count
+    }
+    
+    //Ned these two to avoid some warnings
+    func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
+        return
+    }
+    func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
+        return true
     }
 }
 
@@ -252,14 +252,14 @@ extension TasksVC: CustomTaskCellDelegate {
         let count = cellTask.points
         let date = cellTask.deadline
         let checked = cellTask.isCompleted
-        let progressDotRadius = CGFloat(4.0)
+        let progressDotRadius = globalProgressDotRadius
         let indWidth = (10+(2*Int(progressDotRadius)))
         let width = indWidth * count
         let frameWidth = Int(cell.progressBar.frame.width)
         var modifiedCount = count
         //let dotColorsArr = [FlatPurple(),FlatBlue(),FlatGreen(),FlatYellow(),FlatOrange(),FlatRed()]
         //let colorIndex = ((width/indWidth)/(frameWidth/indWidth))%6
-        let dotColor = mainAppColor //dotColorsArr[colorIndex]
+        let dotColor = color //dotColorsArr[colorIndex]
         
         //cell attributes
         cell.taskObj = cellTask
@@ -271,6 +271,9 @@ extension TasksVC: CustomTaskCellDelegate {
         cell.taskTitleLabel.text = title
         
         //due date btn
+        cell.dueDateBtn.setTitleColor(UIColor.white, for: .selected)
+        cell.dueDateBtn.tintColor = mainAppColor
+        
         if date != nil {
             cell.dueDate = date
             cell.dueDateBtn.isHidden = false
@@ -317,8 +320,11 @@ extension TasksVC: CustomTaskCellDelegate {
             cell.dueDate = nil
             cell.dueDateBtn.isHidden = true
         }
+        
         if checked == true {
-            cell.dueDateBtn.isEnabled = false
+            cell.dueDateBtn.isEnabled = false //prevents user from messing with deadling of completed tasks 
+        } else {
+            cell.dueDateBtn.isEnabled = true
         }
         
         //cell progress bar attributes
@@ -410,8 +416,9 @@ extension TasksVC: CustomTaskCellDelegate {
     //update changed deadline
     func cellDueDateChanged(editingCell: TaskCell, date: Date?) {
         
-        //contextual prompt of asking user for permissions to add badges
-        NotificationsController.requestPermission()
+        if date != nil { //contextual prompt of asking user for permissions to add badges
+            NotificationsController.requestPermission()
+        }
         
         let selectedTask = editingCell.taskObj!
         
@@ -507,6 +514,10 @@ extension TasksVC: CustomTaskCellDelegate {
             return
         }
         
+        //Updates currently being edited information
+        editingCell.isBeingEdited = true
+        self.currentlySelectedCell = editingCell
+        
         //Brings drawer up if it is not already up
         //Makes sure user can not move drawer while editing.
         if let drawerVC = self.navigationController?.parent as? PulleyViewController {
@@ -517,41 +528,35 @@ extension TasksVC: CustomTaskCellDelegate {
         //makes due date button visible so user can choose deadline
         editingCell.dueDateBtn.isHidden = false
         
-        //Hide Button if datepicker is selected
-        ///Show keyboard if datepicker is not selected
-        editingCell.taskTitleLabel.isEnabled = true
+     
+        editingCell.taskTitleLabel.isEnabled = true//to allow user input
+        
         if editingCell.pickerSelected == false {
             //triggers keyboard if picker is not the first responder
             editingCell.taskTitleLabel.becomeFirstResponder()
         } else {
-            //So that the button does to overlap with datepicker
-            Floaty.global.button.isHidden = true
+            Floaty.global.button.isHidden = true //So that the button does to overlap with datepicker
         }
         
-        if  editingCell.isBeingEdited == false {
-            let editingOffset = self.tableView.contentOffset.y - editingCell.frame.origin.y as CGFloat
-            let visibleCells = self.tableView.visibleCells as! [TaskCell]
-            for cell in visibleCells {
-                //animate cells up so that edited cell is at top of tableview
-                UIView.animate(withDuration: 0.3, animations: { () -> Void in
-                    cell.transform = CGAffineTransform(translationX: 0, y: editingOffset)
-                    if cell != editingCell {
-                        //gray out any cells that aren't being edited
-                        cell.alpha = 0.1
-                    }
-                })
-            }
+        //animate cells up
+        let editingOffset = self.tableView.contentOffset.y - editingCell.frame.origin.y as CGFloat
+        let visibleCells = self.tableView.visibleCells as! [TaskCell]
+        for cell in visibleCells {
+            //animate cells up so that edited cell is at top of tableview
+            UIView.animate(withDuration: 0.3, animations: { () -> Void in
+                cell.transform = CGAffineTransform(translationX: 0, y: editingOffset)
+                if cell != editingCell {
+                    cell.dueDateBtn.isEnabled = false //so user can not trigger date picker of another cell
+                    cell.alpha = 0.1 //gray out any cells that aren't being edited
+                }
+            })
         }
-        
-        //Updates currently being edited information
-        editingCell.isBeingEdited = true
-        self.currentlySelectedCell = editingCell
     }
     
     func cellDidEndEditing(editingCell: TaskCell) {
         
-        //readjusts insets, because they are changed when new task is created
-        self.tableView.contentInset = UIEdgeInsetsMake(0, 0, 0, 0)
+        self.tableView.contentInset = UIEdgeInsetsMake(0, 0, 0, 0) //readjusts insets, because they are changed when new task is created
+
 
         //Updates isNewTask attribute
         if editingCell.taskObj?.isNewTask == true {
@@ -560,10 +565,7 @@ extension TasksVC: CustomTaskCellDelegate {
             }
             
             //log firebase analytics event for creating new task
-            Analytics.logEvent(createTaskEvent, parameters: [
-                "name": (editingCell.taskObj?.title)! as NSObject,
-                "full_text": "" as NSObject
-                ])
+            Analytics.logEvent(createTaskEvent, parameters: [ "name": (editingCell.taskObj?.title)! as NSObject, "full_text": "" as NSObject ])
         }
         
         //Allows user to now more drawer again
@@ -573,9 +575,9 @@ extension TasksVC: CustomTaskCellDelegate {
 
         //Updates currently editing info
         //doesnt change isbeingedited if picker is selected because cell is still being edited (case applies when user selects date picker while keyboard is active)
-        if editingCell.pickerSelected == false {
-            editingCell.isBeingEdited = false
-        }
+        
+        editingCell.isBeingEdited = false
+
         //self.currentlySelectedCell might be another cell that the user clicked on, which caused this cell to resign and end editing
         if self.currentlySelectedCell == editingCell{
             self.currentlySelectedCell = nil
@@ -586,11 +588,12 @@ extension TasksVC: CustomTaskCellDelegate {
             editingCell.dueDateBtn.isHidden = true
         }
         
-        //Shows floaty button because it is hidden when date picker is selected
-        Floaty.global.button.isHidden = false
+        Floaty.global.button.isHidden = false //Shows floaty button because it is hidden when date picker is selected
         
-        //Disables textfield again, so that selecting cell is not confused with selecting textfield
-        editingCell.taskTitleLabel.isEnabled = false
+        editingCell.dueDateBtn.isSelected = false //means user is not editing deadline
+        
+        editingCell.taskTitleLabel.isEnabled = false //Disables textfield again, so that selecting cell is not confused with selecting textfield
+
         
         //save updated task title, delete if new title is empty
         let newText = editingCell.taskTitleLabel.text
@@ -598,24 +601,22 @@ extension TasksVC: CustomTaskCellDelegate {
         if trimmedText.isEmpty == false {
             self.updateTaskTitle(editingCell: editingCell, newTitle: newText!)
         } else {
-            //delete new task if user did not give it title
-            //deletes existing task if user removed its title
-            editingCell.objectDeleted = true 
+            //delete new task if user did not give it title or deletes existing task if user removed its title
+            editingCell.objectDeleted = true
+            editingCell.pickerSelected = false //important for edge case where user clicks on add deadline when creating new task, but task title is empty 
             self.deleteTask(editingCell: editingCell)
         }
         
-        //if condition, because dont want to end offset + alpha changes if picker is selected right after keyboard is resigned
-        if editingCell.pickerSelected == false {
-            let visibleCells = tableView.visibleCells as! [TaskCell]
-            for cell: TaskCell in visibleCells {
-                UIView.animate(withDuration: 0.2, animations: { () -> Void in
-                    cell.transform = CGAffineTransform.identity
-                    if cell != editingCell {
-                        cell.alpha = 0.3
-                    }
-                }, completion: { (Finished: Bool) -> Void in
-                })
-            }
+        //animates cells back down
+        let visibleCells = tableView.visibleCells as! [TaskCell]
+        for cell: TaskCell in visibleCells {
+            UIView.animate(withDuration: 0.2, animations: { () -> Void in
+                cell.transform = CGAffineTransform.identity
+                if cell != editingCell {
+                    cell.dueDateBtn.isEnabled = true //diabled before so user can not trigger date picker of another cell
+                    cell.alpha = 1.0
+                }
+            }, completion: { (Finished: Bool) -> Void in return })
         }
     }
 }
