@@ -93,11 +93,7 @@ extension TaskCell: BEMCheckBoxDelegate {
 extension TaskCell {
     
     @IBAction func dueDateBtnSelected(_ sender: UIButton) {
-        
-        //let delayTime = DispatchTime.now() +  .seconds(1)
-        //DispatchQueue.main.asyncAfter(deadline: delayTime) {
-            
-            
+
             let newText = self.taskTitleLabel.text
             let trimmedText = newText?.trimmingCharacters(in: .whitespacesAndNewlines)
             if trimmedText?.isEmpty == true {
@@ -122,7 +118,6 @@ extension TaskCell {
                 }
                 self.customDelegate?.cellPickerDone(editingCell: self)
             }
-       // }
     }
 }
 

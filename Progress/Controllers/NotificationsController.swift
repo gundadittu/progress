@@ -210,6 +210,16 @@ class NotificationsController  {
             }
         }
     }
+    
+    static func checkHapticPermissions() -> Bool {
+        let hapticBool = self.defaults.value(forKey: "hapticFeedback") as! Bool
+        return hapticBool
+    }
+    
+    static func checkInAppNotificationPermissions() -> Bool {
+        let inAppBool = self.defaults.value(forKey: "inAppNotifications") as! Bool
+        return inAppBool
+    }
 }
 
 extension UIApplication {

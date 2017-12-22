@@ -402,9 +402,10 @@ extension TasksVC: CustomTaskCellDelegate {
                 NotificationsController.removeNotifications(task: selectedTask)
             }
             
-            let taskTitle = selectedTask.title
-            let message = Message(title: "You completed \"\(taskTitle)\".", backgroundColor: FlatGreen())
-            Whisper.show(whisper: message, to: self.navigationController!, action: .show)
+            if NotificationsController.checkInAppNotificationPermissions() == true {
+                let message = Message(title: "You completed a task.", backgroundColor: FlatGreen())
+                Whisper.show(whisper: message, to: self.navigationController!, action: .show)
+            }
             
             //log firebase analytics event
             Analytics.logEvent(taskCheckedEvent, parameters: [
@@ -522,6 +523,10 @@ extension TasksVC: CustomTaskCellDelegate {
             AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
         }
         
+        if NotificationsController.checkInAppNotificationPermissions() == true {
+            let message = Message(title: "Your added a task to Your Day.", backgroundColor: FlatPurple())
+            Whisper.show(whisper: message, to: self.navigationController!, action: .show)
+        }
         
         let storyboard: UIStoryboard = UIStoryboard.init(name: "Main",bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "PrimaryContentViewController") as! TodayVC
@@ -639,47 +644,45 @@ extension TasksVC: CustomTaskCellDelegate {
     }
     
     func cellPickerSelected(editingCell: TaskCell) {
-        /*
-        //Makes sure you cannot edit cell if it is completed or mid-swipe
-        if editingCell.taskObj?.isCompleted == true || editingCell.swipeOffset > 0 {
-            return
+        let delayTime = DispatchTime.now() +  .seconds(1)
+        DispatchQueue.main.asyncAfter(deadline: delayTime) {
+            
+            //Makes sure you cannot edit cell if it is completed or mid-swipe
+            if editingCell.taskObj?.isCompleted == true || editingCell.swipeOffset > 0 {
+                return
+            }
+            
+            Floaty.global.button.isHidden = true
+            
+            //Updates currently being edited information
+            self.currentlySelectedCell = editingCell
+            
+            //Brings drawer up if it is not already up + Makes sure user can not move drawer while editing.
+            if let drawerVC = self.navigationController?.parent as? PulleyViewController {
+                drawerVC.setDrawerPosition(position: .open, animated: true)
+                drawerVC.allowsUserDrawerPositionChange = false
+            }
+            
+            //makes due date button visible so user can choose deadline
+            editingCell.dueDateBtn.isHidden = false
+            
+            //animate cells up
+            let editingOffset = self.tableView.contentOffset.y - editingCell.frame.origin.y as CGFloat
+            let visibleCells = self.tableView.visibleCells as! [TaskCell]
+            for cell in visibleCells {
+                //animate cells up so that edited cell is at top of tableview
+                UIView.animate(withDuration: 0.3, animations: { () -> Void in
+                    cell.transform = CGAffineTransform(translationX: 0, y: editingOffset)
+                    if cell != editingCell {
+                        cell.alpha = 0.1 //gray out any cells that aren't being edited
+                    }
+                })
+            }
         }
-        
-        Floaty.global.button.isHidden = true
-
-        //Updates currently being edited information
-        self.currentlySelectedCell = editingCell
-        
-        //Brings drawer up if it is not already up + Makes sure user can not move drawer while editing.
-        if let drawerVC = self.navigationController?.parent as? PulleyViewController {
-            drawerVC.setDrawerPosition(position: .open, animated: true)
-            drawerVC.allowsUserDrawerPositionChange = false
-        }
-        
-        //makes due date button visible so user can choose deadline
-        editingCell.dueDateBtn.isHidden = false
-        
-        editingCell.contentView.backgroundColor = FlatPurple()
-        
-        //animate cells up
-        //let editingOffset = self.tableView.contentOffset.y - editingCell.frame.origin.y as CGFloat
-        let visibleCells = self.tableView.visibleCells as! [TaskCell]
-        for cell in visibleCells {
-            //animate cells up so that edited cell is at top of tableview
-            //UIView.animate(withDuration: 0.3, animations: { () -> Void in
-               // cell.transform = CGAffineTransform(translationX: 0, y: editingOffset)
-                if cell == editingCell {
-                    //cell.dueDateBtn.isEnabled = false //so user can not trigger date picker of another cell
-                    cell.alpha = 0.1 //gray out any cells that aren't being edited
-                }
-            //})
-        }
-         */
-        return 
     }
     
     func cellPickerDone(editingCell: TaskCell) {
-        /*
+        
         //Allows user to now more drawer again
         if let drawerVC = self.navigationController?.parent as? PulleyViewController {
             drawerVC.allowsUserDrawerPositionChange = true
@@ -700,14 +703,13 @@ extension TasksVC: CustomTaskCellDelegate {
         //animates cells back down
         let visibleCells = tableView.visibleCells as! [TaskCell]
         for cell: TaskCell in visibleCells {
-         //   UIView.animate(withDuration: 0.2, animations: { () -> Void in
-           //     cell.transform = CGAffineTransform.identity
+            UIView.animate(withDuration: 0.2, animations: { () -> Void in
+                cell.transform = CGAffineTransform.identity
                 if cell != editingCell {
-                   // cell.dueDateBtn.isEnabled = true //diabled before so user can not trigger date picker of another cell
                     cell.alpha = 1.0
                 }
-          //  }, completion: { (Finished: Bool) -> Void in return })
-        }*/
+            }, completion: { (Finished: Bool) -> Void in return })
+        }
         return
     }
 }

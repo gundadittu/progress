@@ -101,14 +101,16 @@ class TodayVC: UIViewController, TableViewReorderDelegate {
             }
         }
     }
-    //fetches objects from realm
+    //fetches objects from database
     func fetchObjects() -> Results<SavedTask> {
         let isTodayPredicate = NSPredicate(format: "isToday == %@",  Bool(booleanLiteral: true) as CVarArg)
         let isNotCompletedPredicate = NSPredicate(format: "isCompleted == %@",  Bool(booleanLiteral: false) as CVarArg)
+       
         //only fetches objects with isToday tasks and not completed
         let andPredicate = NSCompoundPredicate(type: NSCompoundPredicate.LogicalType.and, subpredicates: [isTodayPredicate, isNotCompletedPredicate])
         let list = self.realm.objects(SavedTask.self).filter(andPredicate)
-        //sorts lust by displayOrder attribute
+        
+        //sorts list by todayDisplayOrder attribute
         return list.sorted(byKeyPath: "todayDisplayOrder", ascending: true)
     }
     
@@ -118,33 +120,6 @@ class TodayVC: UIViewController, TableViewReorderDelegate {
             return false
         }
         return true
-    }
-    
-    func addWelcomeTasks() {
-        
-        var introTasks = [SavedTask]()
-        
-        let introTask2 = SavedTask()
-        introTask2.todayDisplayOrder = 1
-        introTask2.isToday = true
-        introTask2.title = "Done for today? Swipe right on me."
-        introTasks.append(introTask2)
-        
-        let introTask3 = SavedTask()
-        introTask3.todayDisplayOrder = 2
-        introTask3.isToday = true
-        introTask3.title = "The task goes back to All Tasks."
-        introTasks.append(introTask3)
-        
-        let introTask4 = SavedTask()
-        introTask4.todayDisplayOrder = 3
-        introTask4.isToday = true
-        introTask4.title = "And, a progress dot is added underneath it."
-        introTasks.append(introTask4)
-        
-        try! self.realm.write {
-            self.realm.add(introTasks)
-        }
     }
 }
 
@@ -167,27 +142,26 @@ extension TodayVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, reorderRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
         
         //log firebase analytics event
-        Analytics.logEvent(tasksReorderedEvent , parameters: [ "name":"" as NSObject, "full_text": "" as NSObject ])
+        Analytics.logEvent("tasks_reordered", parameters: [ "name":"" as NSObject, "full_text": "" as NSObject ])
         
         //adjusts displayOrder attributes for all cells without notifying Realm so that tableview is not updated again (user's actions already updated it)
         self.realm.beginWrite()
         let sourceObject = tasksList![sourceIndexPath.row]
         let destinationObject = tasksList![destinationIndexPath.row]
-        
-        let destinationObjectOrder = destinationObject.displayOrder
-        
+      
+        let destinationObjectOrder = destinationObject.todayDisplayOrder
         if sourceIndexPath.row < destinationIndexPath.row {
             for index in sourceIndexPath.row...destinationIndexPath.row {
                 let object = tasksList![index]
-                object.displayOrder -= 1
+                object.todayDisplayOrder -= 1
             }
         } else {
             for index in (destinationIndexPath.row..<sourceIndexPath.row).reversed() {
                 let object = tasksList![index]
-                object.displayOrder += 1
+                object.todayDisplayOrder += 1
             }
         }
-        sourceObject.displayOrder = destinationObjectOrder
+        sourceObject.todayDisplayOrder = destinationObjectOrder
         try! self.realm.commitWrite(withoutNotifying: [self.token!])
     }
     
@@ -352,8 +326,7 @@ extension TodayVC: CustomTodayTaskCellDelegate {
     func cellCheckBoxTapped(editingCell: TodayTaskCell, checked: Bool) {
         
         //play vibration if user allows
-        let hapticBool = self.defaults.value(forKey: "hapticFeedback") as! Bool
-        if hapticBool == true {
+        if NotificationsController.checkHapticPermissions() == true {
             AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
         }
         
@@ -361,9 +334,10 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         
         if checked == true {
             
-            let taskTitle = selectedTask.title
-            let message = Message(title: "You completed \"\(taskTitle)\".", backgroundColor: FlatGreen())
-            Whisper.show(whisper: message, to: self.navigationController!, action: .show)
+            if NotificationsController.checkInAppNotificationPermissions() == true {
+                let message = Message(title: "You completed a task.", backgroundColor: FlatGreen())
+                Whisper.show(whisper: message, to: self.navigationController!, action: .show)
+            }
             
             //log firebase analytics event
             Analytics.logEvent(taskCheckedEvent, parameters: [
@@ -509,8 +483,7 @@ extension TodayVC: CustomTodayTaskCellDelegate {
     func taskDoneForToday(editingCell: TodayTaskCell) {
         
         //plays vibration if user has allowed it
-        let hapticBool = self.defaults.value(forKey: "hapticFeedback") as! Bool
-        if hapticBool == true {
+        if NotificationsController.checkHapticPermissions() == true {
             AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
         }
         
@@ -533,13 +506,11 @@ extension TodayVC: CustomTodayTaskCellDelegate {
             selectedTask.displayOrder = 0
             selectedTask.isToday = false
         }
-        
-
     
-        
-        let taskTitle = selectedTask.title
-        let message = Message(title: "You made progress on \"\(taskTitle)\".", backgroundColor: FlatPurple())
-        Whisper.show(whisper: message, to: self.navigationController!, action: .show)
+        if NotificationsController.checkInAppNotificationPermissions() == true {
+            let message = Message(title: "You made progress on a task.", backgroundColor: FlatPurple())
+            Whisper.show(whisper: message, to: self.navigationController!, action: .show)
+        }
         
         //log firebase analytics event
         Analytics.logEvent(taskDoneForTodayEvent, parameters: [
@@ -549,7 +520,7 @@ extension TodayVC: CustomTodayTaskCellDelegate {
     }
 
     func cellDidBeginEditing(editingCell: TodayTaskCell) {
-        /*
+        
         ///Stop editing if task is completed or is mid-swipe
         if editingCell.taskObj?.isCompleted == true || editingCell.swipeOffset > 0 {
             return
@@ -574,12 +545,12 @@ extension TodayVC: CustomTodayTaskCellDelegate {
                     cell.alpha = 0.3
                 }
             })
-        }*/
+        }
         return
     }
     
     func cellDidEndEditing(editingCell: TodayTaskCell) {
-        /*
+        
         //self.currentlySelectedCell might be another cell that the user clicked on, which caused this cell to resign and end editing
         if self.currentlySelectedCell == editingCell{
             self.currentlySelectedCell = nil
@@ -612,8 +583,78 @@ extension TodayVC: CustomTodayTaskCellDelegate {
                     cell.alpha = 1.0
                 }
             }, completion: { (Finished: Bool) -> Void in return })
-        }*/
+        }
         return 
+    }
+    
+    func cellPickerSelected(editingCell: TodayTaskCell) {
+        let delayTime = DispatchTime.now() +  .seconds(1)
+        DispatchQueue.main.asyncAfter(deadline: delayTime) {
+            
+            //Makes sure you cannot edit cell if it is completed or mid-swipe
+            if editingCell.taskObj?.isCompleted == true || editingCell.swipeOffset > 0 {
+                return
+            }
+            
+            Floaty.global.button.isHidden = true
+            
+            //Updates currently being edited information
+            self.currentlySelectedCell = editingCell
+            
+            //Brings drawer up if it is not already up + Makes sure user can not move drawer while editing.
+            if let drawerVC = self.navigationController?.parent as? PulleyViewController {
+                drawerVC.setDrawerPosition(position: .collapsed, animated: true)
+                drawerVC.allowsUserDrawerPositionChange = false
+            }
+            
+            //makes due date button visible so user can choose deadline
+            editingCell.dueDateBtn.isHidden = false
+            
+            //animate cells up
+            let editingOffset = self.tableView.contentOffset.y - editingCell.frame.origin.y as CGFloat
+            let visibleCells = self.tableView.visibleCells as! [TodayTaskCell]
+            for cell in visibleCells {
+                //animate cells up so that edited cell is at top of tableview
+                UIView.animate(withDuration: 0.3, animations: { () -> Void in
+                    cell.transform = CGAffineTransform(translationX: 0, y: editingOffset)
+                    if cell != editingCell {
+                        cell.alpha = 0.1 //gray out any cells that aren't being edited
+                    }
+                })
+            }
+        }
+    }
+    
+    func cellPickerDone(editingCell: TodayTaskCell) {
+        
+        //Allows user to now more drawer again
+        if let drawerVC = self.navigationController?.parent as? PulleyViewController {
+            drawerVC.allowsUserDrawerPositionChange = true
+        }
+        
+        //self.currentlySelectedCell might be another cell that the user clicked on, which caused this cell to resign and end editing
+        if self.currentlySelectedCell == editingCell{
+            self.currentlySelectedCell = nil
+        }
+        
+        Floaty.global.button.isHidden = false
+        
+        //hides due date btn if there is no assigned deadline
+        if editingCell.dueDate == nil {
+            editingCell.dueDateBtn.isHidden = true
+        }
+        
+        //animates cells back down
+        let visibleCells = tableView.visibleCells as! [TodayTaskCell]
+        for cell: TodayTaskCell in visibleCells {
+            UIView.animate(withDuration: 0.2, animations: { () -> Void in
+                cell.transform = CGAffineTransform.identity
+                if cell != editingCell {
+                    cell.alpha = 1.0
+                }
+            }, completion: { (Finished: Bool) -> Void in return })
+        }
+        return
     }
 }
 
@@ -689,7 +730,7 @@ extension TodayVC : AlertOnboardingDelegate {
     
     func loadOnboarding(){
         //First, declare datas
-        let arrayOfImage = ["purpleBox","pie-chart","funnel"]
+        let arrayOfImage = ["purpleBox","stones","meditation"]
         let arrayOfTitle = ["Welcome to Progress", "SPLIT UP YOUR TASKS", "SIMPLE AND FOCUSED"]
         let arrayOfDescription = ["A simple to-do list that helps you reach your goals one step at a time. \n \n Swipe left to learn more",
                                   "The best work isn’t done overnight. Unlike other to-do lists, Progress understands this and helps you feel rewarded each time you work  towards your goal.",
@@ -750,7 +791,33 @@ extension TodayVC : AlertOnboardingDelegate {
     func alertOnboardingNext(_ nextStep: Int) {
         return
     }
-
+    
+    func addWelcomeTasks() {
+        
+        var introTasks = [SavedTask]()
+        
+        let introTask2 = SavedTask()
+        introTask2.todayDisplayOrder = 0
+        introTask2.isToday = true
+        introTask2.title = "Done for today? Swipe right on me."
+        introTasks.append(introTask2)
+        
+        let introTask3 = SavedTask()
+        introTask3.todayDisplayOrder = 1
+        introTask3.isToday = true
+        introTask3.title = "The task goes back to All Tasks."
+        introTasks.append(introTask3)
+        
+        let introTask4 = SavedTask()
+        introTask4.todayDisplayOrder = 2
+        introTask4.isToday = true
+        introTask4.title = "And, a progress dot is added underneath it."
+        introTasks.append(introTask4)
+        
+        try! self.realm.write {
+            self.realm.add(introTasks)
+        }
+    }
 }
 
 

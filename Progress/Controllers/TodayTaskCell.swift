@@ -26,6 +26,13 @@ protocol CustomTodayTaskCellDelegate {
     
     //Indicates that user tried adding a deadline to empty cell
     func userTriedAddingDateToEmptyTask()
+    
+    
+    //Indicates user selected date picker
+    func cellPickerSelected(editingCell: TodayTaskCell)
+    
+    //Indicates user is done with date picker
+    func cellPickerDone(editingCell: TodayTaskCell)
 }
 
 
@@ -89,7 +96,8 @@ extension TodayTaskCell: BEMCheckBoxDelegate {
 extension TodayTaskCell {
     
     //calls custom delegate function to trigger action in TodayVC
-    @IBAction func dueDateBtnSelected(_ sender: UIButton) {
+    @IBAction func dueDateBtnSelected(_ sender: UIButton) {        
+        
         let newText = self.taskTitleLabel.text
         let trimmedText = newText?.trimmingCharacters(in: .whitespacesAndNewlines)
         if trimmedText?.isEmpty == true {
@@ -97,24 +105,22 @@ extension TodayTaskCell {
             return
         }
         
-        //self.pickerSelected  = true
-        Floaty.global.button.isHidden = true
-        let picker = DatePickerDialog(buttonColor: mainAppColor, font: UIFont(name: "HelveticaNeue-Bold", size: CGFloat(100))!)
+        let picker = DatePickerDialog(buttonColor: mainAppColor, font: UIFont(name: "HelveticaNeue-Bold", size: CGFloat(50))!)
         
         var defaultDate = Date()
         if self.dueDate != nil {
             defaultDate = self.dueDate!
         }
         
-        picker.show("Set Deadline", doneButtonTitle: "Done", cancelButtonTitle: "Remove", defaultDate: defaultDate, datePickerMode: .dateAndTime) {
+        self.customDelegate?.cellPickerSelected(editingCell: self)
+        picker.show( "Set Deadline", doneButtonTitle: "Done", cancelButtonTitle: "Remove",defaultDate: defaultDate, datePickerMode: .dateAndTime) {
             (date) -> Void in
             if date != nil {
                 self.customDelegate?.cellDueDateChanged(editingCell: self, date: date)
             } else {
                 self.customDelegate?.cellDueDateChanged(editingCell: self, date: nil)
             }
-            Floaty.global.button.isHidden = false
-            //self.pickerSelected  = false
+            self.customDelegate?.cellPickerDone(editingCell: self)
         }
     }
 }

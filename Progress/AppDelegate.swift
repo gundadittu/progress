@@ -30,6 +30,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         
         NotificationsController.scheduleMorningNotification() //Schedule anyways to change quote
         
+        
+        
         let ydBadgeBool = defaults.value(forKey: "yourDayBadgeCount")
         if ydBadgeBool == nil {
             defaults.set(true, forKey: "yourDayBadgeCount")
@@ -43,6 +45,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         let dtBadgeBool = defaults.value(forKey: "dueTodayBadgeCount")
         if dtBadgeBool == nil {
             defaults.set(true, forKey: "dueTodayBadgeCount")
+        }
+        
+        let inAppBool = defaults.value(forKey: "inAppNotifications")
+        if inAppBool == nil {
+            defaults.set(true, forKey: "inAppNotifications")
         }
         
         //set daily motivational notification to 9 AM
