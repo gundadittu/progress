@@ -18,6 +18,7 @@ class SavedTask: Object {
     @objc dynamic var isCompleted = false
     @objc dynamic var isToday = false
     @objc dynamic var displayOrder = 0
+    @objc dynamic var todayDisplayOrder = 0
     @objc dynamic var isNewTask = false
     @objc dynamic var notificationIdentifier = ""
 }

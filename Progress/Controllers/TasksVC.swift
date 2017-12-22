@@ -88,7 +88,8 @@ class TasksVC: UIViewController, FloatyDelegate  {
         if isTasksVCAlreadyLaunchedOnce() == false {
             self.addWelcomeTasks()
         }
-        self.fetchObjects()
+        
+        self.tasksList = self.fetchObjects()
         
         //Responds to changes in realm to rearrange tableview
         token = self.tasksList?.observe {[weak self] (changes: RealmCollectionChange) in
@@ -125,23 +126,11 @@ class TasksVC: UIViewController, FloatyDelegate  {
     }
     
     //fetches objects from realm
-    func fetchObjects(){
+    func fetchObjects() -> Results<SavedTask> {
         let isNotTodayPredicate = NSPredicate(format: "isToday == %@",  Bool(booleanLiteral: false) as CVarArg)
         let list = self.realm.objects(SavedTask.self).filter(isNotTodayPredicate)
-        let sortProperties = [SortDescriptor(keyPath: "isNewTask", ascending: false), SortDescriptor(keyPath: "isCompleted", ascending: true), SortDescriptor(keyPath: "displayOrder", ascending: true)]
-        self.tasksList = list.sorted(by: sortProperties)
-        self.updateArrayDisplayOrder(self.tasksList!)
-    }
-    
-    //assigns display order attribute to objects. Note: displayOrder attribute help save user defined order of tasks
-    func updateArrayDisplayOrder(_ array: Results<SavedTask>){
-        var i = 0
-        for ro in array {
-             i+=1
-            try! self.realm.write {
-                ro.displayOrder = i
-            }
-        }
+        let sortProperties = [/*SortDescriptor(keyPath: "isNewTask", ascending: false),*/ SortDescriptor(keyPath: "isCompleted", ascending: true), SortDescriptor(keyPath: "displayOrder", ascending: false)]
+        return list.sorted(by: sortProperties)
     }
     
     //Plus button tapped to create new task
@@ -159,11 +148,11 @@ class TasksVC: UIViewController, FloatyDelegate  {
         
         let newTask = SavedTask()
         newTask.isNewTask = true
-        newTask.displayOrder = 0
+        newTask.displayOrder = (tasksList?.count)!
         try! self.realm.write {
             self.realm.add(newTask)
         }
-        
+ 
         //if top of tableview is visible on screen, no need to execute code below that scrolls up
         let visibleCells = self.tableView.indexPathsForVisibleRows
         if visibleCells?.contains(IndexPath(row: 0, section: 0)) == true || visibleCells?.count == 0{
@@ -175,61 +164,6 @@ class TasksVC: UIViewController, FloatyDelegate  {
         let delayTime = DispatchTime.now() + .seconds(1) //delay needed due to some bug
         DispatchQueue.main.asyncAfter(deadline: delayTime) {
             self.tableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: true) //scrolls up to new task if top of table view is not visible when new task is created
-        }
-    }
-    
-    func isTasksVCAlreadyLaunchedOnce()->Bool{
-        if  defaults.string(forKey: "isTasksVCAlreadyLaunchedBefore") == nil{
-            defaults.set(true, forKey: "isTasksVCAlreadyLaunchedBefore")
-            return false
-        }
-        return true
-    }
-    
-    func addWelcomeTasks() {
-        
-        if let drawerVC = self.navigationController?.parent as? PulleyViewController {
-            drawerVC.initialDrawerPosition = .open
-        }
-        
-        var introTasks = [SavedTask]()
-        let introTask1 = SavedTask()
-        introTask1.displayOrder = 0
-        introTask1.title = "Tap the checkbox to complete me."
-        introTasks.append(introTask1)
-        
-        let introTask2 = SavedTask()
-        introTask2.displayOrder = 1
-        introTask2.title = "Swipe left to delete me."
-        introTasks.append(introTask2)
-        
-        let introTask3 = SavedTask()
-        introTask3.displayOrder = 2
-        introTask3.title = "Keep me pressed to pick me up."
-        introTasks.append(introTask3)
-        
-        let introTask4 = SavedTask()
-        introTask4.displayOrder = 3
-        introTask4.title = "Tap to edit my title and add a deadline."
-        introTasks.append(introTask4)
-        
-        let introTask5 = SavedTask()
-        introTask5.displayOrder = 4
-        introTask5.title = "Click on the plus to create a new task"
-        introTasks.append(introTask5)
-        
-        let introTask6 = SavedTask()
-        introTask6.displayOrder = 5
-        introTask6.title = "Swipe right to add me to Your Day."
-        introTasks.append(introTask6)
-        
-        let introTask7 = SavedTask()
-        introTask7.displayOrder = 6
-        introTask7.title = "Pull down to go to Your Day."
-        introTasks.append(introTask7)
-        
-        try! self.realm.write {
-            self.realm.add(introTasks)
         }
     }
 }
@@ -273,12 +207,12 @@ extension TasksVC: UITableViewDelegate, UITableViewDataSource, TableViewReorderD
         if sourceIndexPath.row < destinationIndexPath.row {
             for index in sourceIndexPath.row...destinationIndexPath.row {
                 let object = tasksList![index]
-                object.displayOrder -= 1
+                object.displayOrder += 1
             }
         } else {
             for index in (destinationIndexPath.row..<sourceIndexPath.row).reversed() {
                 let object = tasksList![index]
-                object.displayOrder += 1
+                object.displayOrder -= 1
             }
         }
         sourceObject.displayOrder = destinationObjectOrder
@@ -460,6 +394,14 @@ extension TasksVC: CustomTaskCellDelegate {
         
         if checked == true {
             
+            try! self.realm.write {
+                selectedTask.isCompleted = true
+            }
+            
+            if selectedTask.deadline != nil {
+                NotificationsController.removeNotifications(task: selectedTask)
+            }
+            
             let taskTitle = selectedTask.title
             let message = Message(title: "You completed \"\(taskTitle)\".", backgroundColor: FlatGreen())
             Whisper.show(whisper: message, to: self.navigationController!, action: .show)
@@ -469,24 +411,31 @@ extension TasksVC: CustomTaskCellDelegate {
                 "name": selectedTask.title as NSObject,
                 "full_text": "" as NSObject
                 ])
+        } else {
+            try! self.realm.write {
+                let list = self.fetchObjects()
+                
+                //move recently unchecked task to bottom of pending - make selected task displayOrder = 0 + move all other up 1
+                for task in list {
+                    if task != selectedTask && task.isCompleted == false {
+                        let original = task.displayOrder
+                        task.displayOrder = original + 1
+                    }
+                }
+                
+                selectedTask.displayOrder = 0
+                selectedTask.isCompleted = false
+            }
             
             if selectedTask.deadline != nil {
-                NotificationsController.removeNotifications(task: selectedTask)
+                NotificationsController.scheduleNotification(task: selectedTask)
             }
-        } else {
+            
             //log firebase analytics event
             Analytics.logEvent(taskUncheckedEvent, parameters: [
                 "name": selectedTask.title as NSObject,
                 "full_text": "" as NSObject
                 ])
-            
-            if selectedTask.deadline != nil {
-                NotificationsController.scheduleNotification(task: selectedTask)
-            }
-        }
-        
-        try! self.realm.write {
-            selectedTask.isCompleted = checked
         }
     }
     
@@ -573,20 +522,27 @@ extension TasksVC: CustomTaskCellDelegate {
             AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
         }
         
+        
+        let storyboard: UIStoryboard = UIStoryboard.init(name: "Main",bundle: nil)
+        let vc = storyboard.instantiateViewController(withIdentifier: "PrimaryContentViewController") as! TodayVC
+        let list = vc.fetchObjects()
+        let index = list.count
+        
         let selectedTask = (editingCell.taskObj)!
+        
+        //writes changes to database
+        try! self.realm.write {
+            selectedTask.isToday = true
+            selectedTask.todayDisplayOrder = index
+            //in case user tries to add completed task to today
+            selectedTask.isCompleted = false
+        }
         
         //log firebase analytics event
         Analytics.logEvent(addTaskToYourDayEvent, parameters: [
             "name": selectedTask.title as NSObject,
             "full_text": "" as NSObject
             ])
-        
-        //writes changes to database
-        try! self.realm.write {
-            selectedTask.isToday = true
-            //in case user tries to add completed task to today
-            selectedTask.isCompleted = false
-        }
     }
     
     func cellDidBeginEditing(editingCell: TaskCell) {
@@ -669,18 +625,90 @@ extension TasksVC: CustomTaskCellDelegate {
             //delete new task if user did not give it title or deletes existing task if user removed its title
             self.deleteTask(editingCell: editingCell)
         }
+            //animates cells back down
+            let visibleCells = tableView.visibleCells as! [TaskCell]
+            for cell: TaskCell in visibleCells {
+                UIView.animate(withDuration: 0.2, animations: { () -> Void in
+                    cell.transform = CGAffineTransform.identity
+                    if cell != editingCell {
+                        cell.dueDateBtn.isEnabled = true //diabled before so user can not trigger date picker of another cell
+                        cell.alpha = 1.0
+                    }
+                }, completion: { (Finished: Bool) -> Void in return })
+        }
+    }
+    
+    func cellPickerSelected(editingCell: TaskCell) {
+        /*
+        //Makes sure you cannot edit cell if it is completed or mid-swipe
+        if editingCell.taskObj?.isCompleted == true || editingCell.swipeOffset > 0 {
+            return
+        }
+        
+        Floaty.global.button.isHidden = true
+
+        //Updates currently being edited information
+        self.currentlySelectedCell = editingCell
+        
+        //Brings drawer up if it is not already up + Makes sure user can not move drawer while editing.
+        if let drawerVC = self.navigationController?.parent as? PulleyViewController {
+            drawerVC.setDrawerPosition(position: .open, animated: true)
+            drawerVC.allowsUserDrawerPositionChange = false
+        }
+        
+        //makes due date button visible so user can choose deadline
+        editingCell.dueDateBtn.isHidden = false
+        
+        editingCell.contentView.backgroundColor = FlatPurple()
+        
+        //animate cells up
+        //let editingOffset = self.tableView.contentOffset.y - editingCell.frame.origin.y as CGFloat
+        let visibleCells = self.tableView.visibleCells as! [TaskCell]
+        for cell in visibleCells {
+            //animate cells up so that edited cell is at top of tableview
+            //UIView.animate(withDuration: 0.3, animations: { () -> Void in
+               // cell.transform = CGAffineTransform(translationX: 0, y: editingOffset)
+                if cell == editingCell {
+                    //cell.dueDateBtn.isEnabled = false //so user can not trigger date picker of another cell
+                    cell.alpha = 0.1 //gray out any cells that aren't being edited
+                }
+            //})
+        }
+         */
+        return 
+    }
+    
+    func cellPickerDone(editingCell: TaskCell) {
+        /*
+        //Allows user to now more drawer again
+        if let drawerVC = self.navigationController?.parent as? PulleyViewController {
+            drawerVC.allowsUserDrawerPositionChange = true
+        }
+        
+        //self.currentlySelectedCell might be another cell that the user clicked on, which caused this cell to resign and end editing
+        if self.currentlySelectedCell == editingCell{
+            self.currentlySelectedCell = nil
+        }
+        
+        Floaty.global.button.isHidden = false
+        
+        //hides due date btn if there is no assigned deadline
+        if editingCell.dueDate == nil {
+            editingCell.dueDateBtn.isHidden = true
+        }
         
         //animates cells back down
         let visibleCells = tableView.visibleCells as! [TaskCell]
         for cell: TaskCell in visibleCells {
-            UIView.animate(withDuration: 0.2, animations: { () -> Void in
-                cell.transform = CGAffineTransform.identity
+         //   UIView.animate(withDuration: 0.2, animations: { () -> Void in
+           //     cell.transform = CGAffineTransform.identity
                 if cell != editingCell {
-                    cell.dueDateBtn.isEnabled = true //diabled before so user can not trigger date picker of another cell
+                   // cell.dueDateBtn.isEnabled = true //diabled before so user can not trigger date picker of another cell
                     cell.alpha = 1.0
                 }
-            }, completion: { (Finished: Bool) -> Void in return })
-        }
+          //  }, completion: { (Finished: Bool) -> Void in return })
+        }*/
+        return
     }
 }
 
@@ -712,11 +740,6 @@ extension TasksVC: MGSwipeTableCellDelegate {
                 NotificationsController.requestPermission()
             }
         }
-        
-       /* if modifiedCell.isBeingEdited == true {
-            modifiedCell.taskTitleLabel.resignFirstResponder()
-        }*/
-        
         return true
     }
 }
@@ -742,6 +765,63 @@ extension TasksVC: DZNEmptyDataSetSource, DZNEmptyDataSetDelegate {
     
     func verticalOffset(forEmptyDataSet scrollView: UIScrollView!) -> CGFloat {
         return -((self.navigationController?.navigationBar.frame.size.height)!/2.0)
+    }
+}
+
+extension TasksVC {
+    func isTasksVCAlreadyLaunchedOnce()->Bool{
+        if  defaults.string(forKey: "isTasksVCAlreadyLaunchedBefore") == nil{
+            defaults.set(true, forKey: "isTasksVCAlreadyLaunchedBefore")
+            return false
+        }
+        return true
+    }
+    
+    func addWelcomeTasks() {
+        
+        if let drawerVC = self.navigationController?.parent as? PulleyViewController {
+            drawerVC.initialDrawerPosition = .open
+        }
+        
+        var introTasks = [SavedTask]()
+        let introTask1 = SavedTask()
+        introTask1.displayOrder = 6
+        introTask1.title = "Tap the checkbox to complete me."
+        introTasks.append(introTask1)
+        
+        let introTask2 = SavedTask()
+        introTask2.displayOrder = 5
+        introTask2.title = "Swipe left to delete me."
+        introTasks.append(introTask2)
+        
+        let introTask3 = SavedTask()
+        introTask3.displayOrder = 4
+        introTask3.title = "Keep me pressed to pick me up."
+        introTasks.append(introTask3)
+        
+        let introTask4 = SavedTask()
+        introTask4.displayOrder = 3
+        introTask4.title = "Tap to edit my title and add a deadline."
+        introTasks.append(introTask4)
+        
+        let introTask5 = SavedTask()
+        introTask5.displayOrder = 2
+        introTask5.title = "Click on the plus to create a new task"
+        introTasks.append(introTask5)
+        
+        let introTask6 = SavedTask()
+        introTask6.displayOrder = 1
+        introTask6.title = "Swipe right to work on me today."
+        introTasks.append(introTask6)
+        
+        let introTask7 = SavedTask()
+        introTask7.displayOrder = 0
+        introTask7.title = "Pull down to go to Your Day."
+        introTasks.append(introTask7)
+        
+        try! self.realm.write {
+            self.realm.add(introTasks)
+        }
     }
 }
 

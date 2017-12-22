@@ -68,7 +68,7 @@ class TodayVC: UIViewController, TableViewReorderDelegate {
         if isTodayVCAlreadyLaunchedOnce() == false {
             self.addWelcomeTasks()
         }
-        self.fetchObjects()
+        self.tasksList = self.fetchObjects()
         
         //Responds to changes in realm to rearrange tableview
         token = self.tasksList?.observe {[weak self] (changes: RealmCollectionChange) in
@@ -102,26 +102,14 @@ class TodayVC: UIViewController, TableViewReorderDelegate {
         }
     }
     //fetches objects from realm
-    func fetchObjects(){
+    func fetchObjects() -> Results<SavedTask> {
         let isTodayPredicate = NSPredicate(format: "isToday == %@",  Bool(booleanLiteral: true) as CVarArg)
         let isNotCompletedPredicate = NSPredicate(format: "isCompleted == %@",  Bool(booleanLiteral: false) as CVarArg)
         //only fetches objects with isToday tasks and not completed
         let andPredicate = NSCompoundPredicate(type: NSCompoundPredicate.LogicalType.and, subpredicates: [isTodayPredicate, isNotCompletedPredicate])
         let list = self.realm.objects(SavedTask.self).filter(andPredicate)
         //sorts lust by displayOrder attribute
-        self.tasksList = list.sorted(byKeyPath: "displayOrder", ascending: true)
-        self.updateArrayDisplayOrder(self.tasksList!)
-    }
-
-    //assigns display order attribute to objects. Note: displayOrder attribute help save user defined order of tasks
-    func updateArrayDisplayOrder(_ array: Results<SavedTask>){
-        var i = 0
-        for ro in array {
-            i+=1
-            try! self.realm.write {
-                ro.displayOrder = i
-            }
-        }
+        return list.sorted(byKeyPath: "todayDisplayOrder", ascending: true)
     }
     
     func isTodayVCAlreadyLaunchedOnce()->Bool{
@@ -137,28 +125,22 @@ class TodayVC: UIViewController, TableViewReorderDelegate {
         var introTasks = [SavedTask]()
         
         let introTask2 = SavedTask()
-        introTask2.displayOrder = 1
+        introTask2.todayDisplayOrder = 1
         introTask2.isToday = true
         introTask2.title = "Done for today? Swipe right on me."
         introTasks.append(introTask2)
         
         let introTask3 = SavedTask()
-        introTask3.displayOrder = 2
+        introTask3.todayDisplayOrder = 2
         introTask3.isToday = true
         introTask3.title = "The task goes back to All Tasks."
         introTasks.append(introTask3)
         
         let introTask4 = SavedTask()
-        introTask4.displayOrder = 3
+        introTask4.todayDisplayOrder = 3
         introTask4.isToday = true
-        introTask4.title = "A progress dot is added underneath it."
+        introTask4.title = "And, a progress dot is added underneath it."
         introTasks.append(introTask4)
-        
-        let introTask6 = SavedTask()
-        introTask6.displayOrder = 5
-        introTask6.isToday = true
-        introTask6.title = "Tip: Delete all these instructional tasks easily in settings."
-        introTasks.append(introTask6)
         
         try! self.realm.write {
             self.realm.add(introTasks)
@@ -493,16 +475,24 @@ extension TodayVC: CustomTodayTaskCellDelegate {
     func removeTaskfromToday(editingCell: TodayTaskCell){
         let selectedTask = (editingCell.taskObj)!
         
+        //place at top of all tasks
+        let storyboard: UIStoryboard = UIStoryboard.init(name: "Main",bundle: nil)
+        let vc = storyboard.instantiateViewController(withIdentifier: "DrawerContentViewController") as! TasksVC
+        let list = vc.fetchObjects()
+        let index = list.count
+        
+        //update database
+        try! self.realm.write {
+            selectedTask.displayOrder = index
+            selectedTask.isToday = false
+        }
+        
         //log firebase analytics event
         Analytics.logEvent(removeTaskFromTodayEvent, parameters: [
             "name": selectedTask.title as NSObject,
             "full_text": "" as NSObject
             ])
         
-        //update database
-        try! self.realm.write {
-            selectedTask.isToday = false
-        }
     }
     
     func incrementTaskPoint(editingCell: TodayTaskCell){
@@ -526,6 +516,27 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         
         let selectedTask = (editingCell.taskObj)!
         
+        try! self.realm.write {
+            
+            let storyboard: UIStoryboard = UIStoryboard.init(name: "Main",bundle: nil)
+            let vc = storyboard.instantiateViewController(withIdentifier: "DrawerContentViewController") as! TasksVC
+            let list = vc.fetchObjects()
+            
+            //move recently unchecked task to bottom of pending - make selected task displayOrder = 0 + move all other up 1
+            for task in list {
+                if task != selectedTask && task.isCompleted == false {
+                    let original = task.displayOrder
+                    task.displayOrder = original + 1
+                }
+            }
+            
+            selectedTask.displayOrder = 0
+            selectedTask.isToday = false
+        }
+        
+
+    
+        
         let taskTitle = selectedTask.title
         let message = Message(title: "You made progress on \"\(taskTitle)\".", backgroundColor: FlatPurple())
         Whisper.show(whisper: message, to: self.navigationController!, action: .show)
@@ -535,15 +546,10 @@ extension TodayVC: CustomTodayTaskCellDelegate {
             "name": selectedTask.title as NSObject,
             "full_text": "" as NSObject
             ])
-        
-        //update database
-        try! self.realm.write {
-            selectedTask.isToday = false
-        }        
     }
 
     func cellDidBeginEditing(editingCell: TodayTaskCell) {
-        
+        /*
         ///Stop editing if task is completed or is mid-swipe
         if editingCell.taskObj?.isCompleted == true || editingCell.swipeOffset > 0 {
             return
@@ -568,11 +574,12 @@ extension TodayVC: CustomTodayTaskCellDelegate {
                     cell.alpha = 0.3
                 }
             })
-        }
+        }*/
+        return
     }
     
     func cellDidEndEditing(editingCell: TodayTaskCell) {
-
+        /*
         //self.currentlySelectedCell might be another cell that the user clicked on, which caused this cell to resign and end editing
         if self.currentlySelectedCell == editingCell{
             self.currentlySelectedCell = nil
@@ -605,7 +612,8 @@ extension TodayVC: CustomTodayTaskCellDelegate {
                     cell.alpha = 1.0
                 }
             }, completion: { (Finished: Bool) -> Void in return })
-        }
+        }*/
+        return 
     }
 }
 
@@ -659,7 +667,7 @@ extension TodayVC: DZNEmptyDataSetSource, DZNEmptyDataSetDelegate {
     }
     
     func description(forEmptyDataSet scrollView: UIScrollView!) -> NSAttributedString! {
-        let returnString = "You have no tasks left for today!"
+        let returnString = "Looks like you have no tasks left for today."
         let attrs = [NSAttributedStringKey.font: UIFont.preferredFont(forTextStyle: UIFontTextStyle.headline)]
         return NSAttributedString(string: returnString, attributes: attrs)
     }
@@ -669,27 +677,28 @@ extension TodayVC: DZNEmptyDataSetSource, DZNEmptyDataSetDelegate {
     }
 }
 
-extension TodayVC {
+extension TodayVC : AlertOnboardingDelegate {
+
     
     override func viewDidAppear(_ animated: Bool) {
         if self.isAppAlreadyLaunchedOnce() == false {
+            Floaty.global.button.isHidden = true
             self.loadOnboarding() //load app introduction walkthrough if first time launching app
         }
     }
     
     func loadOnboarding(){
-        
         //First, declare datas
-        let arrayOfImage = ["1","2","3"]
-        let arrayOfTitle = ["CREATE ACCOUNT", "CHOOSE THE PLANET", "DEPARTURE"]
-        let arrayOfDescription = ["In your profile, you can view the statistics of its operations and the recommandations of friends",
-                                  "Purchase tickets on hot tours to your favorite planet and fly to the most comfortable intergalactic spaceships of best companies",
-                                  "In the process of flight you will be in cryogenic sleep and supply the body with all the necessary things for life"]
+        let arrayOfImage = ["purpleBox","pie-chart","funnel"]
+        let arrayOfTitle = ["Welcome to Progress", "SPLIT UP YOUR TASKS", "SIMPLE AND FOCUSED"]
+        let arrayOfDescription = ["A simple to-do list that helps you reach your goals one step at a time. \n \n Swipe left to learn more",
+                                  "The best work isn’t done overnight. Unlike other to-do lists, Progress understands this and helps you feel rewarded each time you work  towards your goal.",
+                                  "Say bye to all the distractions. Most to-do lists are cluttered with features. Progress keeps it simple, so the focus is always on reaching your goals."]
         //Simply call AlertOnboarding...
         let alertView = AlertOnboarding(arrayOfImage: arrayOfImage, arrayOfTitle: arrayOfTitle, arrayOfDescription: arrayOfDescription)
         
         //Modify background color of AlertOnboarding
-        alertView.colorForAlertViewBackground = UIColor.white //UIColor(red: 173/255, green: 206/255, blue: 183/255, alpha: 1.0)
+        alertView.colorForAlertViewBackground = UIColor.white 
         
         //Modify colors of AlertOnboarding's button
         alertView.colorButtonText = UIColor.white
@@ -709,7 +718,10 @@ extension TodayVC {
         
         //Modify labels
         alertView.titleSkipButton = "SKIP"
-        alertView.titleGotItButton = "GET STARTED!"
+        alertView.titleGotItButton = "GET STARTED"
+        
+        //Set delegate
+        alertView.delegate = self
         
         //... and show it !
         alertView.show()
@@ -722,6 +734,23 @@ extension TodayVC {
         }
         return true
     }
+    
+    func alertOnboardingSkipped(_ currentStep: Int, maxStep: Int) {
+        if self == UIApplication.topViewController() {
+            Floaty.global.button.isHidden = false
+        }
+    }
+    
+    func alertOnboardingCompleted() {
+        if self == UIApplication.topViewController() {
+            Floaty.global.button.isHidden = false 
+        }
+    }
+    
+    func alertOnboardingNext(_ nextStep: Int) {
+        return
+    }
+
 }
 
 

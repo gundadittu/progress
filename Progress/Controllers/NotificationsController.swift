@@ -85,7 +85,7 @@ class NotificationsController  {
                 let count = defaults.value(forKey: "notificationRequestCount") as! Int
                 let newCount = count + 1
                 defaults.setValue(newCount, forKey: "notificationRequestCount")
-                if newCount%5 != 3 {
+                if newCount%3 != 2 {
                     return
                 }
             }
@@ -97,7 +97,7 @@ class NotificationsController  {
                 DispatchQueue.main.async {
                     
                     let alertController = CFAlertViewController(title: "👋 We need your permission to send you notifications! ",
-                                                                message: "Nothing annoying. Just so we can remind you in the morning to get Your Day started, place an app badge count of tasks left under Your Day, and remind you of tasks due today.",
+                                                                message: "Nothing annoying. Just so we can place a badge count, and remind you to plan your day and of deadlines. \n \n Even after you give us permission, you have control over which notification we can send you in settings.",
                                                                 textAlignment: .left,
                                                                 preferredStyle: .alert,
                                                                 didDismissAlertHandler: nil)
@@ -161,22 +161,11 @@ class NotificationsController  {
         
         guard let dailyNotificationsTime = self.defaults.value(forKey: "dailyNotificationTime") else { return }
         
-        let parameters: [String : Any] = ["method": "getQuote", "format" : "json", "key" : 4, "lang" : "en"]
-        Alamofire.request(quotesAPIURL, parameters: parameters).responseJSON { (response) in
-            switch response.result {
-            case .success(let value):
-                let json = JSON(value).dictionaryObject!
-                let quote = json["quoteText"] as! String
-                let author = json["quoteAuthor"] as! String
-                body = "\(String(describing: quote))"
-                if author != "" {
-                    body += "- \(String(describing: author))"
-                }
-                break
-            case .failure(let error):
-                print(error.localizedDescription)
-                break
+        randomQuote { quote in
+            if quote != nil {
+                body = quote!
             }
+            
             let string = dailyNotificationsTime as! String
             let formatter = DateFormatter()
             formatter.dateStyle = .none
@@ -196,8 +185,30 @@ class NotificationsController  {
             let n = UNNotificationRequest(identifier: category, content: content, trigger: trigger)
             
             self.center.add(n)
+            
         }
+    }
     
+    static func randomQuote(completion: @escaping (String?) -> Void) {
+        let parameters: [String : Any] = ["method": "getQuote", "format" : "json", "key" : 4, "lang" : "en"]
+        Alamofire.request(quotesAPIURL, parameters: parameters).responseJSON { (response) in
+            switch response.result {
+            case .success(let value):
+                let json = JSON(value).dictionaryObject!
+                let quote = json["quoteText"] as! String
+                let author = json["quoteAuthor"] as! String
+                var body = "\(String(describing: quote))"
+                if author != "" {
+                    body += "- \(String(describing: author))"
+                }
+                completion(body)
+                break
+            case .failure(let error):
+                Crashlytics.sharedInstance().recordError(error) //log crashlytics error
+                completion(nil)
+                break
+            }
+        }
     }
 }
 

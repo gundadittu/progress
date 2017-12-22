@@ -202,22 +202,27 @@ class SettingsTVC: UITableViewController {
     }
     
     @IBAction func dailyNotificationTimeBtnTapped(_ sender: Any) {
+        var defaultDate = Date()
+        let formatter = DateFormatter()
+        formatter.dateStyle = .none
+        formatter.timeStyle = .short
         
+        if let dailyNotificationsTime = defaults.value(forKey: "dailyNotificationTime"){
+            let string = dailyNotificationsTime as! String
+            if string != "" {
+                defaultDate = (formatter.date(from: string))!
+            }
+        }
         let picker = DatePickerDialog(buttonColor: mainAppColor, font: UIFont(name: "HelveticaNeue-Medium", size: CGFloat(50))!)
-        picker.show("Set Deadline", doneButtonTitle: "Done", cancelButtonTitle: "Remove", defaultDate: Date(), datePickerMode: .time) {
+        picker.show("Daily Notification Time", doneButtonTitle: "Done", cancelButtonTitle: "Remove", defaultDate: defaultDate, datePickerMode: .time) {
             (date) -> Void in
             if date != nil {
                 
-                let formatter = DateFormatter()
                 let formattedDate = formatter.string(from: date!)
-                let formatter2 = DateFormatter()
-                formatter2.dateStyle = .none
-                formatter2.timeStyle = .short
-                let formattedDate2 = formatter2.string(from: date!)
                 
                 
                 self.defaults.setValue(formattedDate, forKey: "dailyNotificationTime")
-                self.dailyNotificationTimeBtn.setTitle(formattedDate2, for: .normal)
+                self.dailyNotificationTimeBtn.setTitle(formattedDate, for: .normal)
                 
                 NotificationsController.scheduleMorningNotification()
                 

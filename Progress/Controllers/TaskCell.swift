@@ -29,6 +29,12 @@ protocol CustomTaskCellDelegate {
     
     //Indicates that user tried adding a deadline to empty cell
     func userTriedAddingDateToEmptyTask()
+    
+    //Indicates user selected date picker
+    func cellPickerSelected(editingCell: TaskCell)
+    
+    //Indicates user is done with date picker
+    func cellPickerDone(editingCell: TaskCell)
 }
 
 
@@ -88,30 +94,35 @@ extension TaskCell {
     
     @IBAction func dueDateBtnSelected(_ sender: UIButton) {
         
-        let newText = self.taskTitleLabel.text
-        let trimmedText = newText?.trimmingCharacters(in: .whitespacesAndNewlines)
-        if trimmedText?.isEmpty == true {
-            self.customDelegate?.userTriedAddingDateToEmptyTask()
-            return
-        }
-        
-        Floaty.global.button.isHidden = true
-        let picker = DatePickerDialog(buttonColor: mainAppColor, font: UIFont(name: "HelveticaNeue-Bold", size: CGFloat(100))!)
-        
-        var defaultDate = Date()
-        if self.dueDate != nil {
-            defaultDate = self.dueDate!
-        }
-        
-        picker.show("Set Deadline", doneButtonTitle: "Done", cancelButtonTitle: "Remove", defaultDate: defaultDate, datePickerMode: .dateAndTime) {
-            (date) -> Void in
-            if date != nil {
-                self.customDelegate?.cellDueDateChanged(editingCell: self, date: date)
-            } else {
-                self.customDelegate?.cellDueDateChanged(editingCell: self, date: nil)
+        //let delayTime = DispatchTime.now() +  .seconds(1)
+        //DispatchQueue.main.asyncAfter(deadline: delayTime) {
+            
+            
+            let newText = self.taskTitleLabel.text
+            let trimmedText = newText?.trimmingCharacters(in: .whitespacesAndNewlines)
+            if trimmedText?.isEmpty == true {
+                self.customDelegate?.userTriedAddingDateToEmptyTask()
+                return
             }
-            Floaty.global.button.isHidden = false
-        }
+        
+            let picker = DatePickerDialog(buttonColor: mainAppColor, font: UIFont(name: "HelveticaNeue-Bold", size: CGFloat(50))!)
+            
+            var defaultDate = Date()
+            if self.dueDate != nil {
+                defaultDate = self.dueDate!
+            }
+            
+            self.customDelegate?.cellPickerSelected(editingCell: self)
+            picker.show( "Set Deadline", doneButtonTitle: "Done", cancelButtonTitle: "Remove",defaultDate: defaultDate, datePickerMode: .dateAndTime) {
+                (date) -> Void in
+                if date != nil {
+                    self.customDelegate?.cellDueDateChanged(editingCell: self, date: date)
+                } else {
+                    self.customDelegate?.cellDueDateChanged(editingCell: self, date: nil)
+                }
+                self.customDelegate?.cellPickerDone(editingCell: self)
+            }
+       // }
     }
 }
 
