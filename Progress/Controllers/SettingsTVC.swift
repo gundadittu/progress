@@ -91,6 +91,9 @@ class SettingsTVC: UITableViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         Floaty.global.button.isHidden = false
+        if let drawerVC = self.navigationController?.parent as? PulleyViewController {
+            drawerVC.setDrawerPosition(position: .collapsed, animated: true)
+        }
     }
     
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {

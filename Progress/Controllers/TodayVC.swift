@@ -707,10 +707,10 @@ extension TodayVC : AlertOnboardingDelegate {
     func loadOnboarding(){
         //First, declare datas
         let arrayOfImage = ["purpleBox","stones","meditation"]
-        let arrayOfTitle = ["Welcome to Progress", "SPLIT UP YOUR TASKS", "SIMPLE AND FOCUSED"]
+        let arrayOfTitle = ["Welcome to Progress", "TRACK YOUR PROGRESS", "SIMPLE AND FOCUSED"]
         let arrayOfDescription = ["A simple to-do list that encourages you to reach your goals gradually. \n \n Swipe left to learn more",
-                                  "The best work isn’t done overnight. Progress understands this and helps you feel rewarded each time you work towards your goal.",
-                                  "Say bye to all the distractions. Unlike other to-do lists cluttered with features, Progress' simplicity lets you focus on reaching your goals."]
+                                  "The best work isn’t done overnight. Progress understands this and helps you feel accomplished each time you work on your task.",
+                                  "Say bye to all the distractions. Unlike other to-do lists cluttered with features, Progress' simplicity lets you focus on completing your tasks."]
         //Simply call AlertOnboarding...
         let alertView = AlertOnboarding(arrayOfImage: arrayOfImage, arrayOfTitle: arrayOfTitle, arrayOfDescription: arrayOfDescription)
         
@@ -736,7 +736,7 @@ extension TodayVC : AlertOnboardingDelegate {
         
         //Modify labels
         alertView.titleSkipButton = "SKIP"
-        alertView.titleGotItButton = "STEP INSIDE"
+        alertView.titleGotItButton = "GET STARTED"
         
         //Set delegate
         alertView.delegate = self
