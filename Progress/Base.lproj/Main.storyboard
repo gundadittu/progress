@@ -18,7 +18,7 @@
         <!--Pulley View Controller-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <viewController id="BYZ-38-t0r" customClass="PulleyViewController" customModule="Pulley" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="pulleyVC" id="BYZ-38-t0r" customClass="PulleyViewController" customModule="Pulley" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -27,14 +27,14 @@
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="326"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                 <connections>
-                                    <segue destination="qgT-JD-RDl" kind="embed" id="VLn-kN-5iM"/>
+                                    <segue destination="1n4-cu-m8r" kind="embed" id="gkF-x9-pJh"/>
                                 </connections>
                             </containerView>
                             <containerView opaque="NO" contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="bg4-uc-BHh">
                                 <rect key="frame" x="0.0" y="324" width="375" height="343"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                 <connections>
-                                    <segue destination="UUa-Vb-H7J" kind="embed" id="VAV-Ld-7ua"/>
+                                    <segue destination="UUa-Vb-H7J" kind="embed" id="13N-Jf-pZQ"/>
                                 </connections>
                             </containerView>
                         </subviews>
@@ -156,20 +156,20 @@
             <point key="canvasLocation" x="1642.4000000000001" y="437.63118440779613"/>
         </scene>
         <!--Navigation Controller-->
-        <scene sceneID="9io-1A-Y1R">
+        <scene sceneID="ArM-jG-p8G">
             <objects>
-                <navigationController id="qgT-JD-RDl" sceneMemberID="viewController">
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" largeTitles="YES" id="Qi4-ZI-mCM">
+                <navigationController id="1n4-cu-m8r" sceneMemberID="viewController">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="PgG-Vq-DmE">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <connections>
-                        <segue destination="TLJ-mf-QcS" kind="relationship" relationship="rootViewController" id="bnP-uC-IQ7"/>
+                        <segue destination="TLJ-mf-QcS" kind="relationship" relationship="rootViewController" id="HOR-Wo-eBj"/>
                     </connections>
                 </navigationController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="3GE-ez-zAa" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="7BY-36-HUw" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="911" y="-20"/>
+            <point key="canvasLocation" x="959" y="-120"/>
         </scene>
         <!--TodayVC-->
         <scene sceneID="ppy-zp-6sa">
@@ -270,7 +270,7 @@
                         <barButtonItem key="rightBarButtonItem" image="settings" style="done" id="Xc0-DW-hbP">
                             <color key="tintColor" red="0.68888300660000001" green="0.71366006140000005" blue="0.73448425530000006" alpha="1" colorSpace="calibratedRGB"/>
                             <connections>
-                                <segue destination="XsR-mW-Fh0" kind="show" id="dTd-wi-sGN"/>
+                                <segue destination="XsR-mW-Fh0" kind="show" id="Bnq-BT-4Fb"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
@@ -280,7 +280,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="q7T-AY-JDn" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1644" y="-20"/>
+            <point key="canvasLocation" x="1692" y="-60"/>
         </scene>
         <!--SettingsTVC-->
         <scene sceneID="kay-8h-xhf">
@@ -477,7 +477,6 @@
                                                             <color key="onTintColor" red="0.3707177639" green="0.25714370609999998" blue="0.75468015669999999" alpha="1" colorSpace="calibratedRGB"/>
                                                             <connections>
                                                                 <action selector="dueTodayBadgeCountSwitchToggled:" destination="XsR-mW-Fh0" eventType="valueChanged" id="jjs-q0-hgB"/>
-                                                                <action selector="hapticFeedbackSwitchToggled:" destination="XsR-mW-Fh0" eventType="valueChanged" id="Enj-gY-RA5"/>
                                                             </connections>
                                                         </switch>
                                                     </subviews>
@@ -511,8 +510,6 @@
                                                             <rect key="frame" x="296" y="13.5" width="51" height="31"/>
                                                             <color key="onTintColor" red="0.3707177639" green="0.25714370609999998" blue="0.75468015669999999" alpha="1" colorSpace="calibratedRGB"/>
                                                             <connections>
-                                                                <action selector="dueTodayBadgeCountSwitchToggled:" destination="XsR-mW-Fh0" eventType="valueChanged" id="llZ-hn-09Q"/>
-                                                                <action selector="hapticFeedbackSwitchToggled:" destination="XsR-mW-Fh0" eventType="valueChanged" id="HpS-uC-LNE"/>
                                                                 <action selector="inAppNotificationSwitchToggled:" destination="XsR-mW-Fh0" eventType="valueChanged" id="TsH-AM-XEE"/>
                                                             </connections>
                                                         </switch>
@@ -719,7 +716,7 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ZN2-ay-mJ1" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2469.5999999999999" y="-20.689655172413794"/>
+            <point key="canvasLocation" x="2487" y="-60"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="hxW-4C-e3F">

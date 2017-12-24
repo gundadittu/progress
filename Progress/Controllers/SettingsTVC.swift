@@ -49,6 +49,8 @@ class SettingsTVC: UITableViewController {
             }
             if status == .notDetermined {
                 self.canAskForAccess = true
+            } else {
+                self.canAskForAccess = false
             }
         })
         
@@ -88,17 +90,7 @@ class SettingsTVC: UITableViewController {
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        Floaty.global.button.isHidden = true
-        if let drawerVC = self.navigationController?.parent as? PulleyViewController {
-            drawerVC.setDrawerPosition(position: .closed, animated: true)
-        }
-    }
-    
-    override func viewWillDisappear(_ animated: Bool) {
         Floaty.global.button.isHidden = false
-        if let drawerVC = self.navigationController?.parent as? PulleyViewController {
-            drawerVC.setDrawerPosition(position: .collapsed, animated: true)
-        }
     }
     
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -325,9 +317,6 @@ class SettingsTVC: UITableViewController {
         self.present(alertController, animated: true) {
             //Causes view to disappear and thus makes both show, need to courteract this
             Floaty.global.button.isHidden = true
-            if let drawerVC = self.navigationController?.parent as? PulleyViewController {
-                drawerVC.setDrawerPosition(position: .closed, animated: true)
-            }
         }
     }
     
@@ -367,9 +356,6 @@ class SettingsTVC: UITableViewController {
         self.present(alertController, animated: true) {
             //Causes view to disappear and thus makes both show, need to courteract this
             Floaty.global.button.isHidden = true
-            if let drawerVC = self.navigationController?.parent as? PulleyViewController {
-                drawerVC.setDrawerPosition(position: .closed, animated: true)
-            }
         }
     }
     
@@ -433,9 +419,6 @@ class SettingsTVC: UITableViewController {
         self.present(alertController, animated: true) {
             //Causes view to disappear and thus makes both show, need to courteract this
             Floaty.global.button.isHidden = true
-            if let drawerVC = self.navigationController?.parent as? PulleyViewController {
-                drawerVC.setDrawerPosition(position: .closed, animated: true)
-            }
         }
     }
     
@@ -445,20 +428,19 @@ class SettingsTVC: UITableViewController {
                                                     textAlignment: .left,
                                                     preferredStyle: .alert,
                                                     didDismissAlertHandler: nil)
-        let gotitAction = CFAlertAction(title: "Got It",
+        
+        let settingsAction = CFAlertAction(title: "Settings",
                                         style: .Default,
-                                        alignment: .right,
+                                        alignment: .justified,
                                         backgroundColor: FlatGreen(),
                                         textColor: nil,
-                                        handler: nil)
-        alertController.addAction(gotitAction)
+                                        handler: { (action) in UIApplication.shared.open(URL(string:UIApplicationOpenSettingsURLString)!) })
+        
+        alertController.addAction(settingsAction)
         
         self.present(alertController, animated: true) {
             //Causes view to disappear and thus makes both show, need to courteract this
             Floaty.global.button.isHidden = true
-            if let drawerVC = self.navigationController?.parent as? PulleyViewController {
-                drawerVC.setDrawerPosition(position: .closed, animated: true)
-            }
         }
     }
 }

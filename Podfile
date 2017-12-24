@@ -24,7 +24,8 @@ pod 'CFAlertViewController'
 pod 'Alamofire'
 pod 'SwiftyJSON'
 pod 'DatePickerDialog'
-pod 'Whisper'
+pod 'GSMessages'
 pod 'AlertOnboarding'
+pod 'RMDateSelectionViewController', '~> 2.3.1'
 
 end

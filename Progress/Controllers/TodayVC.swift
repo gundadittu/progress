@@ -22,10 +22,11 @@ import AudioToolbox
 import Firebase
 import Alamofire
 import SwiftyJSON
-import Whisper
 import AlertOnboarding
+import CFAlertViewController
+import GSMessages
 
-class TodayVC: UIViewController, TableViewReorderDelegate {
+class TodayVC: UIViewController {
 
     
     @IBOutlet weak var tableView: UITableView!
@@ -40,14 +41,14 @@ class TodayVC: UIViewController, TableViewReorderDelegate {
     let defaults = UserDefaults.standard
     
     override func viewWillAppear(_ animated: Bool) {
-        self.tableView.contentInset = UIEdgeInsetsMake(0, 0, 0, 0)
+        Floaty.global.button.isHidden = false
     }
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         self.title = "Your Day"
         self.navigationController?.navigationBar.prefersLargeTitles = true
-          
+    
         //table View Properties
         self.tableView.delegate = self
         self.tableView.dataSource = self
@@ -64,10 +65,14 @@ class TodayVC: UIViewController, TableViewReorderDelegate {
         self.tableView.reorder.shadowOpacity = 0.3
         self.tableView.reorder.shadowRadius = 20
         
+        GSMessage.font =  UIFont(name: "HelveticaNeue", size: CGFloat(12))!
+        GSMessage.successBackgroundColor = UIColor.flatGreen
+        GSMessage.warningBackgroundColor = UIColor.flatRed
+        GSMessage.errorBackgroundColor   = UIColor.flatRed
+        GSMessage.infoBackgroundColor    = UIColor.flatPurple
+        NotificationCenter.default.addObserver(self, selector: #selector(self.showAlertToSwipeRight), name: Notification.Name("triggerTodayVCSwipeAlert"), object: nil)
+        
         //Fetch data from database
-        if isTodayVCAlreadyLaunchedOnce() == false {
-            self.addWelcomeTasks()
-        }
         self.tasksList = self.fetchObjects()
         
         //Responds to changes in realm to rearrange tableview
@@ -83,7 +88,7 @@ class TodayVC: UIViewController, TableViewReorderDelegate {
                 tableView.beginUpdates()
                 
                 tableView.insertRows(at: insertions.map { IndexPath(row: $0, section: 0) },
-                                     with: .left)
+                                     with: .right)
                 tableView.deleteRows(at: deletions.map { IndexPath(row: $0, section: 0) },
                                      with: .left)
 
@@ -101,6 +106,7 @@ class TodayVC: UIViewController, TableViewReorderDelegate {
             }
         }
     }
+    
     //fetches objects from database
     func fetchObjects() -> Results<SavedTask> {
         let isTodayPredicate = NSPredicate(format: "isToday == %@",  Bool(booleanLiteral: true) as CVarArg)
@@ -113,17 +119,9 @@ class TodayVC: UIViewController, TableViewReorderDelegate {
         //sorts list by todayDisplayOrder attribute
         return list.sorted(byKeyPath: "todayDisplayOrder", ascending: true)
     }
-    
-    func isTodayVCAlreadyLaunchedOnce()->Bool{
-        if  defaults.string(forKey: "isTodayVCAlreadyLaunchedBefore") == nil{
-            defaults.set(true, forKey: "isTodayVCAlreadyLaunchedBefore")
-            return false
-        }
-        return true
-    }
 }
 
-extension TodayVC: UITableViewDelegate, UITableViewDataSource {
+extension TodayVC: UITableViewDelegate, UITableViewDataSource, TableViewReorderDelegate {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
        
@@ -299,7 +297,7 @@ extension TodayVC: CustomTodayTaskCellDelegate {
             cell.leftSwipeSettings.transition = .drag
             cell.leftExpansion.buttonIndex = 0
             cell.leftExpansion.fillOnTrigger = true
-            cell.leftExpansion.threshold = 2
+            cell.leftExpansion.threshold = 1
             let rightButton1 = MGSwipeButton(title: "Delete", backgroundColor: FlatRed())
             let rightButton2 = MGSwipeButton(title: "Remove", backgroundColor: UIColor.gray)
             cell.rightButtons = [rightButton1, rightButton2]
@@ -334,9 +332,9 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         
         if checked == true {
             
+        
             if NotificationsController.checkInAppNotificationPermissions() == true {
-                let message = Message(title: "You completed a task.", backgroundColor: FlatGreen())
-                Whisper.show(whisper: message, to: self.navigationController!, action: .show)
+                self.showMessage("You completed a task.",type: .success,  options: [.autoHideDelay(1.0), .textNumberOfLines(2)])
             }
             
             //log firebase analytics event
@@ -374,10 +372,6 @@ extension TodayVC: CustomTodayTaskCellDelegate {
     //update changed deadline
     func cellDueDateChanged(editingCell: TodayTaskCell, date: Date?) {
         
-        if date != nil { //contextual prompt of asking user for permissions to add badges
-            NotificationsController.requestPermission()
-        }
-        
         let selectedTask = editingCell.taskObj!
         
         //log firebase analytics event
@@ -405,8 +399,7 @@ extension TodayVC: CustomTodayTaskCellDelegate {
     }
 
     func userTriedAddingDateToEmptyTask() {
-        let message = Message(title: "Give your task a name to add a deadline.", backgroundColor: FlatRed())
-        Whisper.show(whisper: message, to: self.navigationController!, action: .show)
+        self.showMessage("Give your task a name to add a deadline.",type: .warning,  options: [.autoHideDelay(1.0), .textNumberOfLines(2)])
     }
     
     //delete task
@@ -453,7 +446,7 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         let storyboard: UIStoryboard = UIStoryboard.init(name: "Main",bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "DrawerContentViewController") as! TasksVC
         let list = vc.fetchObjects()
-        let index = list.count
+        let index = list.count + 1 
         
         //update database
         try! self.realm.write {
@@ -482,6 +475,8 @@ extension TodayVC: CustomTodayTaskCellDelegate {
     
     func taskDoneForToday(editingCell: TodayTaskCell) {
         
+        self.showAlertAfterFirstSwipeRight() 
+        
         //plays vibration if user has allowed it
         if NotificationsController.checkHapticPermissions() == true {
             AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
@@ -506,10 +501,10 @@ extension TodayVC: CustomTodayTaskCellDelegate {
             selectedTask.displayOrder = 0
             selectedTask.isToday = false
         }
-    
+        
         if NotificationsController.checkInAppNotificationPermissions() == true {
-            let message = Message(title: "You made progress on a task.", backgroundColor: FlatPurple())
-            Whisper.show(whisper: message, to: self.navigationController!, action: .show)
+            self.showMessage("You made progress on a task.",type: .info,  options: [.autoHideDelay(1.0), .textNumberOfLines(2)])
+
         }
         
         //log firebase analytics event
@@ -525,6 +520,8 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         if editingCell.taskObj?.isCompleted == true || editingCell.swipeOffset > 0 {
             return
         }
+        
+        editingCell.isBeingEdited = true 
     
         //update attributes
         self.currentlySelectedCell = editingCell
@@ -551,6 +548,8 @@ extension TodayVC: CustomTodayTaskCellDelegate {
     
     func cellDidEndEditing(editingCell: TodayTaskCell) {
         
+        editingCell.isBeingEdited = false
+        
         //self.currentlySelectedCell might be another cell that the user clicked on, which caused this cell to resign and end editing
         if self.currentlySelectedCell == editingCell{
             self.currentlySelectedCell = nil
@@ -569,6 +568,8 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         if trimmedText.isEmpty == false {
             self.updateTaskTitle(editingCell: editingCell, newTitle: newText!)
         } else {
+            self.showMessage("Your task was deleted because it had no name.",type: .warning, options: [.autoHideDelay(1.0), .textNumberOfLines(2)])
+
             //delete new task if user did not give it title or deletes existing task if user removed its title
             self.deleteTask(editingCell: editingCell)
         }
@@ -588,8 +589,8 @@ extension TodayVC: CustomTodayTaskCellDelegate {
     }
     
     func cellPickerSelected(editingCell: TodayTaskCell) {
-        let delayTime = DispatchTime.now() +  .seconds(1)
-        DispatchQueue.main.asyncAfter(deadline: delayTime) {
+       // let delayTime = DispatchTime.now() +  .seconds(1)
+        //DispatchQueue.main.asyncAfter(deadline: delayTime) {
             
             //Makes sure you cannot edit cell if it is completed or mid-swipe
             if editingCell.taskObj?.isCompleted == true || editingCell.swipeOffset > 0 {
@@ -609,20 +610,7 @@ extension TodayVC: CustomTodayTaskCellDelegate {
             
             //makes due date button visible so user can choose deadline
             editingCell.dueDateBtn.isHidden = false
-            
-            //animate cells up
-            let editingOffset = self.tableView.contentOffset.y - editingCell.frame.origin.y as CGFloat
-            let visibleCells = self.tableView.visibleCells as! [TodayTaskCell]
-            for cell in visibleCells {
-                //animate cells up so that edited cell is at top of tableview
-                UIView.animate(withDuration: 0.3, animations: { () -> Void in
-                    cell.transform = CGAffineTransform(translationX: 0, y: editingOffset)
-                    if cell != editingCell {
-                        cell.alpha = 0.1 //gray out any cells that aren't being edited
-                    }
-                })
-            }
-        }
+
     }
     
     func cellPickerDone(editingCell: TodayTaskCell) {
@@ -643,18 +631,6 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         if editingCell.dueDate == nil {
             editingCell.dueDateBtn.isHidden = true
         }
-        
-        //animates cells back down
-        let visibleCells = tableView.visibleCells as! [TodayTaskCell]
-        for cell: TodayTaskCell in visibleCells {
-            UIView.animate(withDuration: 0.2, animations: { () -> Void in
-                cell.transform = CGAffineTransform.identity
-                if cell != editingCell {
-                    cell.alpha = 1.0
-                }
-            }, completion: { (Finished: Bool) -> Void in return })
-        }
-        return
     }
 }
 
@@ -732,9 +708,9 @@ extension TodayVC : AlertOnboardingDelegate {
         //First, declare datas
         let arrayOfImage = ["purpleBox","stones","meditation"]
         let arrayOfTitle = ["Welcome to Progress", "SPLIT UP YOUR TASKS", "SIMPLE AND FOCUSED"]
-        let arrayOfDescription = ["A simple to-do list that helps you reach your goals one step at a time. \n \n Swipe left to learn more",
-                                  "The best work isn’t done overnight. Unlike other to-do lists, Progress understands this and helps you feel rewarded each time you work  towards your goal.",
-                                  "Say bye to all the distractions. Most to-do lists are cluttered with features. Progress keeps it simple, so the focus is always on reaching your goals."]
+        let arrayOfDescription = ["A simple to-do list that encourages you to reach your goals gradually. \n \n Swipe left to learn more",
+                                  "The best work isn’t done overnight. Progress understands this and helps you feel rewarded each time you work towards your goal.",
+                                  "Say bye to all the distractions. Unlike other to-do lists cluttered with features, Progress' simplicity lets you focus on reaching your goals."]
         //Simply call AlertOnboarding...
         let alertView = AlertOnboarding(arrayOfImage: arrayOfImage, arrayOfTitle: arrayOfTitle, arrayOfDescription: arrayOfDescription)
         
@@ -744,6 +720,7 @@ extension TodayVC : AlertOnboardingDelegate {
         //Modify colors of AlertOnboarding's button
         alertView.colorButtonText = UIColor.white
         alertView.colorButtonBottomBackground = FlatPurple()
+        //alertView.colorTitleLabel.
         
         //Modify colors of labels
         alertView.colorTitleLabel = UIColor.black
@@ -759,11 +736,12 @@ extension TodayVC : AlertOnboardingDelegate {
         
         //Modify labels
         alertView.titleSkipButton = "SKIP"
-        alertView.titleGotItButton = "GET STARTED"
+        alertView.titleGotItButton = "STEP INSIDE"
         
         //Set delegate
         alertView.delegate = self
         
+        Floaty.global.button.isHidden = true
         //... and show it !
         alertView.show()
     }
@@ -777,48 +755,96 @@ extension TodayVC : AlertOnboardingDelegate {
     }
     
     func alertOnboardingSkipped(_ currentStep: Int, maxStep: Int) {
-        if self == UIApplication.topViewController() {
-            Floaty.global.button.isHidden = false
-        }
+        Floaty.global.button.isHidden = false
+        
+        //log firebase analytics event
+        Analytics.logEvent(skippedWalkthroughEvent, parameters: [
+            "name":"" as NSObject,
+            "full_text": "" as NSObject
+            ])
     }
     
     func alertOnboardingCompleted() {
-        if self == UIApplication.topViewController() {
-            Floaty.global.button.isHidden = false 
-        }
+        Floaty.global.button.isHidden = false
+        
+        //log firebase analytics event
+        Analytics.logEvent(finishedWalkthroughEvent, parameters: [
+            "name":"" as NSObject,
+            "full_text": "" as NSObject
+            ])
     }
     
     func alertOnboardingNext(_ nextStep: Int) {
         return
     }
+   
+}
+
+extension TodayVC {
     
-    func addWelcomeTasks() {
+    @objc func showAlertToSwipeRight() {
+        if  defaults.string(forKey: "showAlertToSwipeRightinTodayVC") != nil{
+            return
+        }
+        defaults.set(true, forKey: "showAlertToSwipeRightinTodayVC")
         
-        var introTasks = [SavedTask]()
+        self.showMessage("Swipe right on a task when you're done working.",type: .info, options: [.autoHide(false),.textNumberOfLines(2)])
+    }
+    
+    func showAlertAfterFirstSwipeRight() {
         
-        let introTask2 = SavedTask()
-        introTask2.todayDisplayOrder = 0
-        introTask2.isToday = true
-        introTask2.title = "Done for today? Swipe right on me."
-        introTasks.append(introTask2)
+        if  defaults.string(forKey: "showAlertAfterFirstSwipeRightInTodayVC") != nil{
+            return
+        }
+        defaults.set(true, forKey: "showAlertAfterFirstSwipeRightInTodayVC")
         
-        let introTask3 = SavedTask()
-        introTask3.todayDisplayOrder = 1
-        introTask3.isToday = true
-        introTask3.title = "The task goes back to All Tasks."
-        introTasks.append(introTask3)
+        let alertController = CFAlertViewController(title: "You just made progress on a task!",
+                                                    message: "Your task just disappeared back into All Tasks. Check it out. \n",
+                                                    textAlignment: .center,
+                                                    preferredStyle: .alert,
+                                                    didDismissAlertHandler: nil)
         
-        let introTask4 = SavedTask()
-        introTask4.todayDisplayOrder = 2
-        introTask4.isToday = true
-        introTask4.title = "And, a progress dot is added underneath it."
-        introTasks.append(introTask4)
+        let gotoAction = CFAlertAction(title: "Go Back to All Tasks",
+                                       style: .Default,
+                                       alignment: .center,
+                                       backgroundColor: FlatGreen(),
+                                       textColor: nil,
+                                       handler: { (action) in
+                                        
+                                        if let drawerVC = self.navigationController?.parent as? PulleyViewController {
+                                            drawerVC.setDrawerPosition(position: .open, animated: true)
+                                        }
+                                        
+                                        let delayTime = DispatchTime.now() +  .seconds(2)
+                                        DispatchQueue.main.asyncAfter(deadline: delayTime) {
+                                            self.showDotAlert()
+                                        }
+        })
         
-        try! self.realm.write {
-            self.realm.add(introTasks)
+        alertController.addAction(gotoAction)
+        alertController.shouldDismissOnBackgroundTap = false
+        self.present(alertController, animated: true) {
+            Floaty.global.button.isHidden = true
+        }
+    }
+    
+    func showDotAlert() {
+        let alertController2 = CFAlertViewController(title: "What's that dot doing there?",
+                                                     message: "You'll notice your task has a dot underneath it now. Each dot represents a time you worked on it, so you can track your progress. \n \n When you you reach your goal, tap the checbox to complete the task.",
+                                                     textAlignment: .center,
+                                                     preferredStyle: .alert,
+                                                     didDismissAlertHandler: nil)
+        let gotItAction = CFAlertAction(title: "Makes Sense",
+                                        style: .Default,
+                                        alignment: .center,
+                                        backgroundColor: FlatGreen(),
+                                        textColor: nil,
+                                        handler: nil)
+        alertController2.addAction(gotItAction)
+        
+        self.present(alertController2, animated: true) {
+            Floaty.global.button.isHidden = true
         }
     }
 }
-
-
 

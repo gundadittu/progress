@@ -81,11 +81,12 @@ class NotificationsController  {
         if override != true {
             if defaults.value(forKey: "notificationRequestCount") == nil {
                     defaults.setValue(0, forKey: "notificationRequestCount")
+                    return
             } else {
                 let count = defaults.value(forKey: "notificationRequestCount") as! Int
                 let newCount = count + 1
                 defaults.setValue(newCount, forKey: "notificationRequestCount")
-                if newCount%3 != 2 {
+                if newCount%3 != 2  || newCount < 4{
                     return
                 }
             }
@@ -108,7 +109,6 @@ class NotificationsController  {
                                                       backgroundColor: FlatGreen(),
                                                       textColor: nil,
                                                       handler: { (action) in
-                                                        Floaty.global.button.isHidden = false
                                                         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { (granted, error) in
                                                             if granted == true {
                                                                 //log firebase analytics event
@@ -138,7 +138,7 @@ class NotificationsController  {
                                                     alignment: .justified,
                                                     backgroundColor: FlatWhiteDark(),
                                                     textColor: nil,
-                                                    handler: { (action) in Floaty.global.button.isHidden = false })
+                                                    handler: nil)
                     alertController.addAction(grantedAction)
                     alertController.addAction(laterAction)
                     

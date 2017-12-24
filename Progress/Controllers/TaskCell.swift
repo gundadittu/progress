@@ -15,6 +15,7 @@ import SwiftDate
 import DatePickerDialog
 import Floaty
 import Pulley
+import RMDateSelectionViewController
 
 protocol CustomTaskCellDelegate {
     // Indicates that the edit process has begun for the given cell
@@ -47,6 +48,7 @@ class TaskCell:  MGSwipeTableCell {
     var dueDate: Date?
     var customDelegate: CustomTaskCellDelegate?
     var taskObj: SavedTask?
+    var isBeingEdited = false 
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -94,30 +96,45 @@ extension TaskCell {
     
     @IBAction func dueDateBtnSelected(_ sender: UIButton) {
 
-            let newText = self.taskTitleLabel.text
-            let trimmedText = newText?.trimmingCharacters(in: .whitespacesAndNewlines)
-            if trimmedText?.isEmpty == true {
-                self.customDelegate?.userTriedAddingDateToEmptyTask()
-                return
-            }
+        let newText = self.taskTitleLabel.text
+        let trimmedText = newText?.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmedText?.isEmpty == true {
+            self.customDelegate?.userTriedAddingDateToEmptyTask()
+            return
+        }
         
-            let picker = DatePickerDialog(buttonColor: mainAppColor, font: UIFont(name: "HelveticaNeue-Bold", size: CGFloat(50))!)
+        if self.isBeingEdited == true {
+            self.taskTitleLabel.resignFirstResponder()
+        }
+        
+        Floaty.global.button.isHidden = true
+
+        let select: RMAction<UIDatePicker> = RMAction(title: "Done", style: .done) { (controller) in
+            let date = controller.contentView.date
+            self.customDelegate?.cellDueDateChanged(editingCell: self, date: date)
+            self.customDelegate?.cellPickerDone(editingCell: self)
+            Floaty.global.button.isHidden = false
             
-            var defaultDate = Date()
-            if self.dueDate != nil {
-                defaultDate = self.dueDate!
+            let delayTime = DispatchTime.now() +  .seconds(1)
+            DispatchQueue.main.asyncAfter(deadline: delayTime) {
+                NotificationsController.requestPermission()//contextual ask for notification permissions
             }
             
-            self.customDelegate?.cellPickerSelected(editingCell: self)
-            picker.show( "Set Deadline", doneButtonTitle: "Done", cancelButtonTitle: "Remove",defaultDate: defaultDate, datePickerMode: .dateAndTime) {
-                (date) -> Void in
-                if date != nil {
-                    self.customDelegate?.cellDueDateChanged(editingCell: self, date: date)
-                } else {
-                    self.customDelegate?.cellDueDateChanged(editingCell: self, date: nil)
-                }
-                self.customDelegate?.cellPickerDone(editingCell: self)
-            }
+            }!
+        let clear: RMAction<UIDatePicker> = RMAction(title: "Remove", style: .destructive) { (controller) in
+            self.customDelegate?.cellDueDateChanged(editingCell: self, date: nil)
+            self.customDelegate?.cellPickerDone(editingCell: self)
+            Floaty.global.button.isHidden = false 
+            }!
+        
+        let title = (self.taskObj?.title)!
+        
+        self.customDelegate?.cellPickerSelected(editingCell: self)
+        let picker = RMDateSelectionViewController(style: .sheetWhite, title: "Set Deadline", message: title, select: select, andCancel: clear)
+        if dueDate != nil {
+            picker?.datePicker.date = dueDate!
+        }
+        UIApplication.topViewController()?.present(picker!, animated: true, completion: nil)
     }
 }
 
