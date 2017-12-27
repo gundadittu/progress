@@ -204,6 +204,7 @@ class NotificationsController  {
                 completion(body)
                 break
             case .failure(let error):
+                print(error.localizedDescription)
                 Crashlytics.sharedInstance().recordError(error) //log crashlytics error
                 completion(nil)
                 break

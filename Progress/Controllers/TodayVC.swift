@@ -119,6 +119,19 @@ class TodayVC: UIViewController {
         //sorts list by todayDisplayOrder attribute
         return list.sorted(byKeyPath: "todayDisplayOrder", ascending: true)
     }
+    
+    func updateArrayDisplayOrder(_ array: Results<SavedTask>?){
+        guard let uwArray = array else {
+            return
+        }
+        var i = 0
+        for ro in uwArray {
+            try! self.realm.write {
+                ro.displayOrder = i
+            }
+            i+=1
+        }
+    }
 }
 
 extension TodayVC: UITableViewDelegate, UITableViewDataSource, TableViewReorderDelegate {
@@ -288,6 +301,7 @@ extension TodayVC: CustomTodayTaskCellDelegate {
                 let remainder = (width/indWidth)%(frameWidth/indWidth)
                 modifiedCount = remainder
             }
+            cell.progressBar.setNumberOfDots(modifiedCount+1, animated: false) //needed to avoid, set invalid number of dots error 
             cell.progressBar.setNumberOfDots(modifiedCount, animated: false)
         }
         
@@ -330,36 +344,19 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         
         let selectedTask = editingCell.taskObj!
         
-        if checked == true {
-            
+        if NotificationsController.checkInAppNotificationPermissions() == true {
+            self.showMessage("You completed a task.",type: .success,  options: [.autoHideDelay(1.0), .textNumberOfLines(2)])
+        }
         
-            if NotificationsController.checkInAppNotificationPermissions() == true {
-                self.showMessage("You completed a task.",type: .success,  options: [.autoHideDelay(1.0), .textNumberOfLines(2)])
-            }
-            
-            //log firebase analytics event
-            Analytics.logEvent(taskCheckedEvent, parameters: [
-                "name": selectedTask.title as NSObject,
-                "full_text": "" as NSObject
-                ])
-            
-            //removes scheduled notification if there is a deadline
-            if selectedTask.deadline != nil {
-                NotificationsController.removeNotifications(task: selectedTask)
-            }
-        } else {
-            // user unchecks completed task
-            
-            //log firebase analytics event
-            Analytics.logEvent(taskUncheckedEvent, parameters: [
-                "name": selectedTask.title as NSObject,
-                "full_text": "" as NSObject
-                ])
-            
-            //adds scheduled notification if there is a deadline, because it was removed when user completed task before
-            if selectedTask.deadline != nil {
-                NotificationsController.scheduleNotification(task: selectedTask)
-            }
+        //log firebase analytics event
+        Analytics.logEvent(taskCheckedEvent, parameters: [
+            "name": selectedTask.title as NSObject,
+            "full_text": "" as NSObject
+            ])
+        
+        //removes scheduled notification if there is a deadline
+        if selectedTask.deadline != nil {
+            NotificationsController.removeNotifications(task: selectedTask)
         }
         
         //updates database
@@ -367,6 +364,8 @@ extension TodayVC: CustomTodayTaskCellDelegate {
             selectedTask.isCompleted = checked
             selectedTask.isToday = false
         }
+        
+        self.updateArrayDisplayOrder(self.tasksList)
     }
     
     //update changed deadline
@@ -421,6 +420,7 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         try! self.realm.write {
             self.realm.delete(selectedTask)
         }
+        self.updateArrayDisplayOrder(self.tasksList)
     }
     
     //update new task title
@@ -446,13 +446,14 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         let storyboard: UIStoryboard = UIStoryboard.init(name: "Main",bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "DrawerContentViewController") as! TasksVC
         let list = vc.fetchObjects()
-        let index = list.count + 1 
+        let index = list.count
         
         //update database
         try! self.realm.write {
             selectedTask.displayOrder = index
             selectedTask.isToday = false
         }
+        self.updateArrayDisplayOrder(self.tasksList)
         
         //log firebase analytics event
         Analytics.logEvent(removeTaskFromTodayEvent, parameters: [
@@ -501,6 +502,8 @@ extension TodayVC: CustomTodayTaskCellDelegate {
             selectedTask.displayOrder = 0
             selectedTask.isToday = false
         }
+        
+        self.updateArrayDisplayOrder(self.tasksList)
         
         if NotificationsController.checkInAppNotificationPermissions() == true {
             self.showMessage("You made progress on a task.",type: .info,  options: [.autoHideDelay(1.0), .textNumberOfLines(2)])
@@ -788,7 +791,7 @@ extension TodayVC {
         }
         defaults.set(true, forKey: "showAlertToSwipeRightinTodayVC")
         
-        self.showMessage("Swipe right on a task when you're done working.",type: .info, options: [.autoHide(false),.textNumberOfLines(2)])
+        self.showMessage("Hint: Swipe right on a task when you're done working.",type: .info, options: [.autoHide(false),.textNumberOfLines(2)])
     }
     
     func showAlertAfterFirstSwipeRight() {

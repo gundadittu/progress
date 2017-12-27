@@ -103,9 +103,9 @@ class TasksVC: UIViewController, FloatyDelegate  {
                 
                 //re-order cells when new pushes happen
                 tableView.insertRows(at: insertions.map { IndexPath(row: $0, section: 0) },
-                                     with: .right)
+                                     with: .none)
                 tableView.deleteRows(at: deletions.map { IndexPath(row: $0, section: 0) },
-                                     with: .left)
+                                     with: .none)
 
                 for row in modifications {
                     let indexPath = IndexPath(row: row, section: 0)
@@ -127,8 +127,21 @@ class TasksVC: UIViewController, FloatyDelegate  {
     func fetchObjects() -> Results<SavedTask> {
         let isNotTodayPredicate = NSPredicate(format: "isToday == %@",  Bool(booleanLiteral: false) as CVarArg)
         let list = self.realm.objects(SavedTask.self).filter(isNotTodayPredicate)
-        let sortProperties = [/*SortDescriptor(keyPath: "isNewTask", ascending: false),*/ SortDescriptor(keyPath: "isCompleted", ascending: true), SortDescriptor(keyPath: "displayOrder", ascending: false)]
+        let sortProperties = [SortDescriptor(keyPath: "isCompleted", ascending: true), SortDescriptor(keyPath: "displayOrder", ascending: false)]
         return list.sorted(by: sortProperties)
+    }
+    
+    func updateArrayDisplayOrder(_ array: Results<SavedTask>?){
+        guard let uwArray = array else {
+            return
+        }
+        var i = uwArray.count - 1
+        for ro in uwArray {
+            try! self.realm.write {
+                ro.displayOrder = i
+            }
+            i-=1
+        }
     }
     
     //Plus button tapped to create new task
@@ -146,7 +159,8 @@ class TasksVC: UIViewController, FloatyDelegate  {
         
         let newTask = SavedTask()
         newTask.isNewTask = true
-        newTask.displayOrder = (tasksList?.count)! + 1
+        let order = (tasksList?.count)!
+        newTask.displayOrder = order
         try! self.realm.write {
             self.realm.add(newTask)
         }
@@ -181,7 +195,6 @@ extension TasksVC: UITableViewDelegate, UITableViewDataSource, TableViewReorderD
         
         //if it is new task created, automatically focuses on task to get user input on task title, etc.
         if selectedTask.isNewTask == true {
-            print(indexPath.row)
             cell.customDelegate?.cellDidBeginEditing(editingCell: cell)
         }
         return cell
@@ -437,6 +450,7 @@ extension TasksVC: CustomTaskCellDelegate {
                 "full_text": "" as NSObject
                 ])
         }
+        self.updateArrayDisplayOrder(self.tasksList)
     }
     
     //update changed deadline
@@ -491,6 +505,8 @@ extension TasksVC: CustomTaskCellDelegate {
         try! self.realm.write {
             self.realm.delete(selectedTask)
         }
+        
+        self.updateArrayDisplayOrder(self.tasksList)
     }
     
     //update new task title
@@ -533,6 +549,8 @@ extension TasksVC: CustomTaskCellDelegate {
             //in case user tries to add completed task to today
             selectedTask.isCompleted = false
         }
+        
+        self.updateArrayDisplayOrder(self.tasksList)
         
         //log firebase analytics event
         Analytics.logEvent(addTaskToYourDayEvent, parameters: [
@@ -760,7 +778,7 @@ extension TasksVC {
     
         let delayTime = DispatchTime.now() +  .seconds(10)
         DispatchQueue.main.asyncAfter(deadline: delayTime) {
-            self.showMessage("Swipe right on a task to add it to your day.",type: .info, options: [.autoHide(false), .textNumberOfLines(2)])
+            self.showMessage("Hint: Swipe right on a task to add it to your day.",type: .info, options: [.autoHide(false), .textNumberOfLines(2)])
         }
 
         var introTasks = [SavedTask]()

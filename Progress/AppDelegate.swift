@@ -28,9 +28,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         
         UNUserNotificationCenter.current().delegate = self //Setting notification delegate
         
-        NotificationsController.scheduleMorningNotification() //Schedule anyways to change quote
-        
-        
         
         let ydBadgeBool = defaults.value(forKey: "yourDayBadgeCount")
         if ydBadgeBool == nil {
@@ -64,6 +61,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             let string = formatter.string(from: date!)
             defaults.setValue(string, forKey: "dailyNotificationTime")
         }
+        NotificationsController.scheduleMorningNotification() //Schedule anyways to change quote
         
         return true
     }
