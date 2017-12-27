@@ -8,7 +8,6 @@ PODS:
     - ChameleonFramework/Default
   - Crashlytics (3.9.3):
     - Fabric (~> 1.7.2)
-  - DatePickerDialog (2.0)
   - DottedProgressBar (1.0.4)
   - DZNEmptyDataSet (1.8.1)
   - Fabric (1.7.2)
@@ -70,7 +69,6 @@ DEPENDENCIES:
   - CFAlertViewController
   - ChameleonFramework/Swift (from `https://github.com/ViccAlexander/Chameleon.git`)
   - Crashlytics (~> 3.9.3)
-  - DatePickerDialog
   - DottedProgressBar
   - DZNEmptyDataSet
   - Fabric (~> 1.7.2)
@@ -102,7 +100,6 @@ SPEC CHECKSUMS:
   CFAlertViewController: 460bb12b42b500bb0838e5595ca144a18344765f
   ChameleonFramework: d21a3cc247abfe5e37609a283a8238b03575cf64
   Crashlytics: dbb07d01876c171c5ccbdf7826410380189e452c
-  DatePickerDialog: 5e1c24d9fe6506cd45dbc573eed7b0a251b1c09d
   DottedProgressBar: 4b5cb99a9afd68e20b21f7c9a40f0014ede52e77
   DZNEmptyDataSet: 9525833b9e68ac21c30253e1d3d7076cc828eaa7
   Fabric: 9cd6a848efcf1b8b07497e0b6a2e7d336353ba15
@@ -128,6 +125,6 @@ SPEC CHECKSUMS:
   SwiftReorder: 27d737099efd6125339d5e8cb090e46c67341143
   SwiftyJSON: 070dabdcb1beb81b247c65ffa3a79dbbfb3b48aa
 
-PODFILE CHECKSUM: 8bf9434f7b1df16dbfd0316761cc5277494cd5a1
+PODFILE CHECKSUM: cb6856826d670b9298665a4f87d2713cc2682c47
 
 COCOAPODS: 1.4.0.beta.2

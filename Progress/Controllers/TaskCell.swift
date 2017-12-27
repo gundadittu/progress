@@ -12,7 +12,6 @@ import ChameleonFramework
 import BEMCheckBox
 import MGSwipeTableCell
 import SwiftDate
-import DatePickerDialog
 import Floaty
 import Pulley
 import RMDateSelectionViewController

@@ -48,7 +48,7 @@ class TodayVC: UIViewController {
         super.viewDidLoad()
         self.title = "Your Day"
         self.navigationController?.navigationBar.prefersLargeTitles = true
-    
+        
         //table View Properties
         self.tableView.delegate = self
         self.tableView.dataSource = self

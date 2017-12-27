@@ -14,8 +14,8 @@ import Realm
 import RealmSwift
 import Pulley
 import Firebase
-import DatePickerDialog
 import UserNotifications
+import RMDateSelectionViewController
 
 class SettingsTVC: UITableViewController {
 
@@ -52,41 +52,41 @@ class SettingsTVC: UITableViewController {
             } else {
                 self.canAskForAccess = false
             }
-        })
-        
-        if badgeBool == true && permissionAccess == true {
-            self.badgeCountSwitch.isOn = true
-        } else {
-            self.badgeCountSwitch.isOn = false 
-        }
-        
-        if dtBadgeBool == true && permissionAccess == true {
-            self.dueTodayBadgeCount.isOn = true
-        } else {
-            self.dueTodayBadgeCount.isOn = false
-        }
-        
-        if hapticBool == true {
-            self.hapticFeedbackSwitch.isOn = true
-        } else {
-            self.hapticFeedbackSwitch.isOn = false
-        }
-        
-        if inAppBool == true {
-            self.inAppNotificationSwitch.isOn = true
-        } else {
-            self.inAppNotificationSwitch.isOn = false
-        }
-        
-        if let dailyNotificationsTime = defaults.value(forKey: "dailyNotificationTime")  {
-            let string = dailyNotificationsTime as! String
-            if string != "" && permissionAccess == true {
-                self.dailyNotificationTimeBtn.setTitle(string, for: .normal)
-            } else {
-                self.dailyNotificationTimeBtn.setTitle("Set", for: .normal)
+            DispatchQueue.main.async {
+                if badgeBool == true && self.permissionAccess == true {
+                    self.badgeCountSwitch.isOn = true
+                } else {
+                    self.badgeCountSwitch.isOn = false
+                }
+                
+                if dtBadgeBool == true && self.permissionAccess == true {
+                    self.dueTodayBadgeCount.isOn = true
+                } else {
+                    self.dueTodayBadgeCount.isOn = false
+                }
+                
+                if hapticBool == true {
+                    self.hapticFeedbackSwitch.isOn = true
+                } else {
+                    self.hapticFeedbackSwitch.isOn = false
+                }
+                
+                if inAppBool == true {
+                    self.inAppNotificationSwitch.isOn = true
+                } else {
+                    self.inAppNotificationSwitch.isOn = false
+                }
+                
+                if let dailyNotificationsTime = self.defaults.value(forKey: "dailyNotificationTime")  {
+                    let string = dailyNotificationsTime as! String
+                    if string != "" && self.permissionAccess == true {
+                        self.dailyNotificationTimeBtn.setTitle(string, for: .normal)
+                    } else {
+                        self.dailyNotificationTimeBtn.setTitle("Set", for: .normal)
+                    }
+                }
             }
-        }
-        
+        })
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -212,6 +212,59 @@ class SettingsTVC: UITableViewController {
                 defaultDate = (formatter.date(from: string))!
             }
         }
+        
+        let select: RMAction<UIDatePicker> = RMAction(title: "Done", style: .done) { (controller) in
+            let date = controller.contentView.date
+            let formattedDate = formatter.string(from: date)
+            
+            self.defaults.setValue(formattedDate, forKey: "dailyNotificationTime")
+            self.dailyNotificationTimeBtn.setTitle(formattedDate, for: .normal)
+            
+            NotificationsController.scheduleMorningNotification()
+            
+            Floaty.global.button.isHidden = false
+            if let drawerVC = self.navigationController?.parent as? PulleyViewController {
+                drawerVC.setDrawerPosition(position: .collapsed, animated: true)
+            }
+            
+            
+            ///log firebase analytics event
+            Analytics.logEvent(dailyNotificationTimeChangedEvent, parameters: [
+                "name":"\(formattedDate)" as NSObject,
+                "full_text": "" as NSObject
+                ])
+            
+            }!
+        
+        let clear: RMAction<UIDatePicker> = RMAction(title: "Remove", style: .destructive) { (controller) in
+            self.dailyNotificationTimeBtn.setTitle("Set", for: .normal)
+            self.defaults.setValue("", forKey: "dailyNotificationTime")
+            
+            NotificationsController.scheduleMorningNotification()
+            
+            Floaty.global.button.isHidden = false
+            if let drawerVC = self.navigationController?.parent as? PulleyViewController {
+                drawerVC.setDrawerPosition(position: .collapsed, animated: true)
+            }
+            
+            ///log firebase analytics event
+            Analytics.logEvent(dailyNotificationOffEvent, parameters: [
+                "name":"" as NSObject,
+                "full_text": "" as NSObject
+                ])
+            }!
+        
+        Floaty.global.button.isHidden = true
+        if let drawerVC = self.navigationController?.parent as? PulleyViewController {
+            drawerVC.setDrawerPosition(position: .closed, animated: true)
+        }
+        
+        let picker = RMDateSelectionViewController(style: .sheetWhite, title: "Set Time for Daily Motivational Notification", message: nil, select: select, andCancel: clear)
+        picker?.datePicker.date = defaultDate
+        picker?.contentView.datePickerMode = .time
+        self.present(picker!, animated: true, completion: nil)
+        
+        /*
         let picker = DatePickerDialog(buttonColor: mainAppColor, font: UIFont(name: "HelveticaNeue-Medium", size: CGFloat(50))!)
         picker.show("Daily Notification Time", doneButtonTitle: "Done", cancelButtonTitle: "Remove", defaultDate: defaultDate, datePickerMode: .time) {
             (date) -> Void in
@@ -242,7 +295,7 @@ class SettingsTVC: UITableViewController {
                     "full_text": "" as NSObject
                     ])
             }
-        }
+        }*/
     }
   
     @IBAction func inAppNotificationSwitchToggled(_ sender: Any) {
