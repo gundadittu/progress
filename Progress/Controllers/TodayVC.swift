@@ -709,11 +709,11 @@ extension TodayVC : AlertOnboardingDelegate {
     
     func loadOnboarding(){
         //First, declare datas
-        let arrayOfImage = ["purpleBox","stones","meditation"]
-        let arrayOfTitle = ["Welcome to Progress", "TRACK YOUR PROGRESS", "SIMPLE AND FOCUSED"]
+        let arrayOfImage = ["purpleBox","stones","progress","meditation"]
+        let arrayOfTitle = ["Welcome to Progress", "SPLIT UP TASKS", "TRACK YOUR PROGRESS", "STAY FOCUSED"]
         let arrayOfDescription = ["A simple to-do list that encourages you to reach your goals gradually. \n \n Swipe left to learn more",
-                                  "The best work isn’t done overnight. Progress understands this and helps you feel accomplished each time you work on your task.",
-                                  "Say bye to all the distractions. Unlike other to-do lists cluttered with features, Progress' simplicity lets you focus on completing your tasks."]
+                                  "Most to-do lists only reward you for finishing a task in one shot. With Progress, you decide how many shots you need.","With bold dots under each task, you can easily track your progress on a task and feel accomplished every step of the way.",
+                                  "Progress leaves out all the unnecessary features that usually make to-do list apps intimidating and distracting."]
         //Simply call AlertOnboarding...
         let alertView = AlertOnboarding(arrayOfImage: arrayOfImage, arrayOfTitle: arrayOfTitle, arrayOfDescription: arrayOfDescription)
         

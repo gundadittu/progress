@@ -16,8 +16,9 @@ import Pulley
 import Firebase
 import UserNotifications
 import RMDateSelectionViewController
+import MessageUI
 
-class SettingsTVC: UITableViewController {
+class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
 
     @IBOutlet weak var dueTodayBadgeCount: UISwitch!
     @IBOutlet weak var badgeCountSwitch: UISwitch!
@@ -102,14 +103,51 @@ class SettingsTVC: UITableViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if indexPath.section == 0 {
-            if indexPath.row == 2 {
+            if indexPath.row == 0{
+                //trigger talk to us
+                if MFMailComposeViewController.canSendMail() {
+
+                    let composeVC = MFMailComposeViewController()
+                    composeVC.mailComposeDelegate = self
+                    
+                    // Configure the fields of the interface.
+                    composeVC.setToRecipients(["info@makeprogressapp.com"])
+                    
+                    // Present the view controller modally.
+                    self.present(composeVC, animated: true){
+                        Floaty.global.button.isHidden = true
+                    }
+                    } else {
+                        let alertController = CFAlertViewController(title: "Looks like you don't have the Mail app working on your phone.",
+                                                                    message: "Just shoot us an email info@makeprogress.com to get in touch with us.",
+                                                                    textAlignment: .left,
+                                                                    preferredStyle: .alert,
+                                                                    didDismissAlertHandler: nil)
+
+                        
+                        let gotAction = CFAlertAction(title: "Got It",
+                                                         style: .Default,
+                                                         alignment: .justified,
+                                                         backgroundColor: FlatGreen(),
+                                                         textColor: nil,
+                                                         handler: nil)
+                        
+                        alertController.addAction(gotAction)
+                        self.present(alertController, animated: true) {
+                            //Causes view to disappear and thus makes both show, need to courteract this
+                            Floaty.global.button.isHidden = true
+                    }
+                }
+                
                 ///log firebase analytics event
                 Analytics.logEvent(talkToUsEvent, parameters: [
                     "name":"" as NSObject,
                     "full_text": "" as NSObject
                     ])
             }
-            if indexPath.row == 3 {
+            if indexPath.row == 1 {
+                //load welcome guide
+                
                 ///log firebase analytics event
                 Analytics.logEvent(onboardingFromSettingsEvent, parameters: [
                     "name":"" as NSObject,
@@ -120,6 +158,18 @@ class SettingsTVC: UITableViewController {
                 let vc: TodayVC = storyboard.instantiateViewController(withIdentifier: "PrimaryContentViewController") as! TodayVC
                 vc.loadOnboarding()
             }
+        } else if indexPath.section == 2 {
+             if indexPath.row == 0{
+                //show website
+                if let url = URL(string: "https://www.makeprogressapp.com") {
+                    UIApplication.shared.open(url, options: [:])
+                }
+            } else  if indexPath.row == 1 {
+                //show legal
+                if let url = URL(string: "https://www.makeprogressapp.com#legal") {
+                    UIApplication.shared.open(url, options: [:])
+                }
+            }
         } else if indexPath.section == 3 {
             if indexPath.row == 0 {
                 self.clearCompletedTasks()
@@ -128,6 +178,14 @@ class SettingsTVC: UITableViewController {
                 self.deleteAllTasks()
             }
         }
+    }
+
+
+    func mailComposeController(_ controller: MFMailComposeViewController,
+                               didFinishWith result: MFMailComposeResult, error: Error?) {
+        // Dismiss the mail compose view controller.
+        self.dismiss(animated: true, completion: nil)
+        Floaty.global.button.isHidden = false
     }
 
 
@@ -263,39 +321,6 @@ class SettingsTVC: UITableViewController {
         picker?.datePicker.date = defaultDate
         picker?.contentView.datePickerMode = .time
         self.present(picker!, animated: true, completion: nil)
-        
-        /*
-        let picker = DatePickerDialog(buttonColor: mainAppColor, font: UIFont(name: "HelveticaNeue-Medium", size: CGFloat(50))!)
-        picker.show("Daily Notification Time", doneButtonTitle: "Done", cancelButtonTitle: "Remove", defaultDate: defaultDate, datePickerMode: .time) {
-            (date) -> Void in
-            if date != nil {
-                
-                let formattedDate = formatter.string(from: date!)
-                
-                
-                self.defaults.setValue(formattedDate, forKey: "dailyNotificationTime")
-                self.dailyNotificationTimeBtn.setTitle(formattedDate, for: .normal)
-                
-                NotificationsController.scheduleMorningNotification()
-                
-                ///log firebase analytics event
-                Analytics.logEvent(dailyNotificationTimeChangedEvent, parameters: [
-                    "name":"\(formattedDate)" as NSObject,
-                    "full_text": "" as NSObject
-                    ])
-            } else {
-                self.dailyNotificationTimeBtn.setTitle("Set", for: .normal)
-                self.defaults.setValue("", forKey: "dailyNotificationTime")
-                
-                NotificationsController.scheduleMorningNotification()
-                
-                ///log firebase analytics event
-                Analytics.logEvent(dailyNotificationOffEvent, parameters: [
-                    "name":"" as NSObject,
-                    "full_text": "" as NSObject
-                    ])
-            }
-        }*/
     }
   
     @IBAction func inAppNotificationSwitchToggled(_ sender: Any) {
