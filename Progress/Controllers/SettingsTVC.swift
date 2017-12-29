@@ -166,10 +166,21 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
                 }
             } else  if indexPath.row == 1 {
                 //show legal
-                if let url = URL(string: "https://www.makeprogressapp.com#legal") {
+                if let url = URL(string: "https://www.makeprogressapp.com/credits") {
+                    UIApplication.shared.open(url, options: [:])
+                }
+             }else  if indexPath.row == 2 {
+                //show legal
+                if let url = URL(string: "https://www.makeprogressapp.com/terms") {
+                    UIApplication.shared.open(url, options: [:])
+                }
+             } else  if indexPath.row == 3 {
+                //show legal
+                if let url = URL(string: "https://www.makeprogressapp.com/privacy") {
                     UIApplication.shared.open(url, options: [:])
                 }
             }
+
         } else if indexPath.section == 3 {
             if indexPath.row == 0 {
                 self.clearCompletedTasks()
