@@ -17,6 +17,7 @@ import Firebase
 import UserNotifications
 import RMDateSelectionViewController
 import MessageUI
+import SafariServices
 
 class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
 
@@ -119,7 +120,7 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
                     }
                     } else {
                         let alertController = CFAlertViewController(title: "Looks like you don't have the Mail app working on your phone.",
-                                                                    message: "Just shoot us an email info@makeprogress.com to get in touch with us.",
+                                                                    message: "Just shoot us an email at info@makeprogress.com to get in touch with us.",
                                                                     textAlignment: .left,
                                                                     preferredStyle: .alert,
                                                                     didDismissAlertHandler: nil)
@@ -158,30 +159,38 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
                 let vc: TodayVC = storyboard.instantiateViewController(withIdentifier: "PrimaryContentViewController") as! TodayVC
                 vc.loadOnboarding()
             }
-        } else if indexPath.section == 2 {
+        } else if indexPath.section == 3 {
              if indexPath.row == 0{
                 //show website
-                if let url = URL(string: "https://www.makeprogressapp.com") {
-                    UIApplication.shared.open(url, options: [:])
+                let svc = SFSafariViewController(url: URL(string:"https://www.makeprogressapp.com")!)
+                svc.preferredControlTintColor = UIColor.flatPurpleDark
+                self.present(svc, animated: true){
+                    Floaty.global.button.isHidden = true
                 }
             } else  if indexPath.row == 1 {
-                //show legal
-                if let url = URL(string: "https://www.makeprogressapp.com/credits") {
-                    UIApplication.shared.open(url, options: [:])
+                //show credits
+                let svc = SFSafariViewController(url: URL(string:"https://www.makeprogressapp.com/credits")!)
+                svc.preferredControlTintColor = UIColor.flatPurpleDark
+                self.present(svc, animated: true){
+                    Floaty.global.button.isHidden = true
                 }
              }else  if indexPath.row == 2 {
-                //show legal
-                if let url = URL(string: "https://www.makeprogressapp.com/terms") {
-                    UIApplication.shared.open(url, options: [:])
+                //show terms
+                let svc = SFSafariViewController(url: URL(string:"https://www.makeprogressapp.com/terms")!)
+                svc.preferredControlTintColor = UIColor.flatPurpleDark
+                self.present(svc, animated: true){
+                    Floaty.global.button.isHidden = true
                 }
              } else  if indexPath.row == 3 {
-                //show legal
-                if let url = URL(string: "https://www.makeprogressapp.com/privacy") {
-                    UIApplication.shared.open(url, options: [:])
+                //show privacy
+                let svc = SFSafariViewController(url: URL(string:"https://www.makeprogressapp.com/privacy")!)
+                svc.preferredControlTintColor = UIColor.flatPurpleDark
+                self.present(svc, animated: true){
+                    Floaty.global.button.isHidden = true
                 }
             }
 
-        } else if indexPath.section == 3 {
+        } else if indexPath.section == 2 {
             if indexPath.row == 0 {
                 self.clearCompletedTasks()
             }
