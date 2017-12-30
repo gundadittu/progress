@@ -131,6 +131,7 @@ class TasksVC: UIViewController, FloatyDelegate  {
         return list.sorted(by: sortProperties)
     }
     
+    //used to update display orders after items are deleted + added
     func updateArrayDisplayOrder(_ array: Results<SavedTask>?){
         guard let uwArray = array else {
             return
@@ -157,6 +158,8 @@ class TasksVC: UIViewController, FloatyDelegate  {
             drawerVC.setDrawerPosition(position: .open, animated: true)
         }
         
+        
+        //Adds new task object to database
         let newTask = SavedTask()
         newTask.isNewTask = true
         let order = (tasksList?.count)!
@@ -234,6 +237,8 @@ extension TasksVC: UITableViewDelegate, UITableViewDataSource, TableViewReorderD
     //Handles user clicking on cell - triggers editing
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let cell = self.tableView.cellForRow(at: indexPath) as! TaskCell
+        
+        //handles edge case where user selects cell immedately after clicking delete
         if cell.objectDeleted == true {
             return 
         }
@@ -278,9 +283,7 @@ extension TasksVC: CustomTaskCellDelegate {
         let width = indWidth * count
         let frameWidth = Int(cell.progressBar.frame.width)
         var modifiedCount = count
-        //let dotColorsArr = [FlatPurple(),FlatBlue(),FlatGreen(),FlatYellow(),FlatOrange(),FlatRed()]
-        //let colorIndex = ((width/indWidth)/(frameWidth/indWidth))%6
-        let dotColor = color //dotColorsArr[colorIndex]
+        let dotColor = mainAppColor
         
         //cell attributes
         cell.taskObj = cellTask

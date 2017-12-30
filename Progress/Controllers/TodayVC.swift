@@ -120,6 +120,7 @@ class TodayVC: UIViewController {
         return list.sorted(byKeyPath: "todayDisplayOrder", ascending: true)
     }
     
+    //used to update display orders after items are deleted + added
     func updateArrayDisplayOrder(_ array: Results<SavedTask>?){
         guard let uwArray = array else {
             return
@@ -179,6 +180,8 @@ extension TodayVC: UITableViewDelegate, UITableViewDataSource, TableViewReorderD
     //Handles user clicking on cell - triggers editing
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let cell = self.tableView.cellForRow(at: indexPath) as! TodayTaskCell
+       
+        //handles edge case where user selects cell immedately after clicking delete
         if cell.objectDeleted == true {
             return
         }
@@ -226,9 +229,7 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         let width = indWidth * count
         let frameWidth = Int(cell.progressBar.frame.width)
         var modifiedCount = count
-        //let dotColorsArr = globalProgressDotsColorArr
-        //let colorIndex = ((width/indWidth)/(frameWidth/indWidth))%6
-        let dotColor = color //dotColorsArr[colorIndex]
+        let dotColor = mainAppColor
         
         //cell attributes
         cell.taskObj = cellTask
