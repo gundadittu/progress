@@ -18,6 +18,7 @@ import UserNotifications
 import RMDateSelectionViewController
 import MessageUI
 import SafariServices
+import StoreKit
 
 class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
 
@@ -146,7 +147,10 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
                     "full_text": "" as NSObject
                     ])
             }
-            if indexPath.row == 1 {
+             if indexPath.row == 1 {
+                 SKStoreReviewController.requestReview()
+            }
+            if indexPath.row == 2 {
                 //load welcome guide
                 
                 ///log firebase analytics event
