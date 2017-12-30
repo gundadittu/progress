@@ -234,6 +234,9 @@ extension TasksVC: UITableViewDelegate, UITableViewDataSource, TableViewReorderD
     //Handles user clicking on cell - triggers editing
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let cell = self.tableView.cellForRow(at: indexPath) as! TaskCell
+        if cell.objectDeleted == true {
+            return 
+        }
         //Ensures only one cell is being edited at a time
         if self.currentlySelectedCell != nil && self.currentlySelectedCell != cell {
             self.currentlySelectedCell?.customDelegate?.cellDidEndEditing(editingCell: cell)
@@ -488,8 +491,8 @@ extension TasksVC: CustomTaskCellDelegate {
     
     //delete task
     func deleteTask(editingCell: TaskCell) {
+        editingCell.objectDeleted = true
         let selectedTask = (editingCell.taskObj)!
-        
         //log firebase analytics event
         Analytics.logEvent(taskDeletedEvent, parameters: [
             "name": selectedTask.title as NSObject,

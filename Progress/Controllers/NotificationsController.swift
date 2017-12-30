@@ -16,6 +16,7 @@ import ChameleonFramework
 import Floaty
 import Alamofire
 import SwiftyJSON
+import StoreKit
 
 class NotificationsController  {
     
@@ -220,6 +221,19 @@ class NotificationsController  {
     static func checkInAppNotificationPermissions() -> Bool {
         let inAppBool = self.defaults.value(forKey: "inAppNotifications") as! Bool
         return inAppBool
+    }
+    
+    static func askForAppReview() {
+        let val = self.defaults.value(forKey: "reviewsCount")
+        if val == nil {
+            self.defaults.setValue(1, forKey: "reviewsCount")
+            return
+        }
+        let count = val as! Int
+        if count%7 == 0 {
+            SKStoreReviewController.requestReview()
+        }
+        self.defaults.setValue(count+1, forKey: "reviewsCount")
     }
 }
 

@@ -179,6 +179,10 @@ extension TodayVC: UITableViewDelegate, UITableViewDataSource, TableViewReorderD
     //Handles user clicking on cell - triggers editing
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let cell = self.tableView.cellForRow(at: indexPath) as! TodayTaskCell
+        if cell.objectDeleted == true {
+            return
+        }
+        
         //Ensures only one cell is being edited at a time
         if self.currentlySelectedCell != nil && self.currentlySelectedCell != cell {
             self.currentlySelectedCell?.customDelegate?.cellDidEndEditing(editingCell: cell)
@@ -403,6 +407,7 @@ extension TodayVC: CustomTodayTaskCellDelegate {
     
     //delete task
     func deleteTask(editingCell: TodayTaskCell) {
+        editingCell.objectDeleted = true 
         let selectedTask = (editingCell.taskObj)!
         
         //log firebase analytics event

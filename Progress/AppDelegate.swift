@@ -28,7 +28,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         
         UNUserNotificationCenter.current().delegate = self //Setting notification delegate
         
-        
         let ydBadgeBool = defaults.value(forKey: "yourDayBadgeCount")
         if ydBadgeBool == nil {
             defaults.set(true, forKey: "yourDayBadgeCount")
@@ -64,6 +63,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         NotificationsController.scheduleMorningNotification() //Schedule anyways to change quote
         
         return true
+    }
+    
+    func applicationDidBecomeActive(_ application: UIApplication) {
+        NotificationsController.askForAppReview()
     }
     
     func applicationWillResignActive(_ application: UIApplication) {

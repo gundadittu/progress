@@ -47,7 +47,8 @@ class TodayTaskCell:  MGSwipeTableCell {
     var customDelegate: CustomTodayTaskCellDelegate?
     var isBeingEdited = false
     var taskObj: SavedTask?
- 
+    var objectDeleted = false
+    
     override func awakeFromNib() {
         super.awakeFromNib()
         taskTitleLabel.borderStyle = .none
