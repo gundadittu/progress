@@ -37,6 +37,7 @@ import ChameleonFramework
     let openedNotificationEvent = "opened_notification"
     let deleteTaskDeadlineNotificationEvent = "deleteTask_deadline_notification"
     let completeTaskDeadlineNotificationEvent = "completeTask_deadline_notification"
-    
+    let clickedHelpEvent = "clicked_help_in_settings"
+    let clickedRateAppEvent = "clicked_rate_app_in_settings"
     //user defaults
     let UDyourDayBadgeCount = "yourDayBadgeCount"

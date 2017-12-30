@@ -105,39 +105,53 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if indexPath.section == 0 {
-            if indexPath.row == 0{
+            if indexPath.row == 0 {
+                //show help
+                let svc = SFSafariViewController(url: URL(string:"https://www.makeprogressapp.com/help")!)
+                svc.preferredControlTintColor = UIColor.flatPurpleDark
+                self.present(svc, animated: true){
+                    Floaty.global.button.isHidden = true
+                }
+                
+                ///log firebase analytics event
+                Analytics.logEvent(clickedHelpEvent, parameters: [
+                    "name":"" as NSObject,
+                    "full_text": "" as NSObject
+                    ])
+            }
+            if indexPath.row == 1 {
                 //trigger talk to us
                 if MFMailComposeViewController.canSendMail() {
-
+                    
                     let composeVC = MFMailComposeViewController()
                     composeVC.mailComposeDelegate = self
                     
                     // Configure the fields of the interface.
-                    composeVC.setToRecipients(["info@makeprogressapp.com"])
+                    composeVC.setToRecipients(["support@makeprogressapp.com"])
                     
                     // Present the view controller modally.
                     self.present(composeVC, animated: true){
                         Floaty.global.button.isHidden = true
                     }
-                    } else {
-                        let alertController = CFAlertViewController(title: "Looks like you don't have the Mail app working on your phone.",
-                                                                    message: "Just shoot us an email at info@makeprogress.com to get in touch with us.",
-                                                                    textAlignment: .left,
-                                                                    preferredStyle: .alert,
-                                                                    didDismissAlertHandler: nil)
-
-                        
-                        let gotAction = CFAlertAction(title: "Got It",
-                                                         style: .Default,
-                                                         alignment: .justified,
-                                                         backgroundColor: FlatGreen(),
-                                                         textColor: nil,
-                                                         handler: nil)
-                        
-                        alertController.addAction(gotAction)
-                        self.present(alertController, animated: true) {
-                            //Causes view to disappear and thus makes both show, need to courteract this
-                            Floaty.global.button.isHidden = true
+                } else {
+                    let alertController = CFAlertViewController(title: "Looks like you don't have the Mail app working on your phone.",
+                                                                message: "Just shoot us an email at info@makeprogress.com to get in touch with us.",
+                                                                textAlignment: .left,
+                                                                preferredStyle: .alert,
+                                                                didDismissAlertHandler: nil)
+                    
+                    
+                    let gotAction = CFAlertAction(title: "Got It",
+                                                  style: .Default,
+                                                  alignment: .justified,
+                                                  backgroundColor: FlatGreen(),
+                                                  textColor: nil,
+                                                  handler: nil)
+                    
+                    alertController.addAction(gotAction)
+                    self.present(alertController, animated: true) {
+                        //Causes view to disappear and thus makes both show, need to courteract this
+                        Floaty.global.button.isHidden = true
                     }
                 }
                 
@@ -147,21 +161,36 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
                     "full_text": "" as NSObject
                     ])
             }
-             if indexPath.row == 1 {
-                 SKStoreReviewController.requestReview()
-            }
+            
             if indexPath.row == 2 {
                 //load welcome guide
+                
+                let storyboard: UIStoryboard = UIStoryboard.init(name: "Main",bundle: nil)
+                let vc: TodayVC = storyboard.instantiateViewController(withIdentifier: "PrimaryContentViewController") as! TodayVC
+                vc.loadOnboarding()
                 
                 ///log firebase analytics event
                 Analytics.logEvent(onboardingFromSettingsEvent, parameters: [
                     "name":"" as NSObject,
                     "full_text": "" as NSObject
                     ])
+            }
+            if indexPath.row == 3 {
+                //review app
+                SKStoreReviewController.requestReview()
                 
-                let storyboard: UIStoryboard = UIStoryboard.init(name: "Main",bundle: nil)
-                let vc: TodayVC = storyboard.instantiateViewController(withIdentifier: "PrimaryContentViewController") as! TodayVC
-                vc.loadOnboarding()
+                ///log firebase analytics event
+                Analytics.logEvent(clickedRateAppEvent, parameters: [
+                    "name":"" as NSObject,
+                    "full_text": "" as NSObject
+                    ])
+            }
+        }  else if indexPath.section == 2 {
+            if indexPath.row == 0 {
+                self.clearCompletedTasks()
+            }
+            if indexPath.row == 1 {
+                self.deleteAllTasks()
             }
         } else if indexPath.section == 3 {
              if indexPath.row == 0{
@@ -193,17 +222,8 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
                     Floaty.global.button.isHidden = true
                 }
             }
-
-        } else if indexPath.section == 2 {
-            if indexPath.row == 0 {
-                self.clearCompletedTasks()
-            }
-            if indexPath.row == 1 {
-                self.deleteAllTasks()
-            }
         }
     }
-
 
     func mailComposeController(_ controller: MFMailComposeViewController,
                                didFinishWith result: MFMailComposeResult, error: Error?) {
