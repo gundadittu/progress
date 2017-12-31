@@ -12,6 +12,7 @@
 		0431271E1FDC5FD2002DEFA8 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0431271C1FDC5FD2002DEFA8 /* Main.storyboard */; };
 		043127231FDC5FD2002DEFA8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 043127221FDC5FD2002DEFA8 /* Assets.xcassets */; };
 		043127261FDC5FD2002DEFA8 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 043127241FDC5FD2002DEFA8 /* LaunchScreen.storyboard */; };
+		0438FE001FF992C800116E73 /* Debugging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0438FDFF1FF992C800116E73 /* Debugging.swift */; };
 		044C24261FDC6AF200AD6B8D /* TodayVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 044C24251FDC6AF200AD6B8D /* TodayVC.swift */; };
 		044C24281FDC6B0F00AD6B8D /* TasksVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 044C24271FDC6B0F00AD6B8D /* TasksVC.swift */; };
 		044C24531FDC8E7A00AD6B8D /* TodayTaskCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 044C24521FDC8E7A00AD6B8D /* TodayTaskCell.swift */; };
@@ -31,6 +32,7 @@
 		043127221FDC5FD2002DEFA8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		043127251FDC5FD2002DEFA8 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		043127271FDC5FD2002DEFA8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		0438FDFF1FF992C800116E73 /* Debugging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Debugging.swift; sourceTree = "<group>"; };
 		044C24251FDC6AF200AD6B8D /* TodayVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayVC.swift; sourceTree = "<group>"; };
 		044C24271FDC6B0F00AD6B8D /* TasksVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TasksVC.swift; sourceTree = "<group>"; };
 		044C24521FDC8E7A00AD6B8D /* TodayTaskCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayTaskCell.swift; sourceTree = "<group>"; };
@@ -98,6 +100,7 @@
 				040532201FDE377500E377AF /* TaskCell.swift */,
 				049A38BE1FE90EA100AC0F06 /* SettingsTVC.swift */,
 				049A38BA1FE8921E00AC0F06 /* NotificationsController.swift */,
+				0438FDFF1FF992C800116E73 /* Debugging.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -316,6 +319,7 @@
 			files = (
 				04CBA1D11FE30CE20013AF20 /* RealmModels.swift in Sources */,
 				049A38BB1FE8921E00AC0F06 /* NotificationsController.swift in Sources */,
+				0438FE001FF992C800116E73 /* Debugging.swift in Sources */,
 				044C24281FDC6B0F00AD6B8D /* TasksVC.swift in Sources */,
 				044C24261FDC6AF200AD6B8D /* TodayVC.swift in Sources */,
 				049A38BF1FE90EA100AC0F06 /* SettingsTVC.swift in Sources */,

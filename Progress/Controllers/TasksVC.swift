@@ -148,6 +148,9 @@ class TasksVC: UIViewController, FloatyDelegate  {
     //Plus button tapped to create new task
     func emptyFloatySelected(_ floaty: Floaty) {
         self.createNewTask()
+        
+        //log firebase debug event
+        DebugController.write(string: "clicked to create new task")
     }
     
     //Creates a new task
@@ -157,7 +160,6 @@ class TasksVC: UIViewController, FloatyDelegate  {
         if let drawerVC = self.navigationController?.parent as? PulleyViewController {
             drawerVC.setDrawerPosition(position: .open, animated: true)
         }
-        
         
         //Adds new task object to database
         let newTask = SavedTask()
@@ -213,6 +215,10 @@ extension TasksVC: UITableViewDelegate, UITableViewDataSource, TableViewReorderD
         self.realm.beginWrite()
         let sourceObject = tasksList![sourceIndexPath.row]
         let destinationObject = tasksList![destinationIndexPath.row]
+        
+        //log firebase debug event
+        DebugController.write(string: "Reordered tasks: moved \(sourceObject.title) to \(destinationObject.title)")
+        
         let sourceStatus = sourceObject.isCompleted
         let destinationStatus = destinationObject.isCompleted
         if sourceStatus != destinationStatus {
@@ -242,6 +248,15 @@ extension TasksVC: UITableViewDelegate, UITableViewDataSource, TableViewReorderD
         if cell.objectDeleted == true {
             return 
         }
+        
+        if let title = cell.taskObj?.title {
+            //log firebase debug event
+            DebugController.write(string: "Selected task - task title: \(title)")
+        } else {
+            //log firebase debug event
+            DebugController.write(string: "Selected task - not title")
+        }
+        
         //Ensures only one cell is being edited at a time
         if self.currentlySelectedCell != nil && self.currentlySelectedCell != cell {
             self.currentlySelectedCell?.customDelegate?.cellDidEndEditing(editingCell: cell)
@@ -410,6 +425,9 @@ extension TasksVC: CustomTaskCellDelegate {
         }
         let selectedTask = editingCell.taskObj!
         
+        //log firebase debug event
+        DebugController.write(string: "tapped checkbox for state: \(checked); task title: \(selectedTask.title)")
+        
         if checked == true {
             
             try! self.realm.write {
@@ -479,8 +497,14 @@ extension TasksVC: CustomTaskCellDelegate {
         try! self.realm.write {
             if let unwrappedDate = date {
                 selectedTask.deadline = unwrappedDate
+                
+                //log firebase debug event
+                DebugController.write(string: "changed deadline for \(selectedTask.title) to \(unwrappedDate)")
             } else {
                 selectedTask.deadline = nil
+                
+                //log firebase debug event
+                DebugController.write(string: "changed deadline for \(selectedTask.title) to none")
             }
         }
         
@@ -489,6 +513,9 @@ extension TasksVC: CustomTaskCellDelegate {
     }
     
     func userTriedAddingDateToEmptyTask() {
+        //log firebase debug event
+        DebugController.write(string: "tried adding deadline to empty task")
+        
         self.showMessage("Give your task a name to add a deadline.",type: .warning, options: [.autoHideDelay(1.0), .textNumberOfLines(2)])
     }
     
@@ -496,6 +523,10 @@ extension TasksVC: CustomTaskCellDelegate {
     func deleteTask(editingCell: TaskCell) {
         editingCell.objectDeleted = true
         let selectedTask = (editingCell.taskObj)!
+        
+        //log firebase debug event
+        DebugController.write(string: "deleted task - task title: \(selectedTask.title)")
+        
         //log firebase analytics event
         Analytics.logEvent(taskDeletedEvent, parameters: [
             "name": selectedTask.title as NSObject,
@@ -518,6 +549,9 @@ extension TasksVC: CustomTaskCellDelegate {
     //update new task title
     func updateTaskTitle(editingCell: TaskCell, newTitle: String) {
         let selectedTask = (editingCell.taskObj)!
+        
+        //log firebase debug event
+        DebugController.write(string: "updated task title to \(newTitle) - prev task title: \(selectedTask.title)")
         
         //log firebase analytics event
         Analytics.logEvent(updatedTaskTitleEvent, parameters: [
@@ -548,6 +582,9 @@ extension TasksVC: CustomTaskCellDelegate {
         
         let selectedTask = (editingCell.taskObj)!
         
+        //log firebase debug event
+        DebugController.write(string: "add task for today - task title: \(selectedTask.title)")
+        
         //writes changes to database
         try! self.realm.write {
             selectedTask.isToday = true
@@ -567,10 +604,14 @@ extension TasksVC: CustomTaskCellDelegate {
     
     func cellDidBeginEditing(editingCell: TaskCell) {
         
+        //log firebase debug event
+        DebugController.write(string: "cell did begin editing - task title: \(String(describing: editingCell.taskObj?.title))")
+        
         //Makes sure you cannot edit cell if it is completed or mid-swipe
         if editingCell.taskObj?.isCompleted == true || editingCell.swipeOffset > 0 {
             return
         }
+        
         editingCell.isBeingEdited = true
         
         //Updates currently being edited information
@@ -604,6 +645,9 @@ extension TasksVC: CustomTaskCellDelegate {
     }
     
     func cellDidEndEditing(editingCell: TaskCell) {
+        
+        //log firebase debug event
+        DebugController.write(string: "cell did end editing - task title: \(String(describing: editingCell.taskObj?.title))")
         
         self.tableView.contentInset = UIEdgeInsetsMake(0, 0, 0, 0) //readjusts insets, because they are changed when new task is created
         
@@ -664,8 +708,8 @@ extension TasksVC: CustomTaskCellDelegate {
     
     func cellPickerSelected(editingCell: TaskCell) {
         
-        let delayTime = DispatchTime.now() +  .seconds(1)
-        DispatchQueue.main.asyncAfter(deadline: delayTime) {
+        //log firebase debug event
+        DebugController.write(string: "selected date picker - task title: \(String(describing: editingCell.taskObj?.title))")
             
             //Makes sure you cannot edit cell if it is completed or mid-swipe
             if editingCell.taskObj?.isCompleted == true || editingCell.swipeOffset > 0 {
@@ -685,11 +729,12 @@ extension TasksVC: CustomTaskCellDelegate {
             
             //makes due date button visible so user can choose deadline
             editingCell.dueDateBtn.isHidden = false
-            
-        }
     }
     
     func cellPickerDone(editingCell: TaskCell) {
+        
+        //log firebase debug event
+        DebugController.write(string: "done with date picker - task title: \(String(describing: editingCell.taskObj?.title))")
         
         //Allows user to now more drawer again
         if let drawerVC = self.navigationController?.parent as? PulleyViewController {
@@ -728,11 +773,18 @@ extension TasksVC: MGSwipeTableCellDelegate {
             if index == 0 {
                 //if user swipes to delete cell
                 self.deleteTask(editingCell: modifiedCell)
+                
+                //log firebase debug event
+                DebugController.write(string: "swiped to delete - task title: \(String(describing: modifiedCell.taskObj?.title))")
             }
         } else {
             if index == 0 {
                 //if user swipes to add task to today
                 self.addTasktoToday(editingCell: modifiedCell)
+                
+                
+                //log firebase debug event
+                DebugController.write(string: "swiped to add task to today - task title: \(String(describing: modifiedCell.taskObj?.title))")
                 
                 //contextual prompt of asking user for permissions to add badges
                 NotificationsController.requestPermission()
@@ -841,6 +893,10 @@ extension TasksVC {
                                         backgroundColor: FlatGreen(),
                                         textColor: nil,
                                         handler: { (action) in
+                                            
+                                            //log firebase debug event
+                                            DebugController.write(string: "selected action for alert after first swipe right in all tasks")
+                                            
                                             Floaty.global.button.isHidden = false
                                             if let drawerVC = self.navigationController?.parent as? PulleyViewController {
                                                 drawerVC.setDrawerPosition(position: .collapsed, animated: true)

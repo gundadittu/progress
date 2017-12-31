@@ -66,6 +66,10 @@ extension TaskCell: UITextFieldDelegate {
     
     //calls custom delegate function to trigger action in TaskVC
     func textFieldDidEndEditing(_ textField: UITextField) {
+        
+        //log firebase debug event
+        DebugController.write(string: "textfield did end editing - \(self.taskTitleLabel.text!)")
+        
         self.taskTitleLabel.text = textField.text!
         if self.customDelegate != nil  {
             self.customDelegate?.cellDidEndEditing(editingCell: self)
@@ -73,6 +77,10 @@ extension TaskCell: UITextFieldDelegate {
     }
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        
+        //log firebase debug event
+        DebugController.write(string: "textfield should return - \(self.taskTitleLabel.text!)")
+        
         textField.resignFirstResponder()
         return false
     }
@@ -110,6 +118,10 @@ extension TaskCell {
         Floaty.global.button.isHidden = true
 
         let select: RMAction<UIDatePicker> = RMAction(title: "Done", style: .done) { (controller) in
+            
+            //log firebase debug event
+            DebugController.write(string: "Selected date in picker - \(self.taskTitleLabel.text!)")
+            
             let date = controller.contentView.date
             self.customDelegate?.cellDueDateChanged(editingCell: self, date: date)
             self.customDelegate?.cellPickerDone(editingCell: self)
@@ -122,6 +134,10 @@ extension TaskCell {
             
             }!
         let clear: RMAction<UIDatePicker> = RMAction(title: "Remove", style: .destructive) { (controller) in
+            
+            //log firebase debug event
+            DebugController.write(string: "removed date in picker - \(self.taskTitleLabel.text!)")
+            
             self.customDelegate?.cellDueDateChanged(editingCell: self, date: nil)
             self.customDelegate?.cellPickerDone(editingCell: self)
             Floaty.global.button.isHidden = false 

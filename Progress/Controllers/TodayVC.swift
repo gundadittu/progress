@@ -160,6 +160,9 @@ extension TodayVC: UITableViewDelegate, UITableViewDataSource, TableViewReorderD
         self.realm.beginWrite()
         let sourceObject = tasksList![sourceIndexPath.row]
         let destinationObject = tasksList![destinationIndexPath.row]
+        
+        //log firebase debug event
+        DebugController.write(string: "Reordered tasks: moved \(sourceObject.title) to \(destinationObject.title)")
       
         let destinationObjectOrder = destinationObject.todayDisplayOrder
         if sourceIndexPath.row < destinationIndexPath.row {
@@ -179,11 +182,21 @@ extension TodayVC: UITableViewDelegate, UITableViewDataSource, TableViewReorderD
     
     //Handles user clicking on cell - triggers editing
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
+        
         let cell = self.tableView.cellForRow(at: indexPath) as! TodayTaskCell
        
         //handles edge case where user selects cell immedately after clicking delete
         if cell.objectDeleted == true {
             return
+        }
+        
+        if let title = cell.taskObj?.title {
+            //log firebase debug event
+            DebugController.write(string: "Selected task - task title: \(title)")
+        } else {
+            //log firebase debug event
+            DebugController.write(string: "Selected task - not title")
         }
         
         //Ensures only one cell is being edited at a time
@@ -341,6 +354,7 @@ extension TodayVC: CustomTodayTaskCellDelegate {
     
     //mark task as completed when checked
     func cellCheckBoxTapped(editingCell: TodayTaskCell, checked: Bool) {
+
         
         //play vibration if user allows
         if NotificationsController.checkHapticPermissions() == true {
@@ -348,6 +362,9 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         }
         
         let selectedTask = editingCell.taskObj!
+        
+        //log firebase debug event
+        DebugController.write(string: "tapped checkbox for state: \(checked); task title: \(selectedTask.title)")
         
         if NotificationsController.checkInAppNotificationPermissions() == true {
             self.showMessage("You completed a task.",type: .success,  options: [.autoHideDelay(1.0), .textNumberOfLines(2)])
@@ -376,6 +393,7 @@ extension TodayVC: CustomTodayTaskCellDelegate {
     //update changed deadline
     func cellDueDateChanged(editingCell: TodayTaskCell, date: Date?) {
         
+        
         let selectedTask = editingCell.taskObj!
         
         //log firebase analytics event
@@ -393,8 +411,14 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         try! self.realm.write {
             if let unwrappedDate = date {
                 selectedTask.deadline = unwrappedDate
+                
+                //log firebase debug event
+                DebugController.write(string: "changed deadline for \(selectedTask.title) to \(unwrappedDate)")
             } else {
                 selectedTask.deadline = nil
+                
+                //log firebase debug event
+                DebugController.write(string: "changed deadline for \(selectedTask.title) to none")
             }
         }
         
@@ -403,13 +427,21 @@ extension TodayVC: CustomTodayTaskCellDelegate {
     }
 
     func userTriedAddingDateToEmptyTask() {
+        
+        //log firebase debug event
+        DebugController.write(string: "tried adding deadline to empty task")
+        
         self.showMessage("Give your task a name to add a deadline.",type: .warning,  options: [.autoHideDelay(1.0), .textNumberOfLines(2)])
     }
     
     //delete task
     func deleteTask(editingCell: TodayTaskCell) {
+        
         editingCell.objectDeleted = true 
         let selectedTask = (editingCell.taskObj)!
+        
+        //log firebase debug event
+        DebugController.write(string: "deleted task - task title: \(selectedTask.title)")
         
         //log firebase analytics event
         Analytics.logEvent(taskDeletedEvent, parameters: [
@@ -431,7 +463,11 @@ extension TodayVC: CustomTodayTaskCellDelegate {
     
     //update new task title
     func updateTaskTitle(editingCell: TodayTaskCell, newTitle: String) {
+        
         let selectedTask = (editingCell.taskObj)!
+        
+        //log firebase debug event
+        DebugController.write(string: "updated task title to \(newTitle) - prev task title: \(selectedTask.title)")
         
         //log firebase analytics event
         Analytics.logEvent(updatedTaskTitleEvent, parameters: [
@@ -446,7 +482,11 @@ extension TodayVC: CustomTodayTaskCellDelegate {
     }
     
     func removeTaskfromToday(editingCell: TodayTaskCell){
+        
         let selectedTask = (editingCell.taskObj)!
+        
+        //log firebase debug event
+        DebugController.write(string: "removed task from today - task title: \(selectedTask.title)")
         
         //place at top of all tasks
         let storyboard: UIStoryboard = UIStoryboard.init(name: "Main",bundle: nil)
@@ -491,6 +531,9 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         
         let selectedTask = (editingCell.taskObj)!
         
+        //log firebase debug event
+        DebugController.write(string: "done with task for today - task title: \(selectedTask.title)")
+        
         try! self.realm.write {
             
             let storyboard: UIStoryboard = UIStoryboard.init(name: "Main",bundle: nil)
@@ -525,6 +568,9 @@ extension TodayVC: CustomTodayTaskCellDelegate {
 
     func cellDidBeginEditing(editingCell: TodayTaskCell) {
         
+        //log firebase debug event
+        DebugController.write(string: "cell did begin editing - task title: \(String(describing: editingCell.taskObj?.title))")
+        
         ///Stop editing if task is completed or is mid-swipe
         if editingCell.taskObj?.isCompleted == true || editingCell.swipeOffset > 0 {
             return
@@ -557,6 +603,9 @@ extension TodayVC: CustomTodayTaskCellDelegate {
     
     func cellDidEndEditing(editingCell: TodayTaskCell) {
         
+        //log firebase debug event
+        DebugController.write(string: "cell did end editing - task title: \(String(describing: editingCell.taskObj?.title))")
+
         editingCell.isBeingEdited = false
         
         //self.currentlySelectedCell might be another cell that the user clicked on, which caused this cell to resign and end editing
@@ -598,31 +647,35 @@ extension TodayVC: CustomTodayTaskCellDelegate {
     }
     
     func cellPickerSelected(editingCell: TodayTaskCell) {
-       // let delayTime = DispatchTime.now() +  .seconds(1)
-        //DispatchQueue.main.asyncAfter(deadline: delayTime) {
-            
-            //Makes sure you cannot edit cell if it is completed or mid-swipe
-            if editingCell.taskObj?.isCompleted == true || editingCell.swipeOffset > 0 {
-                return
-            }
-            
-            Floaty.global.button.isHidden = true
-            
-            //Updates currently being edited information
-            self.currentlySelectedCell = editingCell
-            
-            //Brings drawer up if it is not already up + Makes sure user can not move drawer while editing.
-            if let drawerVC = self.navigationController?.parent as? PulleyViewController {
-                drawerVC.setDrawerPosition(position: .collapsed, animated: true)
-                drawerVC.allowsUserDrawerPositionChange = false
-            }
-            
-            //makes due date button visible so user can choose deadline
-            editingCell.dueDateBtn.isHidden = false
+        
+        //log firebase debug event
+        DebugController.write(string: "selected date picker - task title: \(String(describing: editingCell.taskObj?.title))")
+        
+        //Makes sure you cannot edit cell if it is completed or mid-swipe
+        if editingCell.taskObj?.isCompleted == true || editingCell.swipeOffset > 0 {
+            return
+        }
+        
+        Floaty.global.button.isHidden = true
+        
+        //Updates currently being edited information
+        self.currentlySelectedCell = editingCell
+        
+        //Brings drawer up if it is not already up + Makes sure user can not move drawer while editing.
+        if let drawerVC = self.navigationController?.parent as? PulleyViewController {
+            drawerVC.setDrawerPosition(position: .collapsed, animated: true)
+            drawerVC.allowsUserDrawerPositionChange = false
+        }
+        
+        //makes due date button visible so user can choose deadline
+        editingCell.dueDateBtn.isHidden = false
 
     }
     
     func cellPickerDone(editingCell: TodayTaskCell) {
+        
+        //log firebase debug event
+        DebugController.write(string: "done with date picker - task title: \(String(describing: editingCell.taskObj?.title))")
         
         //Allows user to now more drawer again
         if let drawerVC = self.navigationController?.parent as? PulleyViewController {
@@ -663,9 +716,16 @@ extension TodayVC: MGSwipeTableCellDelegate {
             if index == 0 {
                 //user swipes left to delete
                 self.deleteTask(editingCell: modifiedCell)
+                
+                //log firebase debug event
+                DebugController.write(string: "swiped to delete - task title: \(String(describing: modifiedCell.taskObj?.title))")
+                
             } else if index == 1 {
                 //if user swipes to remove cell from today
                 self.removeTaskfromToday(editingCell: modifiedCell)
+                
+                //log firebase debug event
+                DebugController.write(string: "swiped to remove from today - task title: \(String(describing: modifiedCell.taskObj?.title))")
             }
             
         } else {
@@ -673,6 +733,9 @@ extension TodayVC: MGSwipeTableCellDelegate {
                 //if user swipes to mark cell as done for today
                 self.incrementTaskPoint(editingCell: modifiedCell)
                 self.taskDoneForToday(editingCell: modifiedCell)
+                
+                //log firebase debug event
+                DebugController.write(string: "swiped to mark as done for today - task title: \(String(describing: modifiedCell.taskObj?.title))")
             }
         }        
         return true
@@ -766,6 +829,9 @@ extension TodayVC : AlertOnboardingDelegate {
     func alertOnboardingSkipped(_ currentStep: Int, maxStep: Int) {
         Floaty.global.button.isHidden = false
         
+        //log firebase debug event
+        DebugController.write(string: "skipped onboarding")
+        
         //log firebase analytics event
         Analytics.logEvent(skippedWalkthroughEvent, parameters: [
             "name":"" as NSObject,
@@ -775,6 +841,9 @@ extension TodayVC : AlertOnboardingDelegate {
     
     func alertOnboardingCompleted() {
         Floaty.global.button.isHidden = false
+        
+        //log firebase debug event
+        DebugController.write(string: "finished onboarding")
         
         //log firebase analytics event
         Analytics.logEvent(finishedWalkthroughEvent, parameters: [
@@ -820,6 +889,9 @@ extension TodayVC {
                                        textColor: nil,
                                        handler: { (action) in
                                         
+                                        //log firebase debug event
+                                        DebugController.write(string: "selected action for alert after first swipe right in today")
+                                        
                                         if let drawerVC = self.navigationController?.parent as? PulleyViewController {
                                             drawerVC.setDrawerPosition(position: .open, animated: true)
                                         }
@@ -847,8 +919,10 @@ extension TodayVC {
                                         style: .Default,
                                         alignment: .center,
                                         backgroundColor: FlatGreen(),
-                                        textColor: nil,
-                                        handler: nil)
+                                        textColor: nil, handler: { action in
+                                            //log firebase debug event
+                                            DebugController.write(string: "selected action for first dot alert")
+        })
         alertController2.addAction(gotItAction)
         
         self.present(alertController2, animated: true) {

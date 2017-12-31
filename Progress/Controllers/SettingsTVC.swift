@@ -107,6 +107,10 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
         if indexPath.section == 0 {
             if indexPath.row == 0 {
                 //show help
+                
+                //log firebase debug event
+                DebugController.write(string: "clicked help in settings")
+                
                 let svc = SFSafariViewController(url: URL(string:"https://www.makeprogressapp.com/help")!)
                 svc.preferredControlTintColor = UIColor.flatPurpleDark
                 self.present(svc, animated: true){
@@ -121,6 +125,10 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
             }
             if indexPath.row == 1 {
                 //trigger talk to us
+                
+                //log firebase debug event
+                DebugController.write(string: "clicked talk to us in settings")
+                
                 if MFMailComposeViewController.canSendMail() {
                     
                     let composeVC = MFMailComposeViewController()
@@ -165,6 +173,9 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
             if indexPath.row == 2 {
                 //load welcome guide
                 
+                //log firebase debug event
+                DebugController.write(string: "clicked welcome guide in settings")
+                
                 let storyboard: UIStoryboard = UIStoryboard.init(name: "Main",bundle: nil)
                 let vc: TodayVC = storyboard.instantiateViewController(withIdentifier: "PrimaryContentViewController") as! TodayVC
                 vc.loadOnboarding()
@@ -177,6 +188,10 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
             }
             if indexPath.row == 3 {
                 //review app
+                
+                //log firebase debug event
+                DebugController.write(string: "clicked rate app in settings")
+                
                 SKStoreReviewController.requestReview()
                 
                 ///log firebase analytics event
@@ -187,14 +202,26 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
             }
         }  else if indexPath.section == 2 {
             if indexPath.row == 0 {
+                
+                //log firebase debug event
+                DebugController.write(string: "clicked clear completed tasks in settings")
+                
                 self.clearCompletedTasks()
             }
             if indexPath.row == 1 {
+                
+                //log firebase debug event
+                DebugController.write(string: "clicked delete all tasks in settings")
+                
                 self.deleteAllTasks()
             }
         } else if indexPath.section == 3 {
              if indexPath.row == 0{
                 //show website
+                
+                //log firebase debug event
+                DebugController.write(string: "clicked website in settings")
+                
                 let svc = SFSafariViewController(url: URL(string:"https://www.makeprogressapp.com")!)
                 svc.preferredControlTintColor = UIColor.flatPurpleDark
                 self.present(svc, animated: true){
@@ -202,6 +229,10 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
                 }
             } else  if indexPath.row == 1 {
                 //show credits
+                
+                //log firebase debug event
+                DebugController.write(string: "clicked credits in settings")
+                
                 let svc = SFSafariViewController(url: URL(string:"https://www.makeprogressapp.com/credits")!)
                 svc.preferredControlTintColor = UIColor.flatPurpleDark
                 self.present(svc, animated: true){
@@ -209,6 +240,10 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
                 }
              }else  if indexPath.row == 2 {
                 //show terms
+                
+                //log firebase debug event
+                DebugController.write(string: "clicked terms in settings")
+                
                 let svc = SFSafariViewController(url: URL(string:"https://www.makeprogressapp.com/terms")!)
                 svc.preferredControlTintColor = UIColor.flatPurpleDark
                 self.present(svc, animated: true){
@@ -216,6 +251,10 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
                 }
              } else  if indexPath.row == 3 {
                 //show privacy
+                
+                //log firebase debug event
+                DebugController.write(string: "clicked privacy in settings")
+                
                 let svc = SFSafariViewController(url: URL(string:"https://www.makeprogressapp.com/privacy")!)
                 svc.preferredControlTintColor = UIColor.flatPurpleDark
                 self.present(svc, animated: true){
@@ -244,6 +283,9 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
             self.deniedAlert() //display alert saying they need to go their phone's settings
             return
         }
+        
+        //log firebase debug event
+        DebugController.write(string: "your day badge count switch toggled in settings")
         
         if badgeCountSwitch.isOn == true {
            
@@ -276,6 +318,9 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
             return
         }
         
+        //log firebase debug event
+        DebugController.write(string: "due today badge count switch toggled in settings")
+        
         if dueTodayBadgeCount.isOn == true {
             //log firebase analytics event
             Analytics.logEvent("due_today_count_badge_on", parameters: [
@@ -303,6 +348,9 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
             return
         }
         
+        //log firebase debug event
+        DebugController.write(string: "daily notification time clicked in settings")
+        
         var defaultDate = Date()
         let formatter = DateFormatter()
         formatter.dateStyle = .none
@@ -316,6 +364,10 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
         }
         
         let select: RMAction<UIDatePicker> = RMAction(title: "Done", style: .done) { (controller) in
+            
+            //log firebase debug event
+            DebugController.write(string: "daily notification time in settings - select action clicked")
+            
             let date = controller.contentView.date
             let formattedDate = formatter.string(from: date)
             
@@ -339,6 +391,10 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
             }!
         
         let clear: RMAction<UIDatePicker> = RMAction(title: "Remove", style: .destructive) { (controller) in
+            
+            //log firebase debug event
+            DebugController.write(string: "daily notification time in settings - clear action clicked")
+            
             self.dailyNotificationTimeBtn.setTitle("Set", for: .normal)
             self.defaults.setValue("", forKey: "dailyNotificationTime")
             
@@ -368,6 +424,10 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
     }
   
     @IBAction func inAppNotificationSwitchToggled(_ sender: Any) {
+        
+        //log firebase debug event
+        DebugController.write(string: "in app notification switch toggled in settings - select action clicked")
+        
         if inAppNotificationSwitch.isOn == true {
             //log firebase analytics event
             Analytics.logEvent("in_app_notifications_on", parameters: [
@@ -387,6 +447,10 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
     
     
     @IBAction func hapticFeedbackSwitchToggled(_ sender: Any) {
+        
+        //log firebase debug event
+        DebugController.write(string: "haptic feedback switch toggled in settings - select action clicked")
+        
         if hapticFeedbackSwitch.isOn {
             ///log firebase analytics event
             Analytics.logEvent(hapticFeedbackOnEvent, parameters: [

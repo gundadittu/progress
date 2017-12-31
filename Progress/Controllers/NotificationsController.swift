@@ -30,6 +30,9 @@ class NotificationsController  {
             return
         }
         
+        //log firebase debug event
+        DebugController.write(string: "scheduled notification - \(task.title)")
+        
         let title = ""
         let body = task.title
         let categoryID = "deadline"
@@ -69,6 +72,10 @@ class NotificationsController  {
     }
     
     class func removeNotifications(task: SavedTask) {
+        
+        //log firebase debug event
+        DebugController.write(string: "removed notification - \(task.title)")
+        
         let identifier = task.notificationIdentifier
         self.center.removePendingNotificationRequests(withIdentifiers: [identifier])
         let realm = try! Realm()
@@ -78,6 +85,9 @@ class NotificationsController  {
     }
     
     class func requestPermission(_ override: Bool = false){
+        
+        //log firebase debug event
+        DebugController.write(string: "request permission called")
         
         if override != true {
             if defaults.value(forKey: "notificationRequestCount") == nil {
@@ -110,6 +120,10 @@ class NotificationsController  {
                                                       backgroundColor: FlatGreen(),
                                                       textColor: nil,
                                                       handler: { (action) in
+                                                        
+                                                        //log firebase debug event
+                                                        DebugController.write(string: "granted action for notification permission alert clicked")
+                                                        
                                                         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { (granted, error) in
                                                             if granted == true {
                                                                 //log firebase analytics event
@@ -154,6 +168,9 @@ class NotificationsController  {
     }
     
     class func scheduleMorningNotification(){
+        //log firebase debug event
+        DebugController.write(string: "schedule morning notifications called")
+        
         let title = "What do you want to work on today?"
         var body = "A good plan today is better than a perfect plan tomorrow. - Anonymous"
         let category = "morningNotification"
@@ -191,6 +208,10 @@ class NotificationsController  {
     }
     
     static func randomQuote(completion: @escaping (String?) -> Void) {
+        
+        //log firebase debug event
+        DebugController.write(string: "randomQuote called")
+        
         let parameters: [String : Any] = ["method": "getQuote", "format" : "json", "key" : 4, "lang" : "en"]
         Alamofire.request(quotesAPIURL, parameters: parameters).responseJSON { (response) in
             switch response.result {
@@ -205,7 +226,10 @@ class NotificationsController  {
                 completion(body)
                 break
             case .failure(let error):
-                print(error.localizedDescription)
+                let desc = error.localizedDescription
+                //log firebase debug event
+                DebugController.write(string: "quote api error - \(desc)")
+                
                 Crashlytics.sharedInstance().recordError(error) //log crashlytics error
                 completion(nil)
                 break
@@ -224,6 +248,10 @@ class NotificationsController  {
     }
     
     static func askForAppReview() {
+        
+        //log firebase debug event
+        DebugController.write(string: "askForAppReview called")
+        
         let val = self.defaults.value(forKey: "reviewsCount")
         if val == nil {
             self.defaults.setValue(1, forKey: "reviewsCount")
