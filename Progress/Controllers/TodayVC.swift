@@ -339,7 +339,7 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         }
         
             //sliding options
-            let leftButton1 = MGSwipeButton(title: "Made Progress Today", backgroundColor: FlatPurple())
+            let leftButton1 = MGSwipeButton(title: "Made Progress", backgroundColor: FlatPurple())
             cell.leftButtons = [leftButton1]
             cell.leftSwipeSettings.transition = .drag
             cell.leftExpansion.buttonIndex = 0

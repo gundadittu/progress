@@ -8,6 +8,7 @@
 
 import UIKit
 import Pulley
+import FirebaseAnalytics
 
 class AllTasksNVC: UINavigationController,  PulleyDrawerViewControllerDelegate{
 
@@ -26,15 +27,13 @@ class AllTasksNVC: UINavigationController,  PulleyDrawerViewControllerDelegate{
     }
     
     func supportedDrawerPositions() -> [PulleyPosition] {
-        return [.partiallyRevealed, .open]
+        return [.closed, .partiallyRevealed, .open]
     }
     
     func drawerPositionDidChange(drawer: PulleyViewController, bottomSafeArea: CGFloat) {
         if drawer.drawerPosition == .open {
             NotificationCenter.default.post(name: Notification.Name("triggerTaskVCSwipeAlert"), object: nil)
         }
+        Analytics.logEvent("drawer_position_did_change", parameters: [ "name":"" as NSObject, "full_text": "" as NSObject ])
     }
-    
-    
-    
 }

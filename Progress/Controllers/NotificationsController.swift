@@ -203,7 +203,6 @@ class NotificationsController  {
             let n = UNNotificationRequest(identifier: category, content: content, trigger: trigger)
             
             self.center.add(n)
-            
         }
     }
     

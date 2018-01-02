@@ -164,6 +164,8 @@ class TasksVC: UIViewController, FloatyDelegate  {
         if let drawerVC = self.navigationController?.parent as? PulleyViewController {
             drawerVC.setDrawerPosition(position: .open, animated: true)
         }
+        
+        Analytics.logEvent("tapped_to_open_drawer", parameters: [ "name":"" as NSObject, "full_text": "" as NSObject ])
     }
     
     //Plus button tapped to create new task
