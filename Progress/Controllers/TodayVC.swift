@@ -55,6 +55,7 @@ class TodayVC: UIViewController {
         self.tableView.dataSource = self
         self.tableView.separatorStyle = .none
         self.tableView.sectionHeaderHeight = 0
+        self.tableView.contentInset = UIEdgeInsetsMake(0, 0,self.view.frame.height / 6, 0)
         
         let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboardOnTap))
         self.tableView.backgroundView = UIView()
@@ -95,8 +96,10 @@ class TodayVC: UIViewController {
                     for row in modifications {
                         let indexPath = IndexPath(row: row, section: 0)
                         let selectedTask = results[indexPath.row]
-                        let cell = tableView.cellForRow(at: indexPath) as! TodayTaskCell
-                        self?.configure(cell: cell, with: selectedTask)
+                        if let uwcell = tableView.cellForRow(at: indexPath) {
+                            let cell = uwcell as! TodayTaskCell
+                            self?.configure(cell: cell, with: selectedTask)
+                        }
                     }
                 tableView.endUpdates()
                 break
@@ -125,6 +128,7 @@ class TodayVC: UIViewController {
         guard let uwArray = array else {
             return
         }
+        print(uwArray.count)
         var i = 0
         for ro in uwArray {
             try! self.realm.write {
@@ -132,8 +136,10 @@ class TodayVC: UIViewController {
             }
             i+=1
         }
+        print("reached end")
     }
     
+
     @objc func dismissKeyboardOnTap() {
         if self.currentlySelectedCell != nil {
             self.currentlySelectedCell?.taskTitleLabel.resignFirstResponder()
@@ -188,10 +194,14 @@ extension TodayVC: UITableViewDelegate, UITableViewDataSource, TableViewReorderD
     
     //Handles user clicking on cell - triggers editing
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let cell = self.tableView.cellForRow(at: indexPath) as! TodayTaskCell
+        guard let uwcell = self.tableView.cellForRow(at: indexPath) else  {
+            return
+        }
+        
+        let cell = uwcell as! TodayTaskCell
        
         //handles edge case where user selects cell immedately after clicking delete
-        if cell.objectDeleted == true {
+        if  cell.swipeState != .none {
             return
         }
         
@@ -282,7 +292,7 @@ extension TodayVC: CustomTodayTaskCellDelegate {
                 if (date?.isInPast)! == true {
                     let colloquialPhrase = (date?.colloquialSinceNow())!
                     cell.dueDateBtn.setTitle("\(colloquialPhrase)", for: .normal)
-                    cell.dueDateBtn.setTitleColor(FlatGrayDark(), for: .normal)
+                    cell.dueDateBtn.setTitleColor(FlatRed(), for: .normal)
                 } else {
                     //date is in future
                     let calendar = NSCalendar.current
@@ -325,12 +335,11 @@ extension TodayVC: CustomTodayTaskCellDelegate {
                 let remainder = (width/indWidth)%(frameWidth/indWidth)
                 modifiedCount = remainder
             }
-            cell.progressBar.setNumberOfDots(modifiedCount+1, animated: false) //needed to avoid, set invalid number of dots error 
             cell.progressBar.setNumberOfDots(modifiedCount, animated: false)
         }
         
             //sliding options
-            let leftButton1 = MGSwipeButton(title: "Done for Today", backgroundColor: FlatPurple())
+            let leftButton1 = MGSwipeButton(title: "Made Progress Today", backgroundColor: FlatPurple())
             cell.leftButtons = [leftButton1]
             cell.leftSwipeSettings.transition = .drag
             cell.leftExpansion.buttonIndex = 0
@@ -608,7 +617,8 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         editingCell.isBeingEdited = true
         
         self.tableView.reorder.isEnabled = false
-    
+        self.tableView.isScrollEnabled = false
+
         //update attributes
         self.currentlySelectedCell = editingCell
         
@@ -641,7 +651,8 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         editingCell.isBeingEdited = false
         
         self.tableView.reorder.isEnabled = true 
-        
+        self.tableView.isScrollEnabled = true 
+
         //self.currentlySelectedCell might be another cell that the user clicked on, which caused this cell to resign and end editing
         if self.currentlySelectedCell == editingCell{
             self.currentlySelectedCell = nil
@@ -667,24 +678,23 @@ extension TodayVC: CustomTodayTaskCellDelegate {
                 .bgColor(color: .flatRed)
                 .show()
             
-            
             //delete new task if user did not give it title or deletes existing task if user removed its title
             self.deleteTask(editingCell: editingCell)
         }
         
         //animates cells back down
-        let visibleCells = tableView.visibleCells as! [TodayTaskCell]
+        let visibleCells = self.tableView.visibleCells as! [TodayTaskCell]
         for cell: TodayTaskCell in visibleCells {
             UIView.animate(withDuration: 0.2, animations: { () -> Void in
                 cell.transform = CGAffineTransform.identity
                 if cell != editingCell {
                     cell.checkBox.isEnabled = true
-                    cell.dueDateBtn.isEnabled = true //diabled before so user can not trigger date picker of another cell
+                    cell.dueDateBtn.isEnabled = true //disabled before so user can not trigger date picker of another cell
                     cell.alpha = 1.0
                 }
             }, completion: { (Finished: Bool) -> Void in return })
         }
-        return 
+        return
     }
     
     func cellPickerSelected(editingCell: TodayTaskCell) {

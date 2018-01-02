@@ -13,7 +13,6 @@ class AllTasksNVC: UINavigationController,  PulleyDrawerViewControllerDelegate{
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
         // Do any additional setup after loading the view.
     }
 
@@ -35,5 +34,7 @@ class AllTasksNVC: UINavigationController,  PulleyDrawerViewControllerDelegate{
             NotificationCenter.default.post(name: Notification.Name("triggerTaskVCSwipeAlert"), object: nil)
         }
     }
+    
+    
     
 }

@@ -48,7 +48,7 @@ class TasksVC: UIViewController, FloatyDelegate  {
         super.viewDidLoad()
         self.title = "All Tasks"
         self.navigationController?.navigationBar.prefersLargeTitles = true
-        
+
         //plus button attributes
         Floaty.global.button.buttonColor = color
         Floaty.global.button.plusColor = UIColor.white
@@ -62,11 +62,15 @@ class TasksVC: UIViewController, FloatyDelegate  {
         gripperView.layer.cornerRadius = 3
         self.navigationItem.titleView = gripperView
         
+        let navBarTap = UITapGestureRecognizer(target: self, action: #selector(tappedOnNavBar))
+        self.navigationController?.navigationBar.addGestureRecognizer(navBarTap)
+        
         //tableview attributes
         self.tableView.delegate = self
         self.tableView.dataSource = self
         self.tableView.separatorStyle = .none
         self.tableView.sectionHeaderHeight = 0
+        self.tableView.contentInset = UIEdgeInsetsMake(0, 0,self.view.frame.height / 6, 0)
         
         let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboardOnTap))
         self.tableView.backgroundView = UIView()
@@ -113,8 +117,10 @@ class TasksVC: UIViewController, FloatyDelegate  {
                 for row in modifications {
                     let indexPath = IndexPath(row: row, section: 0)
                     let selectedTask = results[indexPath.row]
-                    let cell = tableView.cellForRow(at: indexPath) as! TaskCell
-                    self?.configure(cell: cell, with: selectedTask)
+                    if let uwcell = tableView.cellForRow(at: indexPath) {
+                        let cell = uwcell as! TaskCell
+                        self?.configure(cell: cell, with: selectedTask)
+                    }
                 }
                 
                 tableView.endUpdates()
@@ -154,8 +160,15 @@ class TasksVC: UIViewController, FloatyDelegate  {
         }
     }
     
+    @objc func tappedOnNavBar() {
+        if let drawerVC = self.navigationController?.parent as? PulleyViewController {
+            drawerVC.setDrawerPosition(position: .open, animated: true)
+        }
+    }
+    
     //Plus button tapped to create new task
     func emptyFloatySelected(_ floaty: Floaty) {
+    
         self.createNewTask()
         
         //log firebase debug event
@@ -179,31 +192,49 @@ class TasksVC: UIViewController, FloatyDelegate  {
         }
         
         //Pull drawer up if task is being created
-        if let drawerVC = self.navigationController?.parent as? PulleyViewController {
-            drawerVC.setDrawerPosition(position: .open, animated: true)
-        }
-        
-        //Adds new task object to database
-        let newTask = SavedTask()
-        newTask.isNewTask = true
-        let order = (tasksList?.count)!
-        newTask.displayOrder = order
-        try! self.realm.write {
-            self.realm.add(newTask)
-        }
- 
-        //if top of tableview is visible on screen, no need to execute code below that scrolls up
-        let visibleCells = self.tableView.indexPathsForVisibleRows
-        if visibleCells?.contains(IndexPath(row: 0, section: 0)) == true || visibleCells?.count == 0{
+        guard let drawerVC = self.navigationController?.parent as? PulleyViewController else {
             return
         }
+        drawerVC.setDrawerPosition(position: .open, animated: true)
         
-        //scrolls to top of tableview
-        self.tableView.contentInset = UIEdgeInsetsMake(20, 0, 0, 0) //inset so that the programattic scroll below doesn't hide the new task cell
-        let delayTime = DispatchTime.now() + .seconds(1) //delay needed due to some bug
-        DispatchQueue.main.asyncAfter(deadline: delayTime) {
-            self.tableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: true) //scrolls up to new task if top of table view is not visible when new task is created
+        var offset = CGFloat(0)
+        if self.tableView.contentOffset != CGPoint.zero {
+            offset = (self.navigationController?.navigationBar.frame.height)!
         }
+        
+        self.tableView.animateScrollToTop(offset: offset, withDuration: TimeInterval(1.0)) {
+            
+            //Adds new task object to database
+            let newTask = SavedTask()
+            newTask.isNewTask = true
+            let order = (self.tasksList?.count)!
+            newTask.displayOrder = order
+            try! self.realm.write {
+                self.realm.add(newTask)
+            }
+        }
+        
+    }
+}
+
+extension UIScrollView {
+    
+    /// Animate scroll to top with completion
+    ///
+    /// - Parameters:
+    ///   - duration:   TimeInterval
+    ///   - completion: Completion block
+    func animateScrollToTop(offset: CGFloat, withDuration duration:  TimeInterval,
+                            completion:             @escaping (()->())) {
+        
+        UIView.animate(withDuration: duration, animations: { [weak self] in
+            self?.setContentOffset(CGPoint(x: 0, y: -offset), animated: false)
+            }, completion: { finish in
+                guard finish else {
+                    return
+                }
+                completion()
+        })
     }
 }
 
@@ -265,11 +296,15 @@ extension TasksVC: UITableViewDelegate, UITableViewDataSource, TableViewReorderD
     
     //Handles user clicking on cell - triggers editing
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let cell = self.tableView.cellForRow(at: indexPath) as! TaskCell
+        guard let uwcell = self.tableView.cellForRow(at: indexPath) else  {
+            return
+        }
+        
+        let cell = uwcell as! TaskCell
         
         //handles edge case where user selects cell immedately after clicking delete
-        if cell.objectDeleted == true {
-            return 
+        if  cell.swipeState != .none {
+            return
         }
         
         if let title = cell.taskObj?.title {
@@ -360,7 +395,7 @@ extension TasksVC: CustomTaskCellDelegate {
                 if (date?.isInPast)! == true {
                     let colloquialPhrase = (date?.colloquialSinceNow())!
                     cell.dueDateBtn.setTitle("\(colloquialPhrase)", for: .normal)
-                    cell.dueDateBtn.setTitleColor(FlatGrayDark(), for: .normal)
+                    cell.dueDateBtn.setTitleColor(FlatRed(), for: .normal)
                 } else {
                     //date is in future
                     let calendar = NSCalendar.current
@@ -656,6 +691,7 @@ extension TasksVC: CustomTaskCellDelegate {
         }
         
         self.tableView.reorder.isEnabled = false
+        self.tableView.isScrollEnabled = false
         
         editingCell.isBeingEdited = true
         
@@ -695,12 +731,13 @@ extension TasksVC: CustomTaskCellDelegate {
         //log firebase debug event
         DebugController.write(string: "cell did end editing - task title: \(String(describing: editingCell.taskObj?.title))")
         
-        self.tableView.contentInset = UIEdgeInsetsMake(0, 0, 0, 0) //readjusts insets, because they are changed when new task is created
+        //self.tableView.contentInset = UIEdgeInsetsMake(0, 0, 0, 0) //readjusts insets, because they are changed when new task is created
         
         editingCell.isBeingEdited = false
         
         self.tableView.reorder.isEnabled = true
-        
+        self.tableView.isScrollEnabled = true
+
         //Updates isNewTask attribute
         if editingCell.taskObj?.isNewTask == true {
             try! self.realm.write {

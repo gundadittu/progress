@@ -105,6 +105,8 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        self.tableView.deselectRow(at: indexPath, animated: true)
+        
         if indexPath.section == 0 {
             if indexPath.row == 0 {
                 //show help
@@ -187,6 +189,7 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
                     "full_text": "" as NSObject
                     ])
             }
+            
             if indexPath.row == 3 {
                 //review app
                 
