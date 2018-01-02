@@ -165,6 +165,19 @@ class TasksVC: UIViewController, FloatyDelegate  {
     //Creates a new task
     func createNewTask(){
         
+        if self.currentlySelectedCell != nil {
+            let newText = self.currentlySelectedCell?.taskTitleLabel.text
+            let trimmedText = newText?.trimmingCharacters(in: .whitespacesAndNewlines)
+            if trimmedText?.isEmpty == true {
+                BPStatusBarAlert(duration: 0.3, delay: 2, position: .statusBar)
+                    .message(message: "Give your task a name before you try creating a new one.")
+                    .messageColor(color: .white)
+                    .bgColor(color: .flatRed)
+                    .show()
+                return
+            }
+        }
+        
         //Pull drawer up if task is being created
         if let drawerVC = self.navigationController?.parent as? PulleyViewController {
             drawerVC.setDrawerPosition(position: .open, animated: true)
@@ -205,6 +218,7 @@ extension TasksVC: UITableViewDelegate, UITableViewDataSource, TableViewReorderD
         
         let selectedTask = tasksList![indexPath.row]
         let cell = tableView.dequeueReusableCell(withIdentifier: "TaskCell", for: indexPath) as! TaskCell
+
         self.configure(cell: cell, with: selectedTask)
         
         //if it is new task created, automatically focuses on task to get user input on task title, etc.
@@ -641,6 +655,8 @@ extension TasksVC: CustomTaskCellDelegate {
             return
         }
         
+        self.tableView.reorder.isEnabled = false
+        
         editingCell.isBeingEdited = true
         
         //Updates currently being edited information
@@ -681,6 +697,8 @@ extension TasksVC: CustomTaskCellDelegate {
         self.tableView.contentInset = UIEdgeInsetsMake(0, 0, 0, 0) //readjusts insets, because they are changed when new task is created
         
         editingCell.isBeingEdited = false
+        
+        self.tableView.reorder.isEnabled = true
         
         //Updates isNewTask attribute
         if editingCell.taskObj?.isNewTask == true {

@@ -605,7 +605,9 @@ extension TodayVC: CustomTodayTaskCellDelegate {
             return
         }
         
-        editingCell.isBeingEdited = true 
+        editingCell.isBeingEdited = true
+        
+        self.tableView.reorder.isEnabled = false
     
         //update attributes
         self.currentlySelectedCell = editingCell
@@ -636,6 +638,8 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         DebugController.write(string: "cell did end editing - task title: \(String(describing: editingCell.taskObj?.title))")
 
         editingCell.isBeingEdited = false
+        
+        self.tableView.reorder.isEnabled = true 
         
         //self.currentlySelectedCell might be another cell that the user clicked on, which caused this cell to resign and end editing
         if self.currentlySelectedCell == editingCell{

@@ -207,10 +207,19 @@ class NotificationsController  {
         }
     }
     
+    class func isConnectedToInternet() ->Bool {
+        return NetworkReachabilityManager()!.isReachable
+    }
+    
     static func randomQuote(completion: @escaping (String?) -> Void) {
         
         //log firebase debug event
         DebugController.write(string: "randomQuote called")
+        
+        if isConnectedToInternet() == false {
+            completion(nil)
+            return
+        }
         
         let parameters: [String : Any] = ["method": "getQuote", "format" : "json", "key" : 4, "lang" : "en"]
         Alamofire.request(quotesAPIURL, parameters: parameters).responseJSON { (response) in
