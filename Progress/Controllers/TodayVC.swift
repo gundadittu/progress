@@ -624,6 +624,7 @@ extension TodayVC: CustomTodayTaskCellDelegate {
             UIView.animate(withDuration: 0.3, animations: { () -> Void in
                 cell.transform = CGAffineTransform(translationX: 0, y: editingOffset)
                 if cell != editingCell {
+                    cell.checkBox.isEnabled = false
                     cell.dueDateBtn.isEnabled = false //so user can not trigger date picker of another cell
                     cell.alpha = 0.3
                 }
@@ -677,6 +678,7 @@ extension TodayVC: CustomTodayTaskCellDelegate {
             UIView.animate(withDuration: 0.2, animations: { () -> Void in
                 cell.transform = CGAffineTransform.identity
                 if cell != editingCell {
+                    cell.checkBox.isEnabled = true
                     cell.dueDateBtn.isEnabled = true //diabled before so user can not trigger date picker of another cell
                     cell.alpha = 1.0
                 }
