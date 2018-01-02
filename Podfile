@@ -23,8 +23,9 @@ pod 'Crashlytics', '~> 3.9.3'
 pod 'CFAlertViewController'
 pod 'Alamofire'
 pod 'SwiftyJSON'
-pod 'GSMessages'
 pod 'AlertOnboarding'
 pod 'RMDateSelectionViewController', '~> 2.3.1'
+pod 'CFNotify'
+pod 'BPStatusBarAlert'
 
 end

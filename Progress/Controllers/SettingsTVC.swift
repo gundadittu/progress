@@ -38,6 +38,7 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
         
         self.title = "Settings"
         self.tableView.separatorStyle = .singleLine
+        self.tableView.contentInset = UIEdgeInsetsMake(0, 0, CGFloat(100), 0)
         self.navigationController?.navigationBar.tintColor = mainAppColor
         
         let badgeBool = defaults.value(forKey: UDyourDayBadgeCount) as! Bool
@@ -95,7 +96,7 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
     override func viewWillAppear(_ animated: Bool) {
         Floaty.global.button.isHidden = false
         if let drawerVC = self.navigationController?.parent as? PulleyViewController {
-            drawerVC.setDrawerPosition(position: .collapsed, animated: true)
+            drawerVC.setDrawerPosition(position: .partiallyRevealed, animated: true)
         }
     }
     
@@ -378,7 +379,7 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
             
             Floaty.global.button.isHidden = false
             if let drawerVC = self.navigationController?.parent as? PulleyViewController {
-                drawerVC.setDrawerPosition(position: .collapsed, animated: true)
+                drawerVC.setDrawerPosition(position: .partiallyRevealed, animated: true)
             }
             
             
@@ -402,7 +403,7 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
             
             Floaty.global.button.isHidden = false
             if let drawerVC = self.navigationController?.parent as? PulleyViewController {
-                drawerVC.setDrawerPosition(position: .collapsed, animated: true)
+                drawerVC.setDrawerPosition(position: .partiallyRevealed, animated: true)
             }
             
             ///log firebase analytics event

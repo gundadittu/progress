@@ -22,7 +22,8 @@ import UserNotifications
 import DispatchIntrospection
 import Firebase
 import CFAlertViewController
-import GSMessages
+import CFNotify
+import BPStatusBarAlert
 
 class TasksVC: UIViewController, FloatyDelegate  {
     
@@ -37,6 +38,7 @@ class TasksVC: UIViewController, FloatyDelegate  {
     var tasksList: Results<SavedTask>?
     var token: NotificationToken?
     let defaults = UserDefaults.standard
+
     
     override func viewWillAppear(_ animated: Bool) {
         Floaty.global.button.isHidden = false 
@@ -60,17 +62,15 @@ class TasksVC: UIViewController, FloatyDelegate  {
         gripperView.layer.cornerRadius = 3
         self.navigationItem.titleView = gripperView
         
-        GSMessage.font =  UIFont(name: "HelveticaNeue", size: CGFloat(12))!
-        GSMessage.successBackgroundColor = UIColor.flatGreen
-        GSMessage.warningBackgroundColor = UIColor.flatRed
-        GSMessage.errorBackgroundColor   = UIColor.flatRed
-        GSMessage.infoBackgroundColor    = UIColor.flatPurple
-        
         //tableview attributes
         self.tableView.delegate = self
         self.tableView.dataSource = self
         self.tableView.separatorStyle = .none
         self.tableView.sectionHeaderHeight = 0
+        
+        let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboardOnTap))
+        self.tableView.backgroundView = UIView()
+        self.tableView.backgroundView?.addGestureRecognizer(tap)
         
         //empty state data
         self.tableView.emptyDataSetSource = self
@@ -82,10 +82,13 @@ class TasksVC: UIViewController, FloatyDelegate  {
         self.tableView.reorder.shadowOpacity = 0.3
         self.tableView.reorder.shadowRadius = 20
         
+        
         //Fetch data from database
         if isTasksVCAlreadyLaunchedOnce() == false {
             self.addWelcomeTasks()
         }
+        
+          NotificationCenter.default.addObserver(self, selector: #selector(self.showAlertToSwipeRight), name: Notification.Name("triggerTaskVCSwipeAlert"), object: nil)
         
         self.tasksList = self.fetchObjects()
         
@@ -142,6 +145,12 @@ class TasksVC: UIViewController, FloatyDelegate  {
                 ro.displayOrder = i
             }
             i-=1
+        }
+    }
+    
+    @objc func dismissKeyboardOnTap() {
+        if self.currentlySelectedCell != nil {
+            self.currentlySelectedCell?.taskTitleLabel.resignFirstResponder()
         }
     }
     
@@ -259,9 +268,11 @@ extension TasksVC: UITableViewDelegate, UITableViewDataSource, TableViewReorderD
         
         //Ensures only one cell is being edited at a time
         if self.currentlySelectedCell != nil && self.currentlySelectedCell != cell {
-            self.currentlySelectedCell?.customDelegate?.cellDidEndEditing(editingCell: cell)
+            self.currentlySelectedCell?.taskTitleLabel.resignFirstResponder()
+            return
         }
-        if self.currentlySelectedCell == cell {
+        
+        if self.currentlySelectedCell != nil && self.currentlySelectedCell == cell {
             return
         }
         cell.customDelegate?.cellDidBeginEditing(editingCell: cell)
@@ -418,6 +429,16 @@ extension TasksVC: CustomTaskCellDelegate {
     //mark task as completed when checked
     func cellCheckBoxTapped(editingCell: TaskCell, checked: Bool) {
         
+        if editingCell.isBeingEdited == true {
+            let newText = editingCell.taskTitleLabel.text
+            let trimmedText = newText?.trimmingCharacters(in: .whitespacesAndNewlines)
+            if trimmedText?.isEmpty == true {
+                editingCell.taskTitleLabel.resignFirstResponder()
+                return
+            }
+            editingCell.taskTitleLabel.resignFirstResponder()
+        }
+        
         //play vibration if user allows
         let hapticBool = self.defaults.value(forKey: "hapticFeedback") as! Bool
         if hapticBool == true {
@@ -440,7 +461,11 @@ extension TasksVC: CustomTaskCellDelegate {
             
             
             if NotificationsController.checkInAppNotificationPermissions() == true {
-                self.showMessage("You completed a task.",type: .success, options: [.autoHideDelay(1.0), .textNumberOfLines(2)])
+                BPStatusBarAlert(duration: 0.3, delay: 2, position: .statusBar)
+                    .message(message: "You completed a task.")
+                    .messageColor(color: .white)
+                    .bgColor(color: .flatGreen)
+                    .show()
             }
             
             //log firebase analytics event
@@ -516,7 +541,11 @@ extension TasksVC: CustomTaskCellDelegate {
         //log firebase debug event
         DebugController.write(string: "tried adding deadline to empty task")
         
-        self.showMessage("Give your task a name to add a deadline.",type: .warning, options: [.autoHideDelay(1.0), .textNumberOfLines(2)])
+        BPStatusBarAlert(duration: 0.3, delay: 2, position: .statusBar)
+            .message(message: "Give your task a name to add a deadline.")
+            .messageColor(color: .white)
+            .bgColor(color: .flatRed)
+            .show()
     }
     
     //delete task
@@ -688,7 +717,11 @@ extension TasksVC: CustomTaskCellDelegate {
             
         } else {
 
-            self.showMessage("Your task was deleted because it had no name.", type: .warning, options: [.autoHideDelay(1.0), .textNumberOfLines(2)])
+            BPStatusBarAlert(duration: 0.3, delay: 2, position: .statusBar)
+                .message(message: "Your task was deleted because it had no name.")
+                .messageColor(color: .white)
+                .bgColor(color: .flatRed)
+                .show()
             
             //delete new task if user did not give it title or deletes existing task if user removed its title
             self.deleteTask(editingCell: editingCell)
@@ -771,11 +804,12 @@ extension TasksVC: MGSwipeTableCellDelegate {
         
         if direction == .rightToLeft {
             if index == 0 {
-                //if user swipes to delete cell
-                self.deleteTask(editingCell: modifiedCell)
                 
                 //log firebase debug event
                 DebugController.write(string: "swiped to delete - task title: \(String(describing: modifiedCell.taskObj?.title))")
+                
+                //if user swipes to delete cell
+                self.deleteTask(editingCell: modifiedCell)
             }
         } else {
             if index == 0 {
@@ -828,15 +862,30 @@ extension TasksVC {
         return true
     }
     
-    func addWelcomeTasks() {
+    @objc func showAlertToSwipeRight() {
+        let bool = defaults.value(forKey: "alreadyShowedTasksFirstAlert")
+        if bool == nil {
+            defaults.setValue(true, forKey: "alreadyShowedTasksFirstAlert")
+        } else {
+            return
+        }
         
+        CFNotify.hideAll()
+        
+        var classicViewConfig = CFNotify.Config()
+        classicViewConfig.appearPosition = .bottom //the view will appear at the top of screen
+        classicViewConfig.hideTime = .never //the view will never automatically hide
+        
+        let classicView = CFNotifyView.toastWith(text: "Hint: Swipe right on a task under All Tasks.",
+                                                 textFont: UIFont.preferredFont(forTextStyle: UIFontTextStyle.headline),
+                                                 textColor: UIColor.white,
+                                                 backgroundColor: UIColor.flatPurple)
+        CFNotify.present(config: classicViewConfig, view: classicView)
+    }
+    
+    func addWelcomeTasks() {
         if let drawerVC = self.navigationController?.parent as? PulleyViewController {
             drawerVC.initialDrawerPosition = .partiallyRevealed
-        }
-    
-        let delayTime = DispatchTime.now() +  .seconds(10)
-        DispatchQueue.main.asyncAfter(deadline: delayTime) {
-            self.showMessage("Hint: Swipe right on a task to add it to your day.",type: .info, options: [.autoHide(false), .textNumberOfLines(2)])
         }
 
         var introTasks = [SavedTask]()
@@ -878,9 +927,7 @@ extension TasksVC {
             return
         }
         defaults.set(true, forKey: "showAlertAfterFirstSwipeRight")
-        
-        self.hideMessage()
-        
+                
         let alertController = CFAlertViewController(title: "You just added a task to Your Day!",
                                                     message: "Your Day hold all the tasks you plan to work on today.",
                                                     textAlignment: .center,
@@ -899,11 +946,12 @@ extension TasksVC {
                                             
                                             Floaty.global.button.isHidden = false
                                             if let drawerVC = self.navigationController?.parent as? PulleyViewController {
-                                                drawerVC.setDrawerPosition(position: .collapsed, animated: true)
+                                                drawerVC.setDrawerPosition(position: .partiallyRevealed, animated: true)
                                             }
                                             
                                             let delayTime = DispatchTime.now() +  .seconds(2)
                                             DispatchQueue.main.asyncAfter(deadline: delayTime) {
+                                              
                                                 NotificationCenter.default.post(name: Notification.Name("triggerTodayVCSwipeAlert"), object: nil)
                                             }
         })
@@ -912,8 +960,8 @@ extension TasksVC {
         alertController.shouldDismissOnBackgroundTap = false
         
         self.present(alertController, animated: true) {
-             Floaty.global.button.isHidden = true
+            CFNotify.hideAll()
+            Floaty.global.button.isHidden = true
         } 
     }
 }
-

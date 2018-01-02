@@ -13,6 +13,7 @@
 		043127231FDC5FD2002DEFA8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 043127221FDC5FD2002DEFA8 /* Assets.xcassets */; };
 		043127261FDC5FD2002DEFA8 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 043127241FDC5FD2002DEFA8 /* LaunchScreen.storyboard */; };
 		0438FE001FF992C800116E73 /* Debugging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0438FDFF1FF992C800116E73 /* Debugging.swift */; };
+		0438FE021FFAE12A00116E73 /* AllTasksNVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0438FE011FFAE12A00116E73 /* AllTasksNVC.swift */; };
 		044C24261FDC6AF200AD6B8D /* TodayVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 044C24251FDC6AF200AD6B8D /* TodayVC.swift */; };
 		044C24281FDC6B0F00AD6B8D /* TasksVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 044C24271FDC6B0F00AD6B8D /* TasksVC.swift */; };
 		044C24531FDC8E7A00AD6B8D /* TodayTaskCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 044C24521FDC8E7A00AD6B8D /* TodayTaskCell.swift */; };
@@ -33,6 +34,7 @@
 		043127251FDC5FD2002DEFA8 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		043127271FDC5FD2002DEFA8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0438FDFF1FF992C800116E73 /* Debugging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Debugging.swift; sourceTree = "<group>"; };
+		0438FE011FFAE12A00116E73 /* AllTasksNVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllTasksNVC.swift; sourceTree = "<group>"; };
 		044C24251FDC6AF200AD6B8D /* TodayVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayVC.swift; sourceTree = "<group>"; };
 		044C24271FDC6B0F00AD6B8D /* TasksVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TasksVC.swift; sourceTree = "<group>"; };
 		044C24521FDC8E7A00AD6B8D /* TodayTaskCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayTaskCell.swift; sourceTree = "<group>"; };
@@ -101,6 +103,7 @@
 				049A38BE1FE90EA100AC0F06 /* SettingsTVC.swift */,
 				049A38BA1FE8921E00AC0F06 /* NotificationsController.swift */,
 				0438FDFF1FF992C800116E73 /* Debugging.swift */,
+				0438FE011FFAE12A00116E73 /* AllTasksNVC.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -227,12 +230,13 @@
 				"${BUILT_PRODUCTS_DIR}/Alamofire/Alamofire.framework",
 				"${BUILT_PRODUCTS_DIR}/AlertOnboarding/AlertOnboarding.framework",
 				"${BUILT_PRODUCTS_DIR}/BEMCheckBox/BEMCheckBox.framework",
+				"${BUILT_PRODUCTS_DIR}/BPStatusBarAlert/BPStatusBarAlert.framework",
 				"${BUILT_PRODUCTS_DIR}/CFAlertViewController/CFAlertViewController.framework",
+				"${BUILT_PRODUCTS_DIR}/CFNotify/CFNotify.framework",
 				"${BUILT_PRODUCTS_DIR}/ChameleonFramework/ChameleonFramework.framework",
 				"${BUILT_PRODUCTS_DIR}/DZNEmptyDataSet/DZNEmptyDataSet.framework",
 				"${BUILT_PRODUCTS_DIR}/DottedProgressBar/DottedProgressBar.framework",
 				"${BUILT_PRODUCTS_DIR}/Floaty/Floaty.framework",
-				"${BUILT_PRODUCTS_DIR}/GSMessages/GSMessages.framework",
 				"${BUILT_PRODUCTS_DIR}/GTMSessionFetcher/GTMSessionFetcher.framework",
 				"${BUILT_PRODUCTS_DIR}/GoogleToolboxForMac/GoogleToolboxForMac.framework",
 				"${BUILT_PRODUCTS_DIR}/MGSwipeTableCell/MGSwipeTableCell.framework",
@@ -252,12 +256,13 @@
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Alamofire.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/AlertOnboarding.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/BEMCheckBox.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/BPStatusBarAlert.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/CFAlertViewController.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/CFNotify.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/ChameleonFramework.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/DZNEmptyDataSet.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/DottedProgressBar.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Floaty.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GSMessages.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GTMSessionFetcher.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GoogleToolboxForMac.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MGSwipeTableCell.framework",
@@ -324,6 +329,7 @@
 				044C24261FDC6AF200AD6B8D /* TodayVC.swift in Sources */,
 				049A38BF1FE90EA100AC0F06 /* SettingsTVC.swift in Sources */,
 				048662321FE9F4BD00E3CDFC /* Constants.swift in Sources */,
+				0438FE021FFAE12A00116E73 /* AllTasksNVC.swift in Sources */,
 				044C24531FDC8E7A00AD6B8D /* TodayTaskCell.swift in Sources */,
 				040532211FDE377500E377AF /* TaskCell.swift in Sources */,
 				043127191FDC5FD2002DEFA8 /* AppDelegate.swift in Sources */,

@@ -10,8 +10,8 @@
 #endif
 #endif
 
-#import "GSMessages.h"
+#import "CFNotify.h"
 
-FOUNDATION_EXPORT double GSMessagesVersionNumber;
-FOUNDATION_EXPORT const unsigned char GSMessagesVersionString[];
+FOUNDATION_EXPORT double CFNotifyVersionNumber;
+FOUNDATION_EXPORT const unsigned char CFNotifyVersionString[];
 

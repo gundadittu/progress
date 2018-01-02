@@ -14,10 +14,10 @@
             buildForArchiving = "YES">
             <BuildableReference
                BuildableIdentifier = 'primary'
-               BlueprintIdentifier = '80A1AAD476BC6D0D87976DE91984E49D'
-               BlueprintName = 'GSMessages'
+               BlueprintIdentifier = '0D75D3E8D32C7982489A94784418027E'
+               BlueprintName = 'CFNotify'
                ReferencedContainer = 'container:Pods.xcodeproj'
-               BuildableName = 'GSMessages.framework'>
+               BuildableName = 'CFNotify.framework'>
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>

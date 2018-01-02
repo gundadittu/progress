@@ -24,7 +24,8 @@ import Alamofire
 import SwiftyJSON
 import AlertOnboarding
 import CFAlertViewController
-import GSMessages
+import CFNotify
+import BPStatusBarAlert
 
 class TodayVC: UIViewController {
 
@@ -55,6 +56,10 @@ class TodayVC: UIViewController {
         self.tableView.separatorStyle = .none
         self.tableView.sectionHeaderHeight = 0
         
+        let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboardOnTap))
+        self.tableView.backgroundView = UIView()
+        self.tableView.backgroundView?.addGestureRecognizer(tap)
+        
         //empty state data
         self.tableView.emptyDataSetSource = self
         self.tableView.emptyDataSetDelegate = self
@@ -65,11 +70,6 @@ class TodayVC: UIViewController {
         self.tableView.reorder.shadowOpacity = 0.3
         self.tableView.reorder.shadowRadius = 20
         
-        GSMessage.font =  UIFont(name: "HelveticaNeue", size: CGFloat(12))!
-        GSMessage.successBackgroundColor = UIColor.flatGreen
-        GSMessage.warningBackgroundColor = UIColor.flatRed
-        GSMessage.errorBackgroundColor   = UIColor.flatRed
-        GSMessage.infoBackgroundColor    = UIColor.flatPurple
         NotificationCenter.default.addObserver(self, selector: #selector(self.showAlertToSwipeRight), name: Notification.Name("triggerTodayVCSwipeAlert"), object: nil)
         
         //Fetch data from database
@@ -133,6 +133,12 @@ class TodayVC: UIViewController {
             i+=1
         }
     }
+    
+    @objc func dismissKeyboardOnTap() {
+        if self.currentlySelectedCell != nil {
+            self.currentlySelectedCell?.taskTitleLabel.resignFirstResponder()
+        }
+    }
 }
 
 extension TodayVC: UITableViewDelegate, UITableViewDataSource, TableViewReorderDelegate {
@@ -182,8 +188,6 @@ extension TodayVC: UITableViewDelegate, UITableViewDataSource, TableViewReorderD
     
     //Handles user clicking on cell - triggers editing
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        
-        
         let cell = self.tableView.cellForRow(at: indexPath) as! TodayTaskCell
        
         //handles edge case where user selects cell immedately after clicking delete
@@ -201,9 +205,11 @@ extension TodayVC: UITableViewDelegate, UITableViewDataSource, TableViewReorderD
         
         //Ensures only one cell is being edited at a time
         if self.currentlySelectedCell != nil && self.currentlySelectedCell != cell {
-            self.currentlySelectedCell?.customDelegate?.cellDidEndEditing(editingCell: cell)
+            self.currentlySelectedCell?.taskTitleLabel.resignFirstResponder()
+            return
         }
-        if self.currentlySelectedCell == cell {
+        
+        if self.currentlySelectedCell != nil && self.currentlySelectedCell == cell {
             return
         }
         cell.customDelegate?.cellDidBeginEditing(editingCell: cell)
@@ -354,7 +360,16 @@ extension TodayVC: CustomTodayTaskCellDelegate {
     
     //mark task as completed when checked
     func cellCheckBoxTapped(editingCell: TodayTaskCell, checked: Bool) {
-
+        
+        if editingCell.isBeingEdited == true {
+            let newText = editingCell.taskTitleLabel.text
+            let trimmedText = newText?.trimmingCharacters(in: .whitespacesAndNewlines)
+            if trimmedText?.isEmpty == true {
+                editingCell.taskTitleLabel.resignFirstResponder()
+                return
+            }
+            editingCell.taskTitleLabel.resignFirstResponder()
+        }
         
         //play vibration if user allows
         if NotificationsController.checkHapticPermissions() == true {
@@ -367,7 +382,11 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         DebugController.write(string: "tapped checkbox for state: \(checked); task title: \(selectedTask.title)")
         
         if NotificationsController.checkInAppNotificationPermissions() == true {
-            self.showMessage("You completed a task.",type: .success,  options: [.autoHideDelay(1.0), .textNumberOfLines(2)])
+            BPStatusBarAlert(duration: 0.3, delay: 2, position: .statusBar)
+                .message(message: "You completed a task.")
+                .messageColor(color: .white)
+                .bgColor(color: .flatGreen)
+                .show()
         }
         
         //log firebase analytics event
@@ -431,7 +450,11 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         //log firebase debug event
         DebugController.write(string: "tried adding deadline to empty task")
         
-        self.showMessage("Give your task a name to add a deadline.",type: .warning,  options: [.autoHideDelay(1.0), .textNumberOfLines(2)])
+        BPStatusBarAlert(duration: 0.3, delay: 2, position: .statusBar)
+            .message(message: "Give your task a name to add a deadline.")
+            .messageColor(color: .white)
+            .bgColor(color: .flatRed)
+            .show()
     }
     
     //delete task
@@ -522,6 +545,8 @@ extension TodayVC: CustomTodayTaskCellDelegate {
     
     func taskDoneForToday(editingCell: TodayTaskCell) {
         
+         CFNotify.hideAll()
+        
         self.showAlertAfterFirstSwipeRight() 
         
         //plays vibration if user has allowed it
@@ -555,8 +580,12 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         self.updateArrayDisplayOrder(self.tasksList)
         
         if NotificationsController.checkInAppNotificationPermissions() == true {
-            self.showMessage("You made progress on a task.",type: .info,  options: [.autoHideDelay(1.0), .textNumberOfLines(2)])
-
+    
+            BPStatusBarAlert(duration: 0.3, delay: 2, position: .statusBar)
+                .message(message: "You made progress on a task.")
+                .messageColor(color: .white)
+                .bgColor(color: .flatPurple)
+                .show()
         }
         
         //log firebase analytics event
@@ -626,8 +655,14 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         if trimmedText.isEmpty == false {
             self.updateTaskTitle(editingCell: editingCell, newTitle: newText!)
         } else {
-            self.showMessage("Your task was deleted because it had no name.",type: .warning, options: [.autoHideDelay(1.0), .textNumberOfLines(2)])
-
+            
+            BPStatusBarAlert(duration: 0.3, delay: 2, position: .statusBar)
+                .message(message: "Your task was deleted because it had no name.")
+                .messageColor(color: .white)
+                .bgColor(color: .flatRed)
+                .show()
+            
+            
             //delete new task if user did not give it title or deletes existing task if user removed its title
             self.deleteTask(editingCell: editingCell)
         }
@@ -663,7 +698,7 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         
         //Brings drawer up if it is not already up + Makes sure user can not move drawer while editing.
         if let drawerVC = self.navigationController?.parent as? PulleyViewController {
-            drawerVC.setDrawerPosition(position: .collapsed, animated: true)
+            drawerVC.setDrawerPosition(position: .partiallyRevealed, animated: true)
             drawerVC.allowsUserDrawerPositionChange = false
         }
         
@@ -715,10 +750,11 @@ extension TodayVC: MGSwipeTableCellDelegate {
         if direction == .rightToLeft {
             if index == 0 {
                 //user swipes left to delete
-                self.deleteTask(editingCell: modifiedCell)
                 
                 //log firebase debug event
                 DebugController.write(string: "swiped to delete - task title: \(String(describing: modifiedCell.taskObj?.title))")
+                
+                self.deleteTask(editingCell: modifiedCell)
                 
             } else if index == 1 {
                 //if user swipes to remove cell from today
@@ -802,9 +838,9 @@ extension TodayVC : AlertOnboardingDelegate {
         alertView.colorPageIndicator = FlatWhiteDark()
         alertView.colorCurrentPageIndicator = FlatPurple()
         
-        //Modify size of alertview (Purcentage of screen height and width)
-        alertView.percentageRatioHeight = 0.75
-        alertView.percentageRatioWidth = 0.75
+        //Modify size of alertview (Percentage of screen height and width)
+        alertView.percentageRatioHeight = 0.9
+        alertView.percentageRatioWidth = 0.9
         
         //Modify labels
         alertView.titleSkipButton = "SKIP"
@@ -831,7 +867,7 @@ extension TodayVC : AlertOnboardingDelegate {
         
         //log firebase debug event
         DebugController.write(string: "skipped onboarding")
-        
+                
         //log firebase analytics event
         Analytics.logEvent(skippedWalkthroughEvent, parameters: [
             "name":"" as NSObject,
@@ -866,7 +902,15 @@ extension TodayVC {
         }
         defaults.set(true, forKey: "showAlertToSwipeRightinTodayVC")
         
-        self.showMessage("Hint: Swipe right on a task when you're done working.",type: .info, options: [.autoHide(false),.textNumberOfLines(2)])
+        var classicViewConfig = CFNotify.Config()
+        classicViewConfig.appearPosition = .bottom //the view will appear at the top of screen
+        classicViewConfig.hideTime = .never //the view will never automatically hide
+        
+        let classicView = CFNotifyView.toastWith(text: "Second Hint: Swipe right on a task in Your Day when you're done working.",
+                                                 textFont: UIFont.preferredFont(forTextStyle: UIFontTextStyle.headline),
+                                                 textColor: UIColor.white,
+                                                 backgroundColor: UIColor.flatPurple)
+        CFNotify.present(config: classicViewConfig, view: classicView)
     }
     
     func showAlertAfterFirstSwipeRight() {
