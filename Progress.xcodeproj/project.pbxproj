@@ -18,12 +18,40 @@
 		044C24281FDC6B0F00AD6B8D /* TasksVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 044C24271FDC6B0F00AD6B8D /* TasksVC.swift */; };
 		044C24531FDC8E7A00AD6B8D /* TodayTaskCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 044C24521FDC8E7A00AD6B8D /* TodayTaskCell.swift */; };
 		048662321FE9F4BD00E3CDFC /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 048662311FE9F4BD00E3CDFC /* Constants.swift */; };
+		049182E91FFD65AB0084F90D /* NotificationCenter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 049182E81FFD65AB0084F90D /* NotificationCenter.framework */; };
+		049182EC1FFD65AB0084F90D /* TodayViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 049182EB1FFD65AB0084F90D /* TodayViewController.swift */; };
+		049182EF1FFD65AB0084F90D /* MainInterface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 049182ED1FFD65AB0084F90D /* MainInterface.storyboard */; };
+		049182F31FFD65AB0084F90D /* Progress Widget.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 049182E71FFD65AB0084F90D /* Progress Widget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		049A38BB1FE8921E00AC0F06 /* NotificationsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 049A38BA1FE8921E00AC0F06 /* NotificationsController.swift */; };
 		049A38BF1FE90EA100AC0F06 /* SettingsTVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 049A38BE1FE90EA100AC0F06 /* SettingsTVC.swift */; };
 		04AFA01C1FE36AEB00887B4B /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 04AFA01B1FE36AEA00887B4B /* GoogleService-Info.plist */; };
 		04CBA1D11FE30CE20013AF20 /* RealmModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04CBA1D01FE30CE20013AF20 /* RealmModels.swift */; };
 		997931A7E7DFC70541A11EA6 /* Pods_Progress.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FB50E384FE7DC903131D9D7E /* Pods_Progress.framework */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		049182F11FFD65AB0084F90D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0431270D1FDC5FD2002DEFA8 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 049182E61FFD65AB0084F90D;
+			remoteInfo = "Progress Widget";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		049182F71FFD65AB0084F90D /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				049182F31FFD65AB0084F90D /* Progress Widget.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		040532201FDE377500E377AF /* TaskCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskCell.swift; sourceTree = "<group>"; };
@@ -39,6 +67,11 @@
 		044C24271FDC6B0F00AD6B8D /* TasksVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TasksVC.swift; sourceTree = "<group>"; };
 		044C24521FDC8E7A00AD6B8D /* TodayTaskCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayTaskCell.swift; sourceTree = "<group>"; };
 		048662311FE9F4BD00E3CDFC /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		049182E71FFD65AB0084F90D /* Progress Widget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Progress Widget.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		049182E81FFD65AB0084F90D /* NotificationCenter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NotificationCenter.framework; path = System/Library/Frameworks/NotificationCenter.framework; sourceTree = SDKROOT; };
+		049182EB1FFD65AB0084F90D /* TodayViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayViewController.swift; sourceTree = "<group>"; };
+		049182EE1FFD65AB0084F90D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/MainInterface.storyboard; sourceTree = "<group>"; };
+		049182F01FFD65AB0084F90D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		049A38BA1FE8921E00AC0F06 /* NotificationsController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsController.swift; sourceTree = "<group>"; };
 		049A38BE1FE90EA100AC0F06 /* SettingsTVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsTVC.swift; sourceTree = "<group>"; };
 		04AFA01B1FE36AEA00887B4B /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
@@ -57,6 +90,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		049182E41FFD65AB0084F90D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				049182E91FFD65AB0084F90D /* NotificationCenter.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -64,6 +105,7 @@
 			isa = PBXGroup;
 			children = (
 				043127171FDC5FD2002DEFA8 /* Progress */,
+				049182EA1FFD65AB0084F90D /* Progress Widget */,
 				043127161FDC5FD2002DEFA8 /* Products */,
 				BF7507048E7BF9EC73C4F5FC /* Pods */,
 				E8C5D9CD953034593623C71D /* Frameworks */,
@@ -74,6 +116,7 @@
 			isa = PBXGroup;
 			children = (
 				043127151FDC5FD2002DEFA8 /* Progress.app */,
+				049182E71FFD65AB0084F90D /* Progress Widget.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -91,6 +134,16 @@
 				043127271FDC5FD2002DEFA8 /* Info.plist */,
 			);
 			path = Progress;
+			sourceTree = "<group>";
+		};
+		049182EA1FFD65AB0084F90D /* Progress Widget */ = {
+			isa = PBXGroup;
+			children = (
+				049182EB1FFD65AB0084F90D /* TodayViewController.swift */,
+				049182ED1FFD65AB0084F90D /* MainInterface.storyboard */,
+				049182F01FFD65AB0084F90D /* Info.plist */,
+			);
+			path = "Progress Widget";
 			sourceTree = "<group>";
 		};
 		04E38BA31FDCA0D20092D664 /* Controllers */ = {
@@ -130,6 +183,7 @@
 			isa = PBXGroup;
 			children = (
 				FB50E384FE7DC903131D9D7E /* Pods_Progress.framework */,
+				049182E81FFD65AB0084F90D /* NotificationCenter.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -148,15 +202,34 @@
 				4048E16DB89751946284C893 /* [CP] Embed Pods Frameworks */,
 				822AF5EDEA8653293C7728AF /* [CP] Copy Pods Resources */,
 				04AFA01D1FE36BF100887B4B /* ShellScript */,
+				049182F71FFD65AB0084F90D /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				049182F21FFD65AB0084F90D /* PBXTargetDependency */,
 			);
 			name = Progress;
 			productName = Progress;
 			productReference = 043127151FDC5FD2002DEFA8 /* Progress.app */;
 			productType = "com.apple.product-type.application";
+		};
+		049182E61FFD65AB0084F90D /* Progress Widget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 049182F61FFD65AB0084F90D /* Build configuration list for PBXNativeTarget "Progress Widget" */;
+			buildPhases = (
+				049182E31FFD65AB0084F90D /* Sources */,
+				049182E41FFD65AB0084F90D /* Frameworks */,
+				049182E51FFD65AB0084F90D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Progress Widget";
+			productName = "Progress Widget";
+			productReference = 049182E71FFD65AB0084F90D /* Progress Widget.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -164,12 +237,16 @@
 		0431270D1FDC5FD2002DEFA8 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 0900;
+				LastSwiftUpdateCheck = 0920;
 				LastUpgradeCheck = 0900;
 				ORGANIZATIONNAME = "Aditya Gunda";
 				TargetAttributes = {
 					043127141FDC5FD2002DEFA8 = {
 						CreatedOnToolsVersion = 9.0;
+						ProvisioningStyle = Automatic;
+					};
+					049182E61FFD65AB0084F90D = {
+						CreatedOnToolsVersion = 9.2;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -188,6 +265,7 @@
 			projectRoot = "";
 			targets = (
 				043127141FDC5FD2002DEFA8 /* Progress */,
+				049182E61FFD65AB0084F90D /* Progress Widget */,
 			);
 		};
 /* End PBXProject section */
@@ -201,6 +279,14 @@
 				043127231FDC5FD2002DEFA8 /* Assets.xcassets in Resources */,
 				04AFA01C1FE36AEB00887B4B /* GoogleService-Info.plist in Resources */,
 				0431271E1FDC5FD2002DEFA8 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		049182E51FFD65AB0084F90D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				049182EF1FFD65AB0084F90D /* MainInterface.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -336,7 +422,23 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		049182E31FFD65AB0084F90D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				049182EC1FFD65AB0084F90D /* TodayViewController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		049182F21FFD65AB0084F90D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 049182E61FFD65AB0084F90D /* Progress Widget */;
+			targetProxy = 049182F11FFD65AB0084F90D /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		0431271C1FDC5FD2002DEFA8 /* Main.storyboard */ = {
@@ -353,6 +455,14 @@
 				043127251FDC5FD2002DEFA8 /* Base */,
 			);
 			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+		049182ED1FFD65AB0084F90D /* MainInterface.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				049182EE1FFD65AB0084F90D /* Base */,
+			);
+			name = MainInterface.storyboard;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -469,6 +579,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = A239CE69DB84DB6FA28781AD /* Pods-Progress.debug.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -486,6 +597,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = C0CC3783E6740BF09C941F4F /* Pods-Progress.release.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = JQ4K8EE77P;
@@ -493,6 +605,38 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = AG.Progress;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 4.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		049182F41FFD65AB0084F90D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = JQ4K8EE77P;
+				INFOPLIST_FILE = "Progress Widget/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 11.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "AG.Progress.Progress-Widget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 4.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		049182F51FFD65AB0084F90D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = JQ4K8EE77P;
+				INFOPLIST_FILE = "Progress Widget/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 11.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "AG.Progress.Progress-Widget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -515,6 +659,15 @@
 			buildConfigurations = (
 				0431272B1FDC5FD2002DEFA8 /* Debug */,
 				0431272C1FDC5FD2002DEFA8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		049182F61FFD65AB0084F90D /* Build configuration list for PBXNativeTarget "Progress Widget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				049182F41FFD65AB0084F90D /* Debug */,
+				049182F51FFD65AB0084F90D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

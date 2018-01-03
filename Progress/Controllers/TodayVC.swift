@@ -556,8 +556,6 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         
          CFNotify.hideAll()
         
-        self.showAlertAfterFirstSwipeRight() 
-        
         //plays vibration if user has allowed it
         if NotificationsController.checkHapticPermissions() == true {
             AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
@@ -588,7 +586,7 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         
         self.updateArrayDisplayOrder(self.tasksList)
         
-        if NotificationsController.checkInAppNotificationPermissions() == true {
+        if NotificationsController.checkInAppNotificationPermissions() == true &&  defaults.string(forKey: "showAlertAfterFirstSwipeRightInTodayVC") != nil{
     
             BPStatusBarAlert(duration: 0.3, delay: 2, position: .statusBar)
                 .message(message: "You made progress on a task.")
@@ -596,6 +594,8 @@ extension TodayVC: CustomTodayTaskCellDelegate {
                 .bgColor(color: .flatPurple)
                 .show()
         }
+        
+        self.showAlertAfterFirstSwipeRight()
         
         //log firebase analytics event
         Analytics.logEvent(taskDoneForTodayEvent, parameters: [
@@ -881,6 +881,8 @@ extension TodayVC : AlertOnboardingDelegate {
     func alertOnboardingSkipped(_ currentStep: Int, maxStep: Int) {
         Floaty.global.button.isHidden = false
         
+        self.introducingYourDayAlert()
+        
         //log firebase debug event
         DebugController.write(string: "skipped onboarding")
                 
@@ -893,6 +895,8 @@ extension TodayVC : AlertOnboardingDelegate {
     
     func alertOnboardingCompleted() {
         Floaty.global.button.isHidden = false
+        
+        self.introducingYourDayAlert()
         
         //log firebase debug event
         DebugController.write(string: "finished onboarding")
@@ -912,6 +916,27 @@ extension TodayVC : AlertOnboardingDelegate {
 
 extension TodayVC {
     
+    func introducingYourDayAlert(){
+        let bool = defaults.value(forKey: "alreadyIntroducedYourDay")
+        if bool == nil {
+            defaults.setValue(true, forKey: "alreadyIntroducedYourDay")
+        } else {
+            return
+        }
+        
+        CFNotify.hideAll()
+        
+        var classicViewConfig = CFNotify.Config()
+        classicViewConfig.appearPosition = .bottom //the view will appear at the top of screen
+        classicViewConfig.hideTime = .never //the view will never automatically hide
+        
+        let classicView = CFNotifyView.toastWith(text:  "Welcome to Your Day.\n \n Here you'll find all the tasks you want to work on today.",
+        textFont: UIFont.preferredFont(forTextStyle: UIFontTextStyle.headline),
+        textColor: UIColor.white,
+        backgroundColor: UIColor.flatPurple)
+        CFNotify.present(config: classicViewConfig, view: classicView)
+    }
+    
     @objc func showAlertToSwipeRight() {
         if  defaults.string(forKey: "showAlertToSwipeRightinTodayVC") != nil{
             return
@@ -922,7 +947,7 @@ extension TodayVC {
         classicViewConfig.appearPosition = .bottom //the view will appear at the top of screen
         classicViewConfig.hideTime = .never //the view will never automatically hide
         
-        let classicView = CFNotifyView.toastWith(text: "Second Hint: Swipe right on a task in Your Day when you're done working.",
+        let classicView = CFNotifyView.toastWith(text: "Your Day Hint: Swipe right on a task if you've made progress, or tap the checkbox if you've completed it.",
                                                  textFont: UIFont.preferredFont(forTextStyle: UIFontTextStyle.headline),
                                                  textColor: UIColor.white,
                                                  backgroundColor: UIColor.flatPurple)
@@ -937,12 +962,12 @@ extension TodayVC {
         defaults.set(true, forKey: "showAlertAfterFirstSwipeRightInTodayVC")
         
         let alertController = CFAlertViewController(title: "You just made progress on a task!",
-                                                    message: "Your task just disappeared back into All Tasks. Check it out. \n",
+                                                    message: "Your task just disappeared back into All Tasks. \n",
                                                     textAlignment: .center,
                                                     preferredStyle: .alert,
                                                     didDismissAlertHandler: nil)
         
-        let gotoAction = CFAlertAction(title: "Go Back to All Tasks",
+        let gotoAction = CFAlertAction(title: "Go to All Tasks",
                                        style: .Default,
                                        alignment: .center,
                                        backgroundColor: FlatGreen(),
@@ -955,8 +980,8 @@ extension TodayVC {
                                         if let drawerVC = self.navigationController?.parent as? PulleyViewController {
                                             drawerVC.setDrawerPosition(position: .open, animated: true)
                                         }
-                                        
-                                        let delayTime = DispatchTime.now() +  .seconds(2)
+            
+                                        let delayTime = DispatchTime.now() +  .seconds(1)
                                         DispatchQueue.main.asyncAfter(deadline: delayTime) {
                                             self.showDotAlert()
                                         }
@@ -970,6 +995,20 @@ extension TodayVC {
     }
     
     func showDotAlert() {
+        
+        CFNotify.hideAll()
+        
+        var classicViewConfig = CFNotify.Config()
+        classicViewConfig.appearPosition = .bottom //the view will appear at the top of screen
+        classicViewConfig.hideTime = .never //the view will never automatically hide
+        
+        let classicView = CFNotifyView.toastWith(text: "What's that dot underneath your task? \n \n Each dot represents a time you've worked on it, allowing you to track your progress.",
+                                                 textFont: UIFont.preferredFont(forTextStyle: UIFontTextStyle.headline),
+                                                 textColor: UIColor.white,
+                                                 backgroundColor: UIColor.flatPurple)
+        CFNotify.present(config: classicViewConfig, view: classicView)
+        
+        /*
         let alertController2 = CFAlertViewController(title: "What's that dot doing there?",
                                                      message: "You'll notice your task has a dot underneath it now. Each dot represents a time you worked on it, so you can track your progress. \n \n When you you reach your goal, tap the checbox to complete the task.",
                                                      textAlignment: .center,
@@ -987,7 +1026,7 @@ extension TodayVC {
         
         self.present(alertController2, animated: true) {
             Floaty.global.button.isHidden = true
-        }
+        }*/
     }
 }
 

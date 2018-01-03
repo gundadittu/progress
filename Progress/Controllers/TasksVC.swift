@@ -935,7 +935,7 @@ extension TasksVC {
         classicViewConfig.appearPosition = .bottom //the view will appear at the top of screen
         classicViewConfig.hideTime = .never //the view will never automatically hide
         
-        let classicView = CFNotifyView.toastWith(text: "Hint: Swipe right on a task under All Tasks.",
+        let classicView = CFNotifyView.toastWith(text:  "All Tasks Hint: Swipe right on a task to add it to Your Day.",
                                                  textFont: UIFont.preferredFont(forTextStyle: UIFontTextStyle.headline),
                                                  textColor: UIColor.white,
                                                  backgroundColor: UIColor.flatPurple)
@@ -988,7 +988,7 @@ extension TasksVC {
         defaults.set(true, forKey: "showAlertAfterFirstSwipeRight")
                 
         let alertController = CFAlertViewController(title: "You just added a task to Your Day!",
-                                                    message: "Your Day hold all the tasks you plan to work on today.",
+                                                    message: "",
                                                     textAlignment: .center,
                                                     preferredStyle: .alert,
                                                     didDismissAlertHandler: nil)
@@ -1008,9 +1008,8 @@ extension TasksVC {
                                                 drawerVC.setDrawerPosition(position: .partiallyRevealed, animated: true)
                                             }
                                             
-                                            let delayTime = DispatchTime.now() +  .seconds(2)
+                                            let delayTime = DispatchTime.now() +  .seconds(1)
                                             DispatchQueue.main.asyncAfter(deadline: delayTime) {
-                                              
                                                 NotificationCenter.default.post(name: Notification.Name("triggerTodayVCSwipeAlert"), object: nil)
                                             }
         })
