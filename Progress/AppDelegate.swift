@@ -21,10 +21,47 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     
     var window: UIWindow?
     let defaults = UserDefaults.standard
+    
+    func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey : Any] = [:]) -> Bool {
+        
+        if url.scheme == "openAppFromWidget"
+        {
+            
+            //log firebase debug event
+            DebugController.write(string: "recieved widget tap URL")
+            
+            //log firebase analytics event
+            Analytics.logEvent(tappedWidgetEvent, parameters: [
+                "name":"" as NSObject,
+                "full_text": "" as NSObject
+                ])
+            NotificationCenter.default.post(name: Notification.Name("todayWidgetSelectedTask"), object: nil)
+            return true
+        }
+        return false
+    }
         
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         
         FirebaseApp.configure() //configure for Fireabase services
+        if defaults.value(forKey: "transferredDataToSharedAppGroup") == nil {
+            let realm = try! Realm()
+            let objects = realm.objects(SavedTask.self)
+            Migration.migrateDataToSharedAppGroup(allObjects: objects)
+            defaults.setValue(true, forKey: "transferredDataToSharedAppGroup")
+        }
+        
+        let config = Realm.Configuration(
+            fileURL: FileManager
+                .default
+                .containerURL(forSecurityApplicationGroupIdentifier: "group.progress.tasks")!
+                .appendingPathComponent("db.realm"),
+            objectTypes: [SavedTask.self])
+        Realm.Configuration.defaultConfiguration = config
+        
+        let sharedDirectory: URL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.progress.tasks")! as URL
+        let sharedRealmURL = sharedDirectory.appendingPathComponent("db.realm")
+        Realm.Configuration.defaultConfiguration = Realm.Configuration(fileURL: sharedRealmURL)
         
         UNUserNotificationCenter.current().delegate = self //Setting notification delegate
         
@@ -170,6 +207,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         default:
             completionHandler()
             break
+        }
+    }
+    
+    func application(_ application: UIApplication, performActionFor shortcutItem: UIApplicationShortcutItem, completionHandler: @escaping (Bool) -> Void) {
+        if shortcutItem.type == "AG.Progress.Progress-Widget.createTask" {
+            NotificationCenter.default.post(name: Notification.Name("shorcutCreateTask"), object: nil)
         }
     }
     

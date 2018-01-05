@@ -130,7 +130,7 @@ extension TodayTaskCell {
             
             let delayTime = DispatchTime.now() +  .seconds(1)
             DispatchQueue.main.asyncAfter(deadline: delayTime) {
-                NotificationsController.requestPermission()//contextual ask for notification permissions
+                NotificationsController.requestPermission() //contextual ask for notification permissions
             }
             
             }!

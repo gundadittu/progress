@@ -31,14 +31,13 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
     let realm = try! Realm()
     var permissionAccess = false
     var canAskForAccess = false
-    
+    var goingForward = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         self.title = "Settings"
         self.tableView.separatorStyle = .singleLine
-        self.tableView.contentInset = UIEdgeInsetsMake(0, 0, CGFloat(100), 0)
         self.navigationController?.navigationBar.tintColor = mainAppColor
         
         let badgeBool = defaults.value(forKey: UDyourDayBadgeCount) as! Bool
@@ -94,9 +93,20 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        Floaty.global.button.isHidden = false
+        Floaty.global.hide()
         if let drawerVC = self.navigationController?.parent as? PulleyViewController {
-            drawerVC.setDrawerPosition(position: .partiallyRevealed, animated: true)
+            drawerVC.setDrawerPosition(position: .closed, animated: true)
+        }
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        if (self.goingForward == false) {
+            Floaty.global.show()
+            if let drawerVC = self.navigationController?.parent as? PulleyViewController {
+                drawerVC.setDrawerPosition(position: .partiallyRevealed, animated: true)
+            }
+        } else {
+            self.goingForward = false
         }
     }
     
@@ -116,9 +126,9 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
                 
                 let svc = SFSafariViewController(url: URL(string:"https://www.makeprogressapp.com/help")!)
                 svc.preferredControlTintColor = UIColor.flatPurpleDark
-                self.present(svc, animated: true){
-                    Floaty.global.button.isHidden = true
-                }
+                
+                self.goingForward = true
+                self.present(svc, animated: true){return  }
                 
                 ///log firebase analytics event
                 Analytics.logEvent(clickedHelpEvent, parameters: [
@@ -139,11 +149,10 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
                     
                     // Configure the fields of the interface.
                     composeVC.setToRecipients(["support@makeprogressapp.com"])
-                    
+                   
+                    self.goingForward = true
                     // Present the view controller modally.
-                    self.present(composeVC, animated: true){
-                        Floaty.global.button.isHidden = true
-                    }
+                    self.present(composeVC, animated: true){ return }
                 } else {
                     let alertController = CFAlertViewController(title: "Looks like you don't have the Mail app working on your phone.",
                                                                 message: "Just shoot us an email at info@makeprogress.com to get in touch with us.",
@@ -157,13 +166,12 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
                                                   alignment: .justified,
                                                   backgroundColor: FlatGreen(),
                                                   textColor: nil,
-                                                  handler: nil)
+                                                  handler: { (action) in return })
                     
                     alertController.addAction(gotAction)
-                    self.present(alertController, animated: true) {
-                        //Causes view to disappear and thus makes both show, need to courteract this
-                        Floaty.global.button.isHidden = true
-                    }
+                    
+                    self.goingForward = true
+                    self.present(alertController, animated: true) {return }
                 }
                 
                 ///log firebase analytics event
@@ -228,9 +236,9 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
                 
                 let svc = SFSafariViewController(url: URL(string:"https://www.makeprogressapp.com")!)
                 svc.preferredControlTintColor = UIColor.flatPurpleDark
-                self.present(svc, animated: true){
-                    Floaty.global.button.isHidden = true
-                }
+                
+                self.goingForward = true
+                self.present(svc, animated: true){ return }
             } else  if indexPath.row == 1 {
                 //show credits
                 
@@ -239,9 +247,9 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
                 
                 let svc = SFSafariViewController(url: URL(string:"https://www.makeprogressapp.com/credits")!)
                 svc.preferredControlTintColor = UIColor.flatPurpleDark
-                self.present(svc, animated: true){
-                    Floaty.global.button.isHidden = true
-                }
+                
+                self.goingForward = true
+                self.present(svc, animated: true){ return }
              }else  if indexPath.row == 2 {
                 //show terms
                 
@@ -250,9 +258,9 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
                 
                 let svc = SFSafariViewController(url: URL(string:"https://www.makeprogressapp.com/terms")!)
                 svc.preferredControlTintColor = UIColor.flatPurpleDark
-                self.present(svc, animated: true){
-                    Floaty.global.button.isHidden = true
-                }
+                
+                self.goingForward = true
+                self.present(svc, animated: true){ return }
              } else  if indexPath.row == 3 {
                 //show privacy
                 
@@ -261,9 +269,8 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
                 
                 let svc = SFSafariViewController(url: URL(string:"https://www.makeprogressapp.com/privacy")!)
                 svc.preferredControlTintColor = UIColor.flatPurpleDark
-                self.present(svc, animated: true){
-                    Floaty.global.button.isHidden = true
-                }
+                self.goingForward = true
+                self.present(svc, animated: true){ return }
             }
         }
     }
@@ -272,7 +279,6 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
                                didFinishWith result: MFMailComposeResult, error: Error?) {
         // Dismiss the mail compose view controller.
         self.dismiss(animated: true, completion: nil)
-        Floaty.global.button.isHidden = false
     }
 
 
@@ -292,26 +298,15 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
         DebugController.write(string: "your day badge count switch toggled in settings")
         
         if badgeCountSwitch.isOn == true {
-           
-            //log firebase analytics event
-            Analytics.logEvent("your_day_count_badge_on", parameters: [
-                "name":"" as NSObject,
-                "full_text": "" as NSObject
-                ])
-            
+            Analytics.logEvent("your_day_count_badge_on", parameters: ["name":"" as NSObject, "full_text": "" as NSObject]) //log firebase analytics event
             defaults.set(true, forKey: "yourDayBadgeCount")
         } else {
-            //log firebase analytics event
-            Analytics.logEvent("your_day_count_badge_off", parameters: [
-                "name":"" as NSObject,
-                "full_text": "" as NSObject
-                ])
-            
+            Analytics.logEvent("your_day_count_badge_off", parameters: [ "name":"" as NSObject, "full_text": "" as NSObject]) //log firebase analytics event
              defaults.set(false, forKey: "yourDayBadgeCount")
         }
     }
-    @IBAction func dueTodayBadgeCountSwitchToggled(_ sender: Any) {
 
+    @IBAction func dueTodayBadgeCountSwitchToggled(_ sender: Any) {
         if self.permissionAccess == false {
             dueTodayBadgeCount.isOn = false
             if self.canAskForAccess == true {
@@ -322,21 +317,17 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
             return
         }
         
-        //log firebase debug event
-        DebugController.write(string: "due today badge count switch toggled in settings")
+        DebugController.write(string: "due today badge count switch toggled in settings") //log firebase debug event
         
         if dueTodayBadgeCount.isOn == true {
             //log firebase analytics event
-            Analytics.logEvent("due_today_count_badge_on", parameters: [
-                "name":"" as NSObject,
-                "full_text": "" as NSObject
-                ])
+            Analytics.logEvent("due_today_count_badge_on", parameters: ["name":"" as NSObject, "full_text": "" as NSObject])
+            
             defaults.set(true, forKey: "dueTodayBadgeCount")
         } else {
-            Analytics.logEvent("due_today_count_badge_off", parameters: [
-                "name":"" as NSObject,
-                "full_text": "" as NSObject
-                ])
+            //log firebase analytics event
+            Analytics.logEvent("due_today_count_badge_off", parameters: ["name":"" as NSObject, "full_text": "" as NSObject])
+            
             defaults.set(false, forKey: "dueTodayBadgeCount")
         }
     }
@@ -369,57 +360,39 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
         
         let select: RMAction<UIDatePicker> = RMAction(title: "Done", style: .done) { (controller) in
             
-            //log firebase debug event
-            DebugController.write(string: "daily notification time in settings - select action clicked")
+                //log firebase debug event
+                DebugController.write(string: "daily notification time in settings - select action clicked")
             
-            let date = controller.contentView.date
-            let formattedDate = formatter.string(from: date)
+                let date = controller.contentView.date
+                let formattedDate = formatter.string(from: date)
             
-            self.defaults.setValue(formattedDate, forKey: "dailyNotificationTime")
-            self.dailyNotificationTimeBtn.setTitle(formattedDate, for: .normal)
+                self.defaults.setValue(formattedDate, forKey: "dailyNotificationTime")
+                self.dailyNotificationTimeBtn.setTitle(formattedDate, for: .normal)
             
-            NotificationsController.scheduleMorningNotification()
+                NotificationsController.scheduleMorningNotification()
             
-            Floaty.global.button.isHidden = false
-            if let drawerVC = self.navigationController?.parent as? PulleyViewController {
-                drawerVC.setDrawerPosition(position: .partiallyRevealed, animated: true)
-            }
-            
-            
-            ///log firebase analytics event
-            Analytics.logEvent(dailyNotificationTimeChangedEvent, parameters: [
-                "name":"\(formattedDate)" as NSObject,
-                "full_text": "" as NSObject
-                ])
+                ///log firebase analytics event
+                Analytics.logEvent(dailyNotificationTimeChangedEvent, parameters: ["name":"\(formattedDate)" as NSObject, "full_text": "" as NSObject])
             
             }!
         
         let clear: RMAction<UIDatePicker> = RMAction(title: "Remove", style: .destructive) { (controller) in
             
-            //log firebase debug event
-            DebugController.write(string: "daily notification time in settings - clear action clicked")
+                //log firebase debug event
+                DebugController.write(string: "daily notification time in settings - clear action clicked")
             
-            self.dailyNotificationTimeBtn.setTitle("Set", for: .normal)
-            self.defaults.setValue("", forKey: "dailyNotificationTime")
+                self.dailyNotificationTimeBtn.setTitle("Set", for: .normal)
+                self.defaults.setValue("", forKey: "dailyNotificationTime")
             
-            NotificationsController.scheduleMorningNotification()
+                NotificationsController.scheduleMorningNotification()
             
-            Floaty.global.button.isHidden = false
-            if let drawerVC = self.navigationController?.parent as? PulleyViewController {
-                drawerVC.setDrawerPosition(position: .partiallyRevealed, animated: true)
-            }
+                if let drawerVC = self.navigationController?.parent as? PulleyViewController {
+                    drawerVC.setDrawerPosition(position: .partiallyRevealed, animated: true)
+                }
             
-            ///log firebase analytics event
-            Analytics.logEvent(dailyNotificationOffEvent, parameters: [
-                "name":"" as NSObject,
-                "full_text": "" as NSObject
-                ])
+                ///log firebase analytics event
+                Analytics.logEvent(dailyNotificationOffEvent, parameters: ["name":"" as NSObject, "full_text": "" as NSObject])
             }!
-        
-        Floaty.global.button.isHidden = true
-        if let drawerVC = self.navigationController?.parent as? PulleyViewController {
-            drawerVC.setDrawerPosition(position: .closed, animated: true)
-        }
         
         let picker = RMDateSelectionViewController(style: .sheetWhite, title: "Set Time for Daily Motivational Notification", message: nil, select: select, andCancel: clear)
         picker?.datePicker.date = defaultDate
@@ -451,23 +424,16 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
     
     
     @IBAction func hapticFeedbackSwitchToggled(_ sender: Any) {
-        
         //log firebase debug event
         DebugController.write(string: "haptic feedback switch toggled in settings - select action clicked")
         
         if hapticFeedbackSwitch.isOn {
             ///log firebase analytics event
-            Analytics.logEvent(hapticFeedbackOnEvent, parameters: [
-                "name":"" as NSObject,
-                "full_text": "" as NSObject
-                ])
+            Analytics.logEvent(hapticFeedbackOnEvent, parameters: ["name":"" as NSObject, "full_text": "" as NSObject])
             defaults.set(true, forKey: "hapticFeedback")
         } else {
             ///log firebase analytics event
-            Analytics.logEvent(hapticFeedbackOffEvent, parameters: [
-                "name":"" as NSObject,
-                "full_text": "" as NSObject
-                ])
+            Analytics.logEvent(hapticFeedbackOffEvent, parameters: ["name":"" as NSObject, "full_text": "" as NSObject])
             defaults.set(false, forKey: "hapticFeedback")
         }
     }
@@ -503,34 +469,31 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
                                          alignment: .justified,
                                          backgroundColor: FlatWhiteDark(),
                                          textColor: nil,
-                                         handler: nil)
+                                         handler: { (action) in return })
         
         alertController.addAction(clearAction)
         alertController.addAction(cancelAction)
-        self.present(alertController, animated: true) {
-            //Causes view to disappear and thus makes both show, need to courteract this
-            Floaty.global.button.isHidden = true
-        }
+        self.goingForward = true
+        self.present(alertController, animated: true) { return }
     }
     
     func deleteAllTasks() {
+        self.goingForward = true
+        
         let alertController = CFAlertViewController(title: "⚠️ WARNING: YOU ARE DELETING ALL YOUR TASKS! ",
                                                     message: "This will delete all your tasks. Once all your tasks are deleted, there is no way to get them back.",
                                                     textAlignment: .left,
                                                     preferredStyle: .alert,
                                                     didDismissAlertHandler: nil)
+
         let deleteAction = CFAlertAction(title: "Delete All My Tasks",
                                          style: .Destructive,
                                          alignment: .justified,
                                          backgroundColor: FlatRed(),
                                          textColor: nil,
                                          handler: { (action) in
-                                            
                                             //log firebase analytics event
-                                            Analytics.logEvent("delete_all_tasks", parameters: [
-                                                "name":"" as NSObject,
-                                                "full_text": "" as NSObject
-                                                ])
+                                            Analytics.logEvent("delete_all_tasks", parameters: ["name":"" as NSObject, "full_text": "" as NSObject])
                                             
                                             try! self.realm.write {
                                                 self.realm.deleteAll()
@@ -542,14 +505,11 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
                                          alignment: .justified,
                                          backgroundColor: FlatWhiteDark(),
                                          textColor: nil,
-                                         handler: nil)
+                                         handler:  { (action) in return })
         
         alertController.addAction(deleteAction)
         alertController.addAction(cancelAction)
-        self.present(alertController, animated: true) {
-            //Causes view to disappear and thus makes both show, need to courteract this
-            Floaty.global.button.isHidden = true
-        }
+        self.present(alertController, animated: true) { return }
     }
     
     func requestPermission() {
@@ -565,14 +525,10 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
                                           backgroundColor: FlatGreen(),
                                           textColor: nil,
                                           handler: { (action) in
-                                            Floaty.global.button.isHidden = false
                                             UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { (granted, error) in
                                                 if granted == true {
                                                     //log firebase analytics event
-                                                    Analytics.logEvent(notificationPermissionGrantedEvent, parameters: [
-                                                        "name":"" as NSObject,
-                                                        "full_text": "" as NSObject
-                                                        ])
+                                                    Analytics.logEvent(notificationPermissionGrantedEvent, parameters: ["name":"" as NSObject, "full_text": "" as NSObject])
                                                     
                                                     self.permissionAccess = true
                                                     self.canAskForAccess = false
@@ -580,18 +536,13 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
                                                     DispatchQueue.main.async {
                                                         self.viewDidLoad()
                                                     }
-                                                    
                                                 } else {
                                                     //log firebase analytics event
-                                                    Analytics.logEvent(notificationPermissionDeniedEvent, parameters: [
-                                                        "name":"" as NSObject,
-                                                        "full_text": "" as NSObject
-                                                        ])
+                                                    Analytics.logEvent(notificationPermissionDeniedEvent, parameters: ["name":"" as NSObject, "full_text": "" as NSObject])
                                                 }
                                                 
                                                 if error != nil {
-                                                    //log crashlytics error
-                                                    Crashlytics.sharedInstance().recordError(error!)
+                                                    Crashlytics.sharedInstance().recordError(error!)  //log crashlytics error
                                                     return
                                                 }
                                             }
@@ -603,20 +554,19 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
                                         alignment: .justified,
                                         backgroundColor: FlatWhiteDark(),
                                         textColor: nil,
-                                        handler: nil)
+                                        handler: { (action) in return})
+    
         alertController.addAction(grantedAction)
         alertController.addAction(laterAction)
         
         alertController.shouldDismissOnBackgroundTap = false
         
-        self.present(alertController, animated: true) {
-            //Causes view to disappear and thus makes both show, need to courteract this
-            Floaty.global.button.isHidden = true
-        }
+        self.goingForward = true
+        self.present(alertController, animated: true) { return }
     }
     
     func deniedAlert() {
-        let alertController = CFAlertViewController(title: " You didn't give us permission to send you notifications! 😞",
+        let alertController = CFAlertViewController(title: "You didn't give us permission to send you notifications! 😞",
                                                     message: "Unfortunately, you need to give us permission to send notifications in order to access this feature. You can manage these permissions in your phone's settings.",
                                                     textAlignment: .left,
                                                     preferredStyle: .alert,
@@ -627,13 +577,12 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
                                         alignment: .justified,
                                         backgroundColor: FlatGreen(),
                                         textColor: nil,
-                                        handler: { (action) in UIApplication.shared.open(URL(string:UIApplicationOpenSettingsURLString)!) })
+                                        handler: { (action) in
+                                            UIApplication.shared.open(URL(string:UIApplicationOpenSettingsURLString)!) })
         
         alertController.addAction(settingsAction)
         
-        self.present(alertController, animated: true) {
-            //Causes view to disappear and thus makes both show, need to courteract this
-            Floaty.global.button.isHidden = true
-        }
+        self.goingForward = true
+        self.present(alertController, animated: true) { return }
     }
 }

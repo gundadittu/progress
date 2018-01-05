@@ -26,6 +26,7 @@
 		049A38BF1FE90EA100AC0F06 /* SettingsTVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 049A38BE1FE90EA100AC0F06 /* SettingsTVC.swift */; };
 		04AFA01C1FE36AEB00887B4B /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 04AFA01B1FE36AEA00887B4B /* GoogleService-Info.plist */; };
 		04CBA1D11FE30CE20013AF20 /* RealmModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04CBA1D01FE30CE20013AF20 /* RealmModels.swift */; };
+		50754B30E4A22DCC26950D0C /* Pods_Progress_Widget.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC526AFC12DC18383BD25C14 /* Pods_Progress_Widget.framework */; };
 		997931A7E7DFC70541A11EA6 /* Pods_Progress.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FB50E384FE7DC903131D9D7E /* Pods_Progress.framework */; };
 /* End PBXBuildFile section */
 
@@ -72,13 +73,18 @@
 		049182EB1FFD65AB0084F90D /* TodayViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayViewController.swift; sourceTree = "<group>"; };
 		049182EE1FFD65AB0084F90D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/MainInterface.storyboard; sourceTree = "<group>"; };
 		049182F01FFD65AB0084F90D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		049182FA1FFD8A1B0084F90D /* Progress.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Progress.entitlements; sourceTree = "<group>"; };
+		049182FB1FFDB8B50084F90D /* Progress Widget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Progress Widget.entitlements"; sourceTree = "<group>"; };
 		049A38BA1FE8921E00AC0F06 /* NotificationsController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsController.swift; sourceTree = "<group>"; };
 		049A38BE1FE90EA100AC0F06 /* SettingsTVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsTVC.swift; sourceTree = "<group>"; };
 		04AFA01B1FE36AEA00887B4B /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		04CBA1D01FE30CE20013AF20 /* RealmModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmModels.swift; sourceTree = "<group>"; };
 		A239CE69DB84DB6FA28781AD /* Pods-Progress.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Progress.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Progress/Pods-Progress.debug.xcconfig"; sourceTree = "<group>"; };
 		C0CC3783E6740BF09C941F4F /* Pods-Progress.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Progress.release.xcconfig"; path = "Pods/Target Support Files/Pods-Progress/Pods-Progress.release.xcconfig"; sourceTree = "<group>"; };
+		E4A354F82A6A92385EEF8C2A /* Pods-Progress Widget.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Progress Widget.release.xcconfig"; path = "Pods/Target Support Files/Pods-Progress Widget/Pods-Progress Widget.release.xcconfig"; sourceTree = "<group>"; };
+		F4AABD877D26455B44FB9CC8 /* Pods-Progress Widget.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Progress Widget.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Progress Widget/Pods-Progress Widget.debug.xcconfig"; sourceTree = "<group>"; };
 		FB50E384FE7DC903131D9D7E /* Pods_Progress.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Progress.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		FC526AFC12DC18383BD25C14 /* Pods_Progress_Widget.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Progress_Widget.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -95,6 +101,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				049182E91FFD65AB0084F90D /* NotificationCenter.framework in Frameworks */,
+				50754B30E4A22DCC26950D0C /* Pods_Progress_Widget.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -124,6 +131,7 @@
 		043127171FDC5FD2002DEFA8 /* Progress */ = {
 			isa = PBXGroup;
 			children = (
+				049182FA1FFD8A1B0084F90D /* Progress.entitlements */,
 				04E38BA31FDCA0D20092D664 /* Controllers */,
 				04E38BA41FDCA0DF0092D664 /* Model */,
 				043127181FDC5FD2002DEFA8 /* AppDelegate.swift */,
@@ -139,6 +147,7 @@
 		049182EA1FFD65AB0084F90D /* Progress Widget */ = {
 			isa = PBXGroup;
 			children = (
+				049182FB1FFDB8B50084F90D /* Progress Widget.entitlements */,
 				049182EB1FFD65AB0084F90D /* TodayViewController.swift */,
 				049182ED1FFD65AB0084F90D /* MainInterface.storyboard */,
 				049182F01FFD65AB0084F90D /* Info.plist */,
@@ -175,6 +184,8 @@
 			children = (
 				A239CE69DB84DB6FA28781AD /* Pods-Progress.debug.xcconfig */,
 				C0CC3783E6740BF09C941F4F /* Pods-Progress.release.xcconfig */,
+				F4AABD877D26455B44FB9CC8 /* Pods-Progress Widget.debug.xcconfig */,
+				E4A354F82A6A92385EEF8C2A /* Pods-Progress Widget.release.xcconfig */,
 			);
 			name = Pods;
 			sourceTree = "<group>";
@@ -184,6 +195,7 @@
 			children = (
 				FB50E384FE7DC903131D9D7E /* Pods_Progress.framework */,
 				049182E81FFD65AB0084F90D /* NotificationCenter.framework */,
+				FC526AFC12DC18383BD25C14 /* Pods_Progress_Widget.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -218,9 +230,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 049182F61FFD65AB0084F90D /* Build configuration list for PBXNativeTarget "Progress Widget" */;
 			buildPhases = (
+				B0126F6D2EC9F89C9DC24BDD /* [CP] Check Pods Manifest.lock */,
 				049182E31FFD65AB0084F90D /* Sources */,
 				049182E41FFD65AB0084F90D /* Frameworks */,
 				049182E51FFD65AB0084F90D /* Resources */,
+				6780FA95045B4F75F476F30A /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -244,10 +258,20 @@
 					043127141FDC5FD2002DEFA8 = {
 						CreatedOnToolsVersion = 9.0;
 						ProvisioningStyle = Automatic;
+						SystemCapabilities = {
+							com.apple.ApplicationGroups.iOS = {
+								enabled = 1;
+							};
+						};
 					};
 					049182E61FFD65AB0084F90D = {
 						CreatedOnToolsVersion = 9.2;
 						ProvisioningStyle = Automatic;
+						SystemCapabilities = {
+							com.apple.ApplicationGroups.iOS = {
+								enabled = 1;
+							};
+						};
 					};
 				};
 			};
@@ -320,22 +344,31 @@
 				"${BUILT_PRODUCTS_DIR}/CFAlertViewController/CFAlertViewController.framework",
 				"${BUILT_PRODUCTS_DIR}/CFNotify/CFNotify.framework",
 				"${BUILT_PRODUCTS_DIR}/ChameleonFramework/ChameleonFramework.framework",
-				"${BUILT_PRODUCTS_DIR}/DZNEmptyDataSet/DZNEmptyDataSet.framework",
-				"${BUILT_PRODUCTS_DIR}/DottedProgressBar/DottedProgressBar.framework",
+				"${BUILT_PRODUCTS_DIR}/DZNEmptyDataSet-iOS11.0/DZNEmptyDataSet.framework",
+				"${BUILT_PRODUCTS_DIR}/DottedProgressBar-iOS11.0/DottedProgressBar.framework",
 				"${BUILT_PRODUCTS_DIR}/Floaty/Floaty.framework",
-				"${BUILT_PRODUCTS_DIR}/GTMSessionFetcher/GTMSessionFetcher.framework",
-				"${BUILT_PRODUCTS_DIR}/GoogleToolboxForMac/GoogleToolboxForMac.framework",
+				"${BUILT_PRODUCTS_DIR}/GTMSessionFetcher-iOS11.0/GTMSessionFetcher.framework",
+				"${BUILT_PRODUCTS_DIR}/GoogleToolboxForMac-iOS11.0/GoogleToolboxForMac.framework",
 				"${BUILT_PRODUCTS_DIR}/MGSwipeTableCell/MGSwipeTableCell.framework",
-				"${BUILT_PRODUCTS_DIR}/Protobuf/Protobuf.framework",
+				"${BUILT_PRODUCTS_DIR}/Protobuf-iOS11.0/Protobuf.framework",
 				"${BUILT_PRODUCTS_DIR}/Pulley/Pulley.framework",
 				"${BUILT_PRODUCTS_DIR}/RMActionController/RMActionController.framework",
 				"${BUILT_PRODUCTS_DIR}/RMDateSelectionViewController/RMDateSelectionViewController.framework",
-				"${BUILT_PRODUCTS_DIR}/Realm/Realm.framework",
-				"${BUILT_PRODUCTS_DIR}/RealmSwift/RealmSwift.framework",
-				"${BUILT_PRODUCTS_DIR}/SwiftDate/SwiftDate.framework",
+				"${BUILT_PRODUCTS_DIR}/Realm-iOS11.0/Realm.framework",
+				"${BUILT_PRODUCTS_DIR}/RealmSwift-iOS11.0/RealmSwift.framework",
+				"${BUILT_PRODUCTS_DIR}/SwiftDate-iOS11.0/SwiftDate.framework",
 				"${BUILT_PRODUCTS_DIR}/SwiftReorder/SwiftReorder.framework",
 				"${BUILT_PRODUCTS_DIR}/SwiftyJSON/SwiftyJSON.framework",
-				"${BUILT_PRODUCTS_DIR}/nanopb/nanopb.framework",
+				"${BUILT_PRODUCTS_DIR}/nanopb-iOS11.0/nanopb.framework",
+				"${BUILT_PRODUCTS_DIR}/DZNEmptyDataSet-iOS11.2/DZNEmptyDataSet.framework",
+				"${BUILT_PRODUCTS_DIR}/DottedProgressBar-iOS11.2/DottedProgressBar.framework",
+				"${BUILT_PRODUCTS_DIR}/GTMSessionFetcher-iOS11.2/GTMSessionFetcher.framework",
+				"${BUILT_PRODUCTS_DIR}/GoogleToolboxForMac-iOS11.2/GoogleToolboxForMac.framework",
+				"${BUILT_PRODUCTS_DIR}/Protobuf-iOS11.2/Protobuf.framework",
+				"${BUILT_PRODUCTS_DIR}/Realm-iOS11.2/Realm.framework",
+				"${BUILT_PRODUCTS_DIR}/RealmSwift-iOS11.2/RealmSwift.framework",
+				"${BUILT_PRODUCTS_DIR}/SwiftDate-iOS11.2/SwiftDate.framework",
+				"${BUILT_PRODUCTS_DIR}/nanopb-iOS11.2/nanopb.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
@@ -362,10 +395,34 @@
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SwiftReorder.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SwiftyJSON.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/nanopb.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/DZNEmptyDataSet.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/DottedProgressBar.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GTMSessionFetcher.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GoogleToolboxForMac.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Protobuf.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Realm.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RealmSwift.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SwiftDate.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/nanopb.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Progress/Pods-Progress-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		6780FA95045B4F75F476F30A /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Progress Widget/Pods-Progress Widget-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		822AF5EDEA8653293C7728AF /* [CP] Copy Pods Resources */ = {
@@ -381,6 +438,24 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Progress/Pods-Progress-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		B0126F6D2EC9F89C9DC24BDD /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-Progress Widget-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
 		F5C50D5F2659B8739D518C4D /* [CP] Check Pods Manifest.lock */ = {
@@ -581,6 +656,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Progress/Progress.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = JQ4K8EE77P;
@@ -599,6 +675,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Progress/Progress.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = JQ4K8EE77P;
 				INFOPLIST_FILE = Progress/Info.plist;
@@ -612,7 +689,9 @@
 		};
 		049182F41FFD65AB0084F90D /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = F4AABD877D26455B44FB9CC8 /* Pods-Progress Widget.debug.xcconfig */;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "Progress Widget/Progress Widget.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = JQ4K8EE77P;
 				INFOPLIST_FILE = "Progress Widget/Info.plist";
@@ -628,7 +707,9 @@
 		};
 		049182F51FFD65AB0084F90D /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = E4A354F82A6A92385EEF8C2A /* Pods-Progress Widget.release.xcconfig */;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "Progress Widget/Progress Widget.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = JQ4K8EE77P;
 				INFOPLIST_FILE = "Progress Widget/Info.plist";

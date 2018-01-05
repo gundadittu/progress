@@ -270,7 +270,7 @@
                         <barButtonItem key="rightBarButtonItem" image="settings" style="done" id="Xc0-DW-hbP">
                             <color key="tintColor" red="0.68888300660000001" green="0.71366006140000005" blue="0.73448425530000006" alpha="1" colorSpace="calibratedRGB"/>
                             <connections>
-                                <segue destination="XsR-mW-Fh0" kind="show" id="Bnq-BT-4Fb"/>
+                                <segue destination="XsR-mW-Fh0" kind="show" id="Vp1-dg-9f8"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>

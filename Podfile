@@ -29,3 +29,19 @@ pod 'CFNotify'
 pod 'BPStatusBarAlert'
 
 end
+
+target 'Progress Widget' do
+
+    use_frameworks!
+    
+    # Pods for Progress Widget
+pod 'RealmSwift'
+pod 'Firebase/Core'
+pod 'Firebase/Performance'
+pod 'Fabric', '~> 1.7.2'
+pod 'Crashlytics', '~> 3.9.3'
+pod 'DottedProgressBar'
+pod 'SwiftDate', '~> 4.5.0'
+pod 'DZNEmptyDataSet'
+
+end

@@ -36,10 +36,11 @@ class TodayVC: UIViewController {
     let bgColor = UIColor.white
     var currentlySelectedCell: TodayTaskCell?
 
-    let realm = try! Realm()
+    var realm = try! Realm()
     var tasksList: Results<SavedTask>?
     var token: NotificationToken?
     let defaults = UserDefaults.standard
+    let sharedDefaults = UserDefaults.init(suiteName: "group.progress.tasks")
     
     override func viewWillAppear(_ animated: Bool) {
         Floaty.global.button.isHidden = false
@@ -72,7 +73,8 @@ class TodayVC: UIViewController {
         self.tableView.reorder.shadowRadius = 20
         
         NotificationCenter.default.addObserver(self, selector: #selector(self.showAlertToSwipeRight), name: Notification.Name("triggerTodayVCSwipeAlert"), object: nil)
-        
+        NotificationCenter.default.addObserver(self, selector: #selector(self.flashSelectedCell), name: Notification.Name("todayWidgetSelectedTask"), object: nil)
+
         //Fetch data from database
         self.tasksList = self.fetchObjects()
         
@@ -128,7 +130,6 @@ class TodayVC: UIViewController {
         guard let uwArray = array else {
             return
         }
-        print(uwArray.count)
         var i = 0
         for ro in uwArray {
             try! self.realm.write {
@@ -136,13 +137,48 @@ class TodayVC: UIViewController {
             }
             i+=1
         }
-        print("reached end")
     }
     
 
     @objc func dismissKeyboardOnTap() {
         if self.currentlySelectedCell != nil {
             self.currentlySelectedCell?.taskTitleLabel.resignFirstResponder()
+        }
+    }
+    
+    @objc func flashSelectedCell() {
+        
+        if sharedDefaults?.value(forKey: "todayWidgetSelectedTask") == nil {
+            if let drawerVC = self.navigationController?.parent as? PulleyViewController {
+                drawerVC.setDrawerPosition(position: .open, animated: true)
+            }
+            
+            //log firebase debug event
+            DebugController.write(string: "recieved widget tap URL with nil selection")
+            return
+        }
+        
+        if let drawerVC = self.navigationController?.parent as? PulleyViewController {
+            drawerVC.setDrawerPosition(position: .partiallyRevealed, animated: true)
+        }
+        
+        if let uwRow = sharedDefaults?.value(forKey: "todayWidgetSelectedTask") {
+            let row = uwRow as! Int
+            let indexPath = IndexPath(row: row, section: 0)
+            self.tableView.scrollToRow(at: indexPath, at: .middle, animated: true)
+            
+            let cell = self.tableView.cellForRow(at: indexPath) as! TodayTaskCell
+            
+            let delayTime = DispatchTime.now() +  .seconds(1)
+            DispatchQueue.main.asyncAfter(deadline: delayTime) {
+                cell.contentView.backgroundColor = UIColor.flatPurple.lighten(byPercentage: CGFloat(80))
+               UIView.animate(withDuration: 2.0, animations: {
+                    cell.contentView.backgroundColor = UIColor.white
+                })
+                
+                //log firebase debug event
+                DebugController.write(string: "recieved widget tap URL - flashed selected cell")
+            }
         }
     }
 }
@@ -566,12 +602,12 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         //log firebase debug event
         DebugController.write(string: "done with task for today - task title: \(selectedTask.title)")
         
+        let storyboard: UIStoryboard = UIStoryboard.init(name: "Main",bundle: nil)
+        let vc = storyboard.instantiateViewController(withIdentifier: "DrawerContentViewController") as! TasksVC
+        let list = vc.fetchObjects()
+        
         try! self.realm.write {
-            
-            let storyboard: UIStoryboard = UIStoryboard.init(name: "Main",bundle: nil)
-            let vc = storyboard.instantiateViewController(withIdentifier: "DrawerContentViewController") as! TasksVC
-            let list = vc.fetchObjects()
-            
+        
             //move recently unchecked task to bottom of pending - make selected task displayOrder = 0 + move all other up 1
             for task in list {
                 if task != selectedTask && task.isCompleted == false {
@@ -751,9 +787,20 @@ extension TodayVC: MGSwipeTableCellDelegate {
     
     //Prevents all swiping if a cell is being edited
     func swipeTableCell(_ cell: MGSwipeTableCell, canSwipe direction: MGSwipeDirection, from point: CGPoint) -> Bool {
-        
+        let editingCell = cell as! TodayTaskCell
         if self.currentlySelectedCell != nil {
-            return false
+            if self.currentlySelectedCell == editingCell {
+                let newText = editingCell.taskTitleLabel.text
+                let trimmedText = newText?.trimmingCharacters(in: .whitespacesAndNewlines)
+                if trimmedText?.isEmpty == true {
+                    return false
+                } else {
+                    editingCell.customDelegate?.cellDidEndEditing(editingCell: editingCell)
+                    return true
+                }
+            } else {
+                return false
+            }
         }
         return true
     }
@@ -879,7 +926,6 @@ extension TodayVC : AlertOnboardingDelegate {
     }
     
     func alertOnboardingSkipped(_ currentStep: Int, maxStep: Int) {
-        Floaty.global.button.isHidden = false
         
         self.introducingYourDayAlert()
         
@@ -894,7 +940,6 @@ extension TodayVC : AlertOnboardingDelegate {
     }
     
     func alertOnboardingCompleted() {
-        Floaty.global.button.isHidden = false
         
         self.introducingYourDayAlert()
         
@@ -923,6 +968,8 @@ extension TodayVC {
         } else {
             return
         }
+        
+        Floaty.global.button.isHidden = false
         
         CFNotify.hideAll()
         
@@ -1007,26 +1054,6 @@ extension TodayVC {
                                                  textColor: UIColor.white,
                                                  backgroundColor: UIColor.flatPurple)
         CFNotify.present(config: classicViewConfig, view: classicView)
-        
-        /*
-        let alertController2 = CFAlertViewController(title: "What's that dot doing there?",
-                                                     message: "You'll notice your task has a dot underneath it now. Each dot represents a time you worked on it, so you can track your progress. \n \n When you you reach your goal, tap the checbox to complete the task.",
-                                                     textAlignment: .center,
-                                                     preferredStyle: .alert,
-                                                     didDismissAlertHandler: nil)
-        let gotItAction = CFAlertAction(title: "Makes Sense",
-                                        style: .Default,
-                                        alignment: .center,
-                                        backgroundColor: FlatGreen(),
-                                        textColor: nil, handler: { action in
-                                            //log firebase debug event
-                                            DebugController.write(string: "selected action for first dot alert")
-        })
-        alertController2.addAction(gotItAction)
-        
-        self.present(alertController2, animated: true) {
-            Floaty.global.button.isHidden = true
-        }*/
     }
 }
 

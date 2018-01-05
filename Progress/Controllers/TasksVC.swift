@@ -34,7 +34,7 @@ class TasksVC: UIViewController, FloatyDelegate  {
     let bgColor = UIColor.white
     var currentlySelectedCell: TaskCell? = nil
     
-    let realm = try! Realm()
+    var realm = try! Realm()
     var tasksList: Results<SavedTask>?
     var token: NotificationToken?
     let defaults = UserDefaults.standard
@@ -86,15 +86,16 @@ class TasksVC: UIViewController, FloatyDelegate  {
         self.tableView.reorder.shadowOpacity = 0.3
         self.tableView.reorder.shadowRadius = 20
         
-        
         //Fetch data from database
         if isTasksVCAlreadyLaunchedOnce() == false {
             self.addWelcomeTasks()
         }
         
           NotificationCenter.default.addObserver(self, selector: #selector(self.showAlertToSwipeRight), name: Notification.Name("triggerTaskVCSwipeAlert"), object: nil)
+         NotificationCenter.default.addObserver(self, selector: #selector(self.createNewTask), name: Notification.Name("shorcutCreateTask"), object: nil)
         
         self.tasksList = self.fetchObjects()
+         self.updateArrayDisplayOrder(self.tasksList)
         
         //Responds to changes in realm to rearrange tableview
         token = self.tasksList?.observe {[weak self] (changes: RealmCollectionChange) in
@@ -136,14 +137,16 @@ class TasksVC: UIViewController, FloatyDelegate  {
     func fetchObjects() -> Results<SavedTask> {
         let isNotTodayPredicate = NSPredicate(format: "isToday == %@",  Bool(booleanLiteral: false) as CVarArg)
         let list = self.realm.objects(SavedTask.self).filter(isNotTodayPredicate)
-        let sortProperties = [SortDescriptor(keyPath: "isCompleted", ascending: true), SortDescriptor(keyPath: "displayOrder", ascending: false)]
-        return list.sorted(by: sortProperties)
+        let sortProperties = [ SortDescriptor(keyPath: "isCompleted", ascending: true), SortDescriptor(keyPath: "displayOrder", ascending: false)]
+        let sortedList = list.sorted(by: sortProperties)
+        return sortedList
+
     }
     
     //used to update display orders after items are deleted + added
     func updateArrayDisplayOrder(_ array: Results<SavedTask>?){
         guard let uwArray = array else {
-            return
+            return //nil
         }
         var i = uwArray.count - 1
         for ro in uwArray {
@@ -152,6 +155,7 @@ class TasksVC: UIViewController, FloatyDelegate  {
             }
             i-=1
         }
+        //return uwArray
     }
     
     @objc func dismissKeyboardOnTap() {
@@ -178,7 +182,7 @@ class TasksVC: UIViewController, FloatyDelegate  {
     }
     
     //Creates a new task
-    func createNewTask(){
+    @objc func createNewTask(){
         
         if self.currentlySelectedCell != nil {
             let newText = self.currentlySelectedCell?.taskTitleLabel.text
@@ -228,15 +232,28 @@ extension UIScrollView {
     ///   - completion: Completion block
     func animateScrollToTop(offset: CGFloat, withDuration duration:  TimeInterval,
                             completion:             @escaping (()->())) {
+
+        var actualOffset = CGFloat(0)
+        if self.contentOffset != CGPoint.zero {
+            actualOffset = offset
+         }
         
         UIView.animate(withDuration: duration, animations: { [weak self] in
-            self?.setContentOffset(CGPoint(x: 0, y: -offset), animated: false)
+            self?.setContentOffset(CGPoint(x: 0, y: -actualOffset), animated: false)
             }, completion: { finish in
                 guard finish else {
                     return
                 }
                 completion()
         })
+    }
+}
+
+extension UITableView {
+    func scrollToBottom(animated: Bool = true, completion: @escaping (()->())) {
+        let rows = self.numberOfRows(inSection: 0)
+        self.scrollToRow(at: IndexPath(row: rows - 1, section: 0), at: .bottom, animated: animated)
+        completion()
     }
 }
 
@@ -455,7 +472,7 @@ extension TasksVC: CustomTaskCellDelegate {
         cell.leftSwipeSettings.transition = .drag
         cell.leftExpansion.buttonIndex = 0
         cell.leftExpansion.fillOnTrigger = true
-        cell.leftExpansion.threshold = 2
+        cell.leftExpansion.threshold = 1
         let rightButton1 = MGSwipeButton(title: "Delete", backgroundColor: FlatRed())
         cell.rightButtons = [ rightButton1]
         cell.rightSwipeSettings.transition = .drag
@@ -711,21 +728,21 @@ extension TasksVC: CustomTaskCellDelegate {
      
         editingCell.taskTitleLabel.isEnabled = true//to allow user input
         editingCell.taskTitleLabel.becomeFirstResponder()
-        
-        //animate cells up
-        let editingOffset = self.tableView.contentOffset.y - editingCell.frame.origin.y as CGFloat
-        let visibleCells = self.tableView.visibleCells as! [TaskCell]
-        for cell in visibleCells {
-            //animate cells up so that edited cell is at top of tableview
-            UIView.animate(withDuration: 0.3, animations: { () -> Void in
-                cell.transform = CGAffineTransform(translationX: 0, y: editingOffset)
-                if cell != editingCell {
-                    cell.checkBox.isEnabled = false
-                    cell.dueDateBtn.isEnabled = false //so user can not trigger date picker of another cell
-                    cell.alpha = 0.1 //gray out any cells that aren't being edited
-                }
-            })
-        }
+
+            //animate cells up
+            let editingOffset = self.tableView.contentOffset.y - editingCell.frame.origin.y as CGFloat
+            let visibleCells = self.tableView.visibleCells as! [TaskCell]
+            for cell in visibleCells {
+                //animate cells up so that edited cell is at top of tableview
+                UIView.animate(withDuration: 0.3, animations: { () -> Void in
+                    cell.transform = CGAffineTransform(translationX: 0, y: editingOffset)
+                    if cell != editingCell {
+                        cell.checkBox.isEnabled = false
+                        cell.dueDateBtn.isEnabled = false //so user can not trigger date picker of another cell
+                        cell.alpha = 0.1 //gray out any cells that aren't being edited
+                    }
+                })
+            }
     }
     
     func cellDidEndEditing(editingCell: TaskCell) {
@@ -849,13 +866,26 @@ extension TasksVC: CustomTaskCellDelegate {
 
 extension TasksVC: MGSwipeTableCellDelegate {
     
-    //Prevents swiping if a cell is being edited
+    //Prevents all swiping if a cell is being edited
     func swipeTableCell(_ cell: MGSwipeTableCell, canSwipe direction: MGSwipeDirection, from point: CGPoint) -> Bool {
+        let editingCell = cell as! TaskCell
         if self.currentlySelectedCell != nil {
-            return false
+            if self.currentlySelectedCell == editingCell {
+                let newText = editingCell.taskTitleLabel.text
+                let trimmedText = newText?.trimmingCharacters(in: .whitespacesAndNewlines)
+                if trimmedText?.isEmpty == true {
+                    return false
+                } else {
+                    editingCell.customDelegate?.cellDidEndEditing(editingCell: editingCell)
+                    return true
+                }
+            } else {
+                return false
+            }
         }
         return true
     }
+
     
     //Handles user swipe inputs 
     func swipeTableCell(_ cell: MGSwipeTableCell, tappedButtonAt index: Int, direction: MGSwipeDirection, fromExpansion: Bool) -> Bool {

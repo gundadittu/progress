@@ -38,7 +38,11 @@ class NotificationsController  {
         let categoryID = "deadline"
         let date = task.deadline!
         
+        //deadline add to your day
         
+        
+        
+        //deadline notification
         let completeAction = UNNotificationAction(identifier: "completeAction",
                                                   title: "Mark as Completed", options: [])
         let deleteAction = UNNotificationAction(identifier: "deleteAction",
