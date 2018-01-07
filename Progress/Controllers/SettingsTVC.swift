@@ -333,22 +333,26 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
 
     
     @IBAction func dailyNotificationInfoTapped(_ sender: Any) {
+        CFNotify.hideAll()
+        
         var classicViewConfig = CFNotify.Config()
         classicViewConfig.appearPosition = .bottom //the view will appear at the top of screen
         classicViewConfig.hideTime = .custom(seconds: TimeInterval(3.0)) //the view will never automatically hide
         
-        let classicView = CFNotifyView.toastWith(text: "If on, this setting will send you a notification at a certain time reminding you to plan Your Day. It will also include a new motivational quote everyday.",
+        let classicView = CFNotifyView.toastWith(text: "This setting will send you a notification everyday at a certain time, reminding you to plan Your Day. It will also include a new motivational quote everyday.",
                                                  textFont: UIFont.preferredFont(forTextStyle: UIFontTextStyle.headline),
                                                  textColor: UIColor.white,
                                                  backgroundColor: UIColor.flatPurple)
         CFNotify.present(config: classicViewConfig, view: classicView)
     }
     @IBAction func yourDayBadgeInfoTapped(_ sender: Any) {
+        CFNotify.hideAll()
+
         var classicViewConfig = CFNotify.Config()
         classicViewConfig.appearPosition = .bottom //the view will appear at the top of screen
         classicViewConfig.hideTime = .custom(seconds: TimeInterval(3.0)) //the view will never automatically hide
 
-        let classicView = CFNotifyView.toastWith(text:  "If this setting is selected, a badge count will appear if there are tasks in Your Day. The badge is the little red icon on the top-right corner of the app icon.",
+        let classicView = CFNotifyView.toastWith(text:  "This setting will add a badge count if there are tasks in Your Day. A badge is the little red number on the top-right corner of the app icon.",
                                                  textFont: UIFont.preferredFont(forTextStyle: UIFontTextStyle.headline),
                                                  textColor: UIColor.white,
                                                  backgroundColor: UIColor.flatPurple)
@@ -356,11 +360,13 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
     }
     
     @IBAction func haptifFeedbackInfoTapped(_ sender: Any) {
+        CFNotify.hideAll()
+
         var classicViewConfig = CFNotify.Config()
         classicViewConfig.appearPosition = .bottom //the view will appear at the top of screen
         classicViewConfig.hideTime = .custom(seconds: TimeInterval(3.0)) //the view will never automatically hide
 
-        let classicView = CFNotifyView.toastWith(text:  "If on, this setting will play haptic feedback (a vibration) after major actions, such as adding tasks to Your Day, completing tasks, etc.",
+        let classicView = CFNotifyView.toastWith(text:  "This setting will play haptic feedback (a vibration) after major actions, such as adding tasks to Your Day, completing tasks, etc.",
                                                  textFont: UIFont.preferredFont(forTextStyle: UIFontTextStyle.headline),
                                                  textColor: UIColor.white,
                                                  backgroundColor: UIColor.flatPurple)
