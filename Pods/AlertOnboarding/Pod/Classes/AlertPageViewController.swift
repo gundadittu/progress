@@ -118,8 +118,6 @@ class AlertPageViewController: UIViewController, UIPageViewControllerDataSource,
         pageContentViewController.image.image = UIImage(named: arrayOfImage[realIndex])
         pageContentViewController.labelMainTitle.text = arrayOfTitle[realIndex]
         pageContentViewController.labelMainTitle.textColor = alertview.colorTitleLabel
-         pageContentViewController.labelMainTitle.font = UIFont(name: "Avenir-Black", size: 20)
-        pageContentViewController.labelDescription.font = UIFont(name: "Avenir-Light", size: 15) 
         pageContentViewController.labelDescription.text = arrayOfDescription[realIndex]
         pageContentViewController.labelDescription.textColor = alertview.colorDescriptionLabel
         

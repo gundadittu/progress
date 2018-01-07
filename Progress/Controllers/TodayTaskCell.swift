@@ -134,7 +134,7 @@ extension TodayTaskCell {
             }
             
             }!
-        
+
         let clear: RMAction<UIDatePicker> = RMAction(title: "Remove", style: .destructive) { (controller) in
             //log firebase debug event
             DebugController.write(string: "removed date in picker - \(self.taskTitleLabel.text!)")
@@ -147,7 +147,8 @@ extension TodayTaskCell {
         let title = (self.taskObj?.title)!
         
         self.customDelegate?.cellPickerSelected(editingCell: self)
-        let picker = RMDateSelectionViewController(style: .sheetWhite, title: "Set Deadline", message: title, select: select, andCancel: clear)
+        let picker = RMDateSelectionViewController(style: .sheetWhite, title: "Add Deadline", message: title, select: select, andCancel: clear)
+        
         if dueDate != nil {
             picker?.datePicker.date = dueDate!
         }

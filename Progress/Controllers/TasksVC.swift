@@ -92,8 +92,9 @@ class TasksVC: UIViewController, FloatyDelegate  {
         }
         
           NotificationCenter.default.addObserver(self, selector: #selector(self.showAlertToSwipeRight), name: Notification.Name("triggerTaskVCSwipeAlert"), object: nil)
-         NotificationCenter.default.addObserver(self, selector: #selector(self.createNewTask), name: Notification.Name("shorcutCreateTask"), object: nil)
-        
+         NotificationCenter.default.addObserver(self, selector: #selector(self.createNewTask), name: Notification.Name("shortcutCreateTask"), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(self.addAllTasksDueTodaytoYourDay), name: Notification.Name("addTasksDueTodayToYourDay"), object: nil)
+
         self.tasksList = self.fetchObjects()
          self.updateArrayDisplayOrder(self.tasksList)
         
@@ -140,7 +141,6 @@ class TasksVC: UIViewController, FloatyDelegate  {
         let sortProperties = [ SortDescriptor(keyPath: "isCompleted", ascending: true), SortDescriptor(keyPath: "displayOrder", ascending: false)]
         let sortedList = list.sorted(by: sortProperties)
         return sortedList
-
     }
     
     //used to update display orders after items are deleted + added
@@ -158,18 +158,57 @@ class TasksVC: UIViewController, FloatyDelegate  {
         //return uwArray
     }
     
+    @objc func addAllTasksDueTodaytoYourDay(showNotification: Bool = false){
+        //log firebase debug event
+        DebugController.write(string: "add all task due today to your day")
+        //log firebase analytics event
+        Analytics.logEvent("add_all_tasks_due_today_to_your_day", parameters: ["name": "" as NSObject, "full_text": "" as NSObject])
+        
+        if (self.tasksList?.count)! > 0 {
+            for task in self.tasksList!{
+                if task.deadline != nil && task.isCompleted == false {
+                    let deadline: Date = task.deadline!
+                    if deadline.isToday{
+                        let storyboard: UIStoryboard = UIStoryboard.init(name: "Main",bundle: nil)
+                        let vc = storyboard.instantiateViewController(withIdentifier: "PrimaryContentViewController") as! TodayVC
+                        let list = vc.fetchObjects()
+                        let index = list.count
+                        try! self.realm.write {
+                            task.isToday = true
+                            task.todayDisplayOrder = index
+                        }
+                        if showNotification == true {
+                            BPStatusBarAlert(duration: 0.3, delay: 2, position: .statusBar)
+                                .message(message: "Your task was moved to Your Day.")
+                                .messageColor(color: .white)
+                                .bgColor(color: .flatPurple)
+                                .show()
+                        }
+                    }
+                }
+            }
+        }
+        self.updateArrayDisplayOrder(self.tasksList)
+    }
+    
     @objc func dismissKeyboardOnTap() {
         if self.currentlySelectedCell != nil {
+            //log firebase analytics event
+            Analytics.logEvent("dismiss_keyboard_on_tap", parameters: ["name": "" as NSObject, "full_text": "" as NSObject])
             self.currentlySelectedCell?.taskTitleLabel.resignFirstResponder()
         }
     }
     
     @objc func tappedOnNavBar() {
         if let drawerVC = self.navigationController?.parent as? PulleyViewController {
-            drawerVC.setDrawerPosition(position: .open, animated: true)
+            if drawerVC.drawerPosition == .open {
+                 drawerVC.setDrawerPosition(position: .partiallyRevealed, animated: true)
+            } else {
+                drawerVC.setDrawerPosition(position: .open, animated: true)
+            }
         }
         
-        Analytics.logEvent("tapped_to_open_drawer", parameters: [ "name":"" as NSObject, "full_text": "" as NSObject ])
+        Analytics.logEvent("tapped_to_move_drawer", parameters: [ "name":"" as NSObject, "full_text": "" as NSObject ])
     }
     
     //Plus button tapped to create new task
@@ -249,14 +288,6 @@ extension UIScrollView {
     }
 }
 
-extension UITableView {
-    func scrollToBottom(animated: Bool = true, completion: @escaping (()->())) {
-        let rows = self.numberOfRows(inSection: 0)
-        self.scrollToRow(at: IndexPath(row: rows - 1, section: 0), at: .bottom, animated: animated)
-        completion()
-    }
-}
-
 extension TasksVC: UITableViewDelegate, UITableViewDataSource, TableViewReorderDelegate {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -325,6 +356,9 @@ extension TasksVC: UITableViewDelegate, UITableViewDataSource, TableViewReorderD
         if  cell.swipeState != .none {
             return
         }
+        
+        //log firebase analytics event
+        Analytics.logEvent("selected_task", parameters: ["name": "" as NSObject, "full_text": "" as NSObject])
         
         if let title = cell.taskObj?.title {
             //log firebase debug event
@@ -567,6 +601,7 @@ extension TasksVC: CustomTaskCellDelegate {
                 "full_text": "" as NSObject
                 ])
         }
+        self.addAllTasksDueTodaytoYourDay(showNotification: true)
         self.updateArrayDisplayOrder(self.tasksList)
     }
     
@@ -603,9 +638,15 @@ extension TasksVC: CustomTaskCellDelegate {
         
         //Schedules notification if there is a new deadline
          NotificationsController.scheduleNotification(task: selectedTask)
+        
+        self.addAllTasksDueTodaytoYourDay(showNotification: true)
     }
     
     func userTriedAddingDateToEmptyTask() {
+        
+        //log firebase analytics event
+        Analytics.logEvent("tried_adding_deadline_to_empty_task", parameters: ["name": "" as NSObject, "full_text": "" as NSObject])
+        
         //log firebase debug event
         DebugController.write(string: "tried adding deadline to empty task")
         
@@ -824,7 +865,9 @@ extension TasksVC: CustomTaskCellDelegate {
             if editingCell.taskObj?.isCompleted == true || editingCell.swipeOffset > 0 {
                 return
             }
-            
+        
+            Analytics.logEvent("selected_date_picker", parameters: ["name": "" as NSObject, "full_text": "" as NSObject])
+
             Floaty.global.button.isHidden = true
             
             //Updates currently being edited information
@@ -871,6 +914,8 @@ extension TasksVC: MGSwipeTableCellDelegate {
         let editingCell = cell as! TaskCell
         if self.currentlySelectedCell != nil {
             if self.currentlySelectedCell == editingCell {
+                Analytics.logEvent("swiped_on_currently_editing_cell", parameters: ["name": "" as NSObject, "full_text": "" as NSObject])
+                
                 let newText = editingCell.taskTitleLabel.text
                 let trimmedText = newText?.trimmingCharacters(in: .whitespacesAndNewlines)
                 if trimmedText?.isEmpty == true {
@@ -965,7 +1010,7 @@ extension TasksVC {
         classicViewConfig.appearPosition = .bottom //the view will appear at the top of screen
         classicViewConfig.hideTime = .never //the view will never automatically hide
         
-        let classicView = CFNotifyView.toastWith(text:  "All Tasks Hint: Swipe right on a task to add it to Your Day.",
+        let classicView = CFNotifyView.toastWith(text:  "All Tasks Hint: Swipe right (-->) on a task to add it to Your Day. ",
                                                  textFont: UIFont.preferredFont(forTextStyle: UIFontTextStyle.headline),
                                                  textColor: UIColor.white,
                                                  backgroundColor: UIColor.flatPurple)
@@ -979,30 +1024,30 @@ extension TasksVC {
 
         var introTasks = [SavedTask]()
         
+        let introTask5 = SavedTask()
+        introTask5.displayOrder = 4
+        introTask5.title = "Tip: Use the plus button to create a task."
+        introTasks.append(introTask5)
+        
         let introTask1 = SavedTask()
-        introTask1.displayOrder = 4
-        introTask1.title = "Tip: Swipe left to delete me."
+        introTask1.displayOrder = 3
+        introTask1.title = "Tip: Swipe left to delete me. <--"
         introTasks.append(introTask1)
         
         let introTask2 = SavedTask()
-        introTask2.displayOrder = 3
+        introTask2.displayOrder = 2
         introTask2.title = "Tip: Tap to edit my title and add a deadline."
         introTasks.append(introTask2)
         
         let introTask3 = SavedTask()
-        introTask3.displayOrder = 2
-        introTask3.title = "Tip: Keep me pressed to pick me up."
+        introTask3.displayOrder = 1
+        introTask3.title = "Tip: Keep me pressed to move me."
         introTasks.append(introTask3)
         
         let introTask4 = SavedTask()
-        introTask4.displayOrder = 1
+        introTask4.displayOrder = 0
         introTask4.title = "Tip: Tap the checkbox to complete me."
         introTasks.append(introTask4)
-        
-        let introTask5 = SavedTask()
-        introTask5.displayOrder = 0
-        introTask5.title = "Tip: Use the plus button to create a task."
-        introTasks.append(introTask5)
 
         
         try! self.realm.write {
@@ -1012,16 +1057,20 @@ extension TasksVC {
     
     func showAlertAfterFirstSwipeRight() {
         
-        if  defaults.string(forKey: "showAlertAfterFirstSwipeRight") != nil{
+        if  defaults.string(forKey: "showAlertAfterFirstSwipeRight") != nil {
             return
         }
         defaults.set(true, forKey: "showAlertAfterFirstSwipeRight")
-                
+      
         let alertController = CFAlertViewController(title: "You just added a task to Your Day!",
-                                                    message: "",
-                                                    textAlignment: .center,
-                                                    preferredStyle: .alert,
-                                                    didDismissAlertHandler: nil)
+                                                         titleColor: .flatBlack,
+                                                         message: "",
+                                                         messageColor: .flatBlack,
+                                                         textAlignment: .center,
+                                                         preferredStyle: .alert,
+                                                         headerView: nil,
+                                                         footerView: nil,
+                                                         didDismissAlertHandler: nil)
         
         let gotoAction = CFAlertAction(title: "Go to Your Day",
                                         style: .Default,

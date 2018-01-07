@@ -869,7 +869,7 @@ open class Floaty: UIView {
             )
         }, completion: nil)
     }
-
+    
     @objc internal func keyboardWillHide(_ notification: Notification) {
         guard respondsToKeyboard, !sticky else {
             return

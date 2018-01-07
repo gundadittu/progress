@@ -150,6 +150,8 @@
     
     if(self.style == RMActionStyleDestructive) {
         [actionButton setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
+    } else if(self.style == RMActionStyleDone) {
+         [actionButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     }
     
     return actionButton;

@@ -38,10 +38,6 @@ class NotificationsController  {
         let categoryID = "deadline"
         let date = task.deadline!
         
-        //deadline add to your day
-        
-        
-        
         //deadline notification
         let completeAction = UNNotificationAction(identifier: "completeAction",
                                                   title: "Mark as Completed", options: [])
@@ -57,6 +53,7 @@ class NotificationsController  {
         content.body = body
         content.sound = UNNotificationSound.default()
         content.categoryIdentifier = categoryID
+        content.badge = 1 
         
         var dateComponents = DateComponents()
         dateComponents.month = NSCalendar.current.component(.month, from: date)
@@ -113,7 +110,7 @@ class NotificationsController  {
                 DispatchQueue.main.async {
                     
                     let alertController = CFAlertViewController(title: "👋 We need your permission to send you notifications! ",
-                                                                message: "Nothing annoying. Just so we can place a badge count, and remind you to plan your day and of deadlines. \n \n Even after you give us permission, you have control over which notification we can send you in settings.",
+                                                                message: "Nothing annoying. Just so we can place a badge count on the app, and remind you to plan your day, and notify you on deadlines. \n \n Even after you give us permission, you have control over which notifications we can send you in settings.",
                                                                 textAlignment: .left,
                                                                 preferredStyle: .alert,
                                                                 didDismissAlertHandler: nil)

@@ -142,6 +142,8 @@ class TodayVC: UIViewController {
 
     @objc func dismissKeyboardOnTap() {
         if self.currentlySelectedCell != nil {
+            //log firebase analytics event
+            Analytics.logEvent("dismiss_keyboard_on_tap", parameters: ["name": "" as NSObject, "full_text": "" as NSObject])
             self.currentlySelectedCell?.taskTitleLabel.resignFirstResponder()
         }
     }
@@ -169,7 +171,7 @@ class TodayVC: UIViewController {
             
             let cell = self.tableView.cellForRow(at: indexPath) as! TodayTaskCell
             
-            let delayTime = DispatchTime.now() +  .seconds(1)
+            let delayTime = DispatchTime.now() +  .microseconds(500000)
             DispatchQueue.main.asyncAfter(deadline: delayTime) {
                 cell.contentView.backgroundColor = UIColor.flatPurple.lighten(byPercentage: CGFloat(80))
                UIView.animate(withDuration: 2.0, animations: {
@@ -179,6 +181,17 @@ class TodayVC: UIViewController {
                 //log firebase debug event
                 DebugController.write(string: "recieved widget tap URL - flashed selected cell")
             }
+        }
+    }
+    
+    
+    @IBAction func composeBtnClicked(_ sender: Any) {
+        //log firebase analytics event
+        Analytics.logEvent("feedback_button_clicked", parameters: ["name": "" as NSObject, "full_text": "" as NSObject])
+        self.performSegue(withIdentifier: "toSettings", sender: nil)
+        let delayTime = DispatchTime.now() +  .seconds(1)
+        DispatchQueue.main.asyncAfter(deadline: delayTime) {
+            NotificationCenter.default.post(name: Notification.Name("triggerMailCompose"), object: nil)
         }
     }
 }
@@ -241,6 +254,9 @@ extension TodayVC: UITableViewDelegate, UITableViewDataSource, TableViewReorderD
             return
         }
         
+        //log firebase analytics event
+        Analytics.logEvent("selected_task", parameters: ["name": "" as NSObject, "full_text": "" as NSObject])
+        
         if let title = cell.taskObj?.title {
             //log firebase debug event
             DebugController.write(string: "Selected task - task title: \(title)")
@@ -276,7 +292,6 @@ extension TodayVC: UITableViewDelegate, UITableViewDataSource, TableViewReorderD
     func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
         return true
     }
-
 }
 
 extension TodayVC: CustomTodayTaskCellDelegate {
@@ -383,6 +398,7 @@ extension TodayVC: CustomTodayTaskCellDelegate {
             cell.leftExpansion.threshold = 1
             let rightButton1 = MGSwipeButton(title: "Delete", backgroundColor: FlatRed())
             let rightButton2 = MGSwipeButton(title: "Remove", backgroundColor: UIColor.gray)
+    
             cell.rightButtons = [rightButton1, rightButton2]
             cell.rightSwipeSettings.transition = .drag
             cell.rightExpansion.buttonIndex = 0
@@ -491,6 +507,9 @@ extension TodayVC: CustomTodayTaskCellDelegate {
     }
 
     func userTriedAddingDateToEmptyTask() {
+        
+        //log firebase analytics event
+        Analytics.logEvent("tried_adding_deadline_to_empty_task", parameters: ["name": "" as NSObject, "full_text": "" as NSObject])
         
         //log firebase debug event
         DebugController.write(string: "tried adding deadline to empty task")
@@ -743,6 +762,8 @@ extension TodayVC: CustomTodayTaskCellDelegate {
             return
         }
         
+        Analytics.logEvent("selected_date_picker", parameters: ["name": "" as NSObject, "full_text": "" as NSObject])
+        
         Floaty.global.button.isHidden = true
         
         //Updates currently being edited information
@@ -790,6 +811,8 @@ extension TodayVC: MGSwipeTableCellDelegate {
         let editingCell = cell as! TodayTaskCell
         if self.currentlySelectedCell != nil {
             if self.currentlySelectedCell == editingCell {
+                Analytics.logEvent("swiped_on_currently_editing_cell", parameters: ["name": "" as NSObject, "full_text": "" as NSObject])
+
                 let newText = editingCell.taskTitleLabel.text
                 let trimmedText = newText?.trimmingCharacters(in: .whitespacesAndNewlines)
                 if trimmedText?.isEmpty == true {
@@ -809,7 +832,6 @@ extension TodayVC: MGSwipeTableCellDelegate {
     func swipeTableCell(_ cell: MGSwipeTableCell, tappedButtonAt index: Int, direction: MGSwipeDirection, fromExpansion: Bool) -> Bool {
         
         let modifiedCell = cell as! TodayTaskCell
-        
         if direction == .rightToLeft {
             if index == 0 {
                 //user swipes left to delete
@@ -855,7 +877,7 @@ extension TodayVC: DZNEmptyDataSetSource, DZNEmptyDataSetDelegate {
     }
     
     func description(forEmptyDataSet scrollView: UIScrollView!) -> NSAttributedString! {
-        let returnString = "Looks like you have no tasks left for today."
+        let returnString = "Looks like you have no tasks to work on or due today."
         let attrs = [NSAttributedStringKey.font: UIFont.preferredFont(forTextStyle: UIFontTextStyle.headline)]
         return NSAttributedString(string: returnString, attributes: attrs)
     }
@@ -866,7 +888,6 @@ extension TodayVC: DZNEmptyDataSetSource, DZNEmptyDataSetDelegate {
 }
 
 extension TodayVC : AlertOnboardingDelegate {
-
     
     override func viewDidAppear(_ animated: Bool) {
         if self.isAppAlreadyLaunchedOnce() == false {
@@ -877,7 +898,7 @@ extension TodayVC : AlertOnboardingDelegate {
     
     func loadOnboarding(){
         //First, declare datas
-        let arrayOfImage = ["purpleBox","stones","progress","meditation"]
+        let arrayOfImage = ["purpleBox","layers","progress","meditation"]
         let arrayOfTitle = ["Welcome to Progress", "SPLIT UP TASKS", "TRACK YOUR PROGRESS", "STAY FOCUSED"]
         let arrayOfDescription = ["A simple to-do list that encourages you to reach your goals gradually. \n \n Swipe left to learn more",
                                   "Most to-do lists only reward you for finishing a task in one shot. With Progress, you decide how many shots you need.","With bold dots under each task, you can easily track your progress on a task and feel accomplished every step of the way.",
@@ -974,10 +995,10 @@ extension TodayVC {
         CFNotify.hideAll()
         
         var classicViewConfig = CFNotify.Config()
-        classicViewConfig.appearPosition = .bottom //the view will appear at the top of screen
+        classicViewConfig.appearPosition = .center //the view will appear at the top of screen
         classicViewConfig.hideTime = .never //the view will never automatically hide
         
-        let classicView = CFNotifyView.toastWith(text:  "Welcome to Your Day.\n \n Here you'll find all the tasks you want to work on today.",
+        let classicView = CFNotifyView.toastWith(text:  "Welcome to Your Day.\n \n Here you'll find all the tasks you want to work and that are due today. \n \n Swipe up to check out All Tasks",
         textFont: UIFont.preferredFont(forTextStyle: UIFontTextStyle.headline),
         textColor: UIColor.white,
         backgroundColor: UIColor.flatPurple)
@@ -994,7 +1015,7 @@ extension TodayVC {
         classicViewConfig.appearPosition = .bottom //the view will appear at the top of screen
         classicViewConfig.hideTime = .never //the view will never automatically hide
         
-        let classicView = CFNotifyView.toastWith(text: "Your Day Hint: Swipe right on a task if you've made progress, or tap the checkbox if you've completed it.",
+        let classicView = CFNotifyView.toastWith(text: "Your Day Hint: Swipe right (-->) on a task if you've made progress, or tap the checkbox if you've completed it.",
                                                  textFont: UIFont.preferredFont(forTextStyle: UIFontTextStyle.headline),
                                                  textColor: UIColor.white,
                                                  backgroundColor: UIColor.flatPurple)

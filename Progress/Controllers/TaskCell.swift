@@ -117,7 +117,7 @@ extension TaskCell {
         
         Floaty.global.button.isHidden = true
 
-        let select: RMAction<UIDatePicker> = RMAction(title: "Done", style: .done) { (controller) in
+        let select: RMAction<UIDatePicker> = RMAction(title: "Done", style: .done)  { (controller) in
             
             //log firebase debug event
             DebugController.write(string: "Selected date in picker - \(self.taskTitleLabel.text!)")
@@ -133,6 +133,7 @@ extension TaskCell {
             }
             
             }!
+       
         let clear: RMAction<UIDatePicker> = RMAction(title: "Remove", style: .destructive) { (controller) in
             
             //log firebase debug event
@@ -146,7 +147,8 @@ extension TaskCell {
         let title = (self.taskObj?.title)!
         
         self.customDelegate?.cellPickerSelected(editingCell: self)
-        let picker = RMDateSelectionViewController(style: .sheetWhite, title: "Set Deadline", message: title, select: select, andCancel: clear)
+        let picker = RMDateSelectionViewController(style: .sheetWhite, title: "Add Deadline", message: title, select: select, andCancel: clear)
+        
         if dueDate != nil {
             picker?.datePicker.date = dueDate!
         }

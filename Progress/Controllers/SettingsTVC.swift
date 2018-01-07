@@ -19,10 +19,10 @@ import RMDateSelectionViewController
 import MessageUI
 import SafariServices
 import StoreKit
+import CFNotify
 
 class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
 
-    @IBOutlet weak var dueTodayBadgeCount: UISwitch!
     @IBOutlet weak var badgeCountSwitch: UISwitch!
     @IBOutlet weak var dailyNotificationTimeBtn: UIButton!
     @IBOutlet weak var hapticFeedbackSwitch: UISwitch!
@@ -40,8 +40,17 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
         self.tableView.separatorStyle = .singleLine
         self.navigationController?.navigationBar.tintColor = mainAppColor
         
+        NotificationCenter.default.addObserver(self, selector: #selector(self.composeMail), name: Notification.Name("triggerMailCompose"), object: nil)
+        
+        if defaults.value(forKey: "setUserIDS") == nil {
+            let uiud = UUID().uuidString
+            Analytics.setUserID(uiud)
+            Crashlytics.sharedInstance().setUserIdentifier("uiud")
+            defaults.set(true, forKey: "setUserIDS")
+        }
+        
         let badgeBool = defaults.value(forKey: UDyourDayBadgeCount) as! Bool
-        let dtBadgeBool = defaults.value(forKey: "dueTodayBadgeCount") as! Bool
+
         let hapticBool = defaults.value(forKey: "hapticFeedback") as! Bool
         let inAppBool = defaults.value(forKey: "inAppNotifications") as! Bool
         
@@ -60,12 +69,6 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
                     self.badgeCountSwitch.isOn = true
                 } else {
                     self.badgeCountSwitch.isOn = false
-                }
-                
-                if dtBadgeBool == true && self.permissionAccess == true {
-                    self.dueTodayBadgeCount.isOn = true
-                } else {
-                    self.dueTodayBadgeCount.isOn = false
                 }
                 
                 if hapticBool == true {
@@ -142,37 +145,7 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
                 //log firebase debug event
                 DebugController.write(string: "clicked talk to us in settings")
                 
-                if MFMailComposeViewController.canSendMail() {
-                    
-                    let composeVC = MFMailComposeViewController()
-                    composeVC.mailComposeDelegate = self
-                    
-                    // Configure the fields of the interface.
-                    composeVC.setToRecipients(["support@makeprogressapp.com"])
-                   
-                    self.goingForward = true
-                    // Present the view controller modally.
-                    self.present(composeVC, animated: true){ return }
-                } else {
-                    let alertController = CFAlertViewController(title: "Looks like you don't have the Mail app working on your phone.",
-                                                                message: "Just shoot us an email at info@makeprogress.com to get in touch with us.",
-                                                                textAlignment: .left,
-                                                                preferredStyle: .alert,
-                                                                didDismissAlertHandler: nil)
-                    
-                    
-                    let gotAction = CFAlertAction(title: "Got It",
-                                                  style: .Default,
-                                                  alignment: .justified,
-                                                  backgroundColor: FlatGreen(),
-                                                  textColor: nil,
-                                                  handler: { (action) in return })
-                    
-                    alertController.addAction(gotAction)
-                    
-                    self.goingForward = true
-                    self.present(alertController, animated: true) {return }
-                }
+                self.composeMail()
                 
                 ///log firebase analytics event
                 Analytics.logEvent(talkToUsEvent, parameters: [
@@ -230,6 +203,10 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
         } else if indexPath.section == 3 {
              if indexPath.row == 0{
                 //show website
+                Analytics.logEvent("clicked_website", parameters: [
+                    "name":"" as NSObject,
+                    "full_text": "" as NSObject
+                    ])
                 
                 //log firebase debug event
                 DebugController.write(string: "clicked website in settings")
@@ -241,6 +218,10 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
                 self.present(svc, animated: true){ return }
             } else  if indexPath.row == 1 {
                 //show credits
+                Analytics.logEvent("clicked_credits", parameters: [
+                    "name":"" as NSObject,
+                    "full_text": "" as NSObject
+                    ])
                 
                 //log firebase debug event
                 DebugController.write(string: "clicked credits in settings")
@@ -252,6 +233,10 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
                 self.present(svc, animated: true){ return }
              }else  if indexPath.row == 2 {
                 //show terms
+                Analytics.logEvent("clicked_terms", parameters: [
+                    "name":"" as NSObject,
+                    "full_text": "" as NSObject
+                    ])
                 
                 //log firebase debug event
                 DebugController.write(string: "clicked terms in settings")
@@ -263,6 +248,10 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
                 self.present(svc, animated: true){ return }
              } else  if indexPath.row == 3 {
                 //show privacy
+                Analytics.logEvent("clicked_privacy", parameters: [
+                    "name":"" as NSObject,
+                    "full_text": "" as NSObject
+                    ])
                 
                 //log firebase debug event
                 DebugController.write(string: "clicked privacy in settings")
@@ -272,6 +261,42 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
                 self.goingForward = true
                 self.present(svc, animated: true){ return }
             }
+        }
+    }
+    
+    @objc func composeMail() {
+        if MFMailComposeViewController.canSendMail() {
+            
+            let composeVC = MFMailComposeViewController()
+            composeVC.mailComposeDelegate = self
+            
+            // Configure the fields of the interface.
+            composeVC.setToRecipients(["support@makeprogressapp.com"])
+            
+            composeVC.setSubject("iOS Beta Feedback")
+            
+            self.goingForward = true
+            // Present the view controller modally.
+            self.present(composeVC, animated: true){ return }
+        } else {
+            let alertController = CFAlertViewController(title: "Looks like you don't have the Mail app working on your phone.",
+                                                        message: "Just shoot us an email at support@makeprogressapp.com to get in touch with us.",
+                                                        textAlignment: .left,
+                                                        preferredStyle: .alert,
+                                                        didDismissAlertHandler: nil)
+            
+            
+            let gotAction = CFAlertAction(title: "Got It",
+                                          style: .Default,
+                                          alignment: .justified,
+                                          backgroundColor: FlatGreen(),
+                                          textColor: nil,
+                                          handler: { (action) in return })
+            
+            alertController.addAction(gotAction)
+            
+            self.goingForward = true
+            self.present(alertController, animated: true) {return }
         }
     }
 
@@ -306,31 +331,42 @@ class SettingsTVC: UITableViewController, MFMailComposeViewControllerDelegate{
         }
     }
 
-    @IBAction func dueTodayBadgeCountSwitchToggled(_ sender: Any) {
-        if self.permissionAccess == false {
-            dueTodayBadgeCount.isOn = false
-            if self.canAskForAccess == true {
-                 self.requestPermission() //display alert saying they need to give us permission
-                return
-            }
-            self.deniedAlert() //display alert saying they need to go their phone's settings
-            return
-        }
+    
+    @IBAction func dailyNotificationInfoTapped(_ sender: Any) {
+        var classicViewConfig = CFNotify.Config()
+        classicViewConfig.appearPosition = .bottom //the view will appear at the top of screen
+        classicViewConfig.hideTime = .custom(seconds: TimeInterval(3.0)) //the view will never automatically hide
         
-        DebugController.write(string: "due today badge count switch toggled in settings") //log firebase debug event
-        
-        if dueTodayBadgeCount.isOn == true {
-            //log firebase analytics event
-            Analytics.logEvent("due_today_count_badge_on", parameters: ["name":"" as NSObject, "full_text": "" as NSObject])
-            
-            defaults.set(true, forKey: "dueTodayBadgeCount")
-        } else {
-            //log firebase analytics event
-            Analytics.logEvent("due_today_count_badge_off", parameters: ["name":"" as NSObject, "full_text": "" as NSObject])
-            
-            defaults.set(false, forKey: "dueTodayBadgeCount")
-        }
+        let classicView = CFNotifyView.toastWith(text: "If on, this setting will send you a notification at a certain time reminding you to plan Your Day. It will also include a new motivational quote everyday.",
+                                                 textFont: UIFont.preferredFont(forTextStyle: UIFontTextStyle.headline),
+                                                 textColor: UIColor.white,
+                                                 backgroundColor: UIColor.flatPurple)
+        CFNotify.present(config: classicViewConfig, view: classicView)
     }
+    @IBAction func yourDayBadgeInfoTapped(_ sender: Any) {
+        var classicViewConfig = CFNotify.Config()
+        classicViewConfig.appearPosition = .bottom //the view will appear at the top of screen
+        classicViewConfig.hideTime = .custom(seconds: TimeInterval(3.0)) //the view will never automatically hide
+
+        let classicView = CFNotifyView.toastWith(text:  "If this setting is selected, a badge count will appear if there are tasks in Your Day. The badge is the little red icon on the top-right corner of the app icon.",
+                                                 textFont: UIFont.preferredFont(forTextStyle: UIFontTextStyle.headline),
+                                                 textColor: UIColor.white,
+                                                 backgroundColor: UIColor.flatPurple)
+        CFNotify.present(config: classicViewConfig, view: classicView)
+    }
+    
+    @IBAction func haptifFeedbackInfoTapped(_ sender: Any) {
+        var classicViewConfig = CFNotify.Config()
+        classicViewConfig.appearPosition = .bottom //the view will appear at the top of screen
+        classicViewConfig.hideTime = .custom(seconds: TimeInterval(3.0)) //the view will never automatically hide
+
+        let classicView = CFNotifyView.toastWith(text:  "If on, this setting will play haptic feedback (a vibration) after major actions, such as adding tasks to Your Day, completing tasks, etc.",
+                                                 textFont: UIFont.preferredFont(forTextStyle: UIFontTextStyle.headline),
+                                                 textColor: UIColor.white,
+                                                 backgroundColor: UIColor.flatPurple)
+        CFNotify.present(config: classicViewConfig, view: classicView)
+    }
+    
     
     @IBAction func dailyNotificationTimeBtnTapped(_ sender: Any) {
         

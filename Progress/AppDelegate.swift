@@ -22,6 +22,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     var window: UIWindow?
     let defaults = UserDefaults.standard
     
+    func applicationDidBecomeActive(_ application: UIApplication) {
+        NotificationCenter.default.post(name: Notification.Name("addTasksDueTodayToYourDay"), object: nil)
+    }
+    
     func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey : Any] = [:]) -> Bool {
         
         if url.scheme == "openAppFromWidget"
@@ -77,11 +81,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             defaults.set(true, forKey: "hapticFeedback")
         }
         
-        let dtBadgeBool = defaults.value(forKey: "dueTodayBadgeCount")
-        if dtBadgeBool == nil {
-            defaults.set(true, forKey: "dueTodayBadgeCount")
-        }
-        
         let inAppBool = defaults.value(forKey: "inAppNotifications")
         if inAppBool == nil {
             defaults.set(true, forKey: "inAppNotifications")
@@ -107,7 +106,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     func applicationWillResignActive(_ application: UIApplication) {
         let realm = try! Realm()
 
-        let badgeBool = defaults.value(forKey: "yourDayBadgeCount") as! Bool
+        /*let badgeBool = defaults.value(forKey: "yourDayBadgeCount") as! Bool
         let dueTodayBool = defaults.value(forKey: "dueTodayBadgeCount") as! Bool
         if badgeBool == true || dueTodayBool == true{
             var total = 0
@@ -140,8 +139,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
                 let andPredicate = NSCompoundPredicate(type: NSCompoundPredicate.LogicalType.and, subpredicates: [isNotCompletedPredicate, isTodayPredicate, datePredicate])
                 let list = realm.objects(SavedTask.self).filter(andPredicate)
                 total -= list.count
-            }
-            application.applicationIconBadgeNumber = total
+            }*/
+        
+        let badgeBool = defaults.value(forKey: "yourDayBadgeCount") as! Bool
+        
+        if badgeBool == true {
+            var total = 0
+            let isNotCompletedPredicate = NSPredicate(format: "isCompleted == %@",  Bool(booleanLiteral: false) as CVarArg)
+            let isTodayPredicate = NSPredicate(format: "isToday == %@",  Bool(booleanLiteral: true) as CVarArg)
+            let andPredicate = NSCompoundPredicate(type: NSCompoundPredicate.LogicalType.and, subpredicates: [isNotCompletedPredicate, isTodayPredicate])
+            let list = realm.objects(SavedTask.self).filter(andPredicate)
+            total += list.count
+            application.applicationIconBadgeNumber = total > 0 ? 1 : 0
         } else {
              application.applicationIconBadgeNumber = 0
         }
@@ -211,11 +220,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     }
     
     func application(_ application: UIApplication, performActionFor shortcutItem: UIApplicationShortcutItem, completionHandler: @escaping (Bool) -> Void) {
-        if shortcutItem.type == "AG.Progress.Progress-Widget.createTask" {
-            NotificationCenter.default.post(name: Notification.Name("shorcutCreateTask"), object: nil)
+        let delayTime = DispatchTime.now() +  .seconds(1)
+        DispatchQueue.main.asyncAfter(deadline: delayTime) {
+            if shortcutItem.type == "AG.Progress.Progress-Widget.createTask" {
+                NotificationCenter.default.post(name: Notification.Name("shortcutCreateTask"), object: nil)
+                
+                //log firebase analytics event
+                Analytics.logEvent("used_3D_touch_to_create_task", parameters: [
+                    "name": "" as NSObject,
+                    "full_text": "" as NSObject
+                    ])
+            }
         }
     }
-    
 }
 
 

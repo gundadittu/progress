@@ -12,13 +12,13 @@ import UIKit
 // swiftlint:disable function_body_length
 
 open class DottedProgressBar: UIView {
-
+    
     public struct DottedProgressAppearance {
         let dotRadius: CGFloat
         let dotsColor: UIColor
         let dotsProgressColor: UIColor
         let backColor: UIColor
-
+        
         public init(dotRadius: CGFloat = 8.0,
                     dotsColor: UIColor = UIColor.orange.withAlphaComponent(0.4),
                     dotsProgressColor: UIColor = UIColor.red,
@@ -29,9 +29,9 @@ open class DottedProgressBar: UIView {
             self.backColor = backColor
         }
     }
-
+    
     open var progressAppearance: DottedProgressAppearance!
-
+    
     /// The duration of dots number change animation in seconds.
     open var dotsNumberChangeAnimationDuration: Double = 0.7
     /// The duration of dots progress change animation in seconds.
@@ -40,26 +40,26 @@ open class DottedProgressBar: UIView {
     open var pauseBetweenConsecutiveAnimations: Double = 1.0
     /// Zoom increase of walking dot while animating progress.
     open var zoomIncreaseValueOnProgressAnimation: CGFloat = 1.5
-
+    
     fileprivate var numberOfDots: Int = 0
     fileprivate var previousProgress: Int = 0
     fileprivate var currentProgress: Int = 0
-
+    
     fileprivate lazy var animationQueue = DottedBarAnimationQueue()
     fileprivate var isAnimatingCurrently: Bool = false
     fileprivate lazy var walkingDot = UIView()
-
+    
     required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         //fatalError("init(coder:) has not been implemented")
     }
-
+    
     override public init(frame: CGRect) {
         progressAppearance = DottedProgressAppearance()
         super.init(frame: frame)
         setup()
     }
-
+    
     public init(frame: CGRect, numberOfDots: Int, initialProgress: Int) {
         progressAppearance = DottedProgressAppearance()
         super.init(frame: frame)
@@ -67,13 +67,13 @@ open class DottedProgressBar: UIView {
         self.currentProgress = initialProgress
         setup()
     }
-
+    
     public init(appearance: DottedProgressAppearance) {
         self.progressAppearance = appearance
         super.init(frame: CGRect.zero)
         setup()
     }
-
+    
     /// Sets a number of steps of progress bar with or without animation.
     ///
     /// - Parameters:
@@ -85,7 +85,7 @@ open class DottedProgressBar: UIView {
             performQueuedAnimations()
         }
     }
-
+    
     /// Sets a number of filled dots as current progress with or without animation.
     ///
     /// - Parameters:
@@ -97,18 +97,18 @@ open class DottedProgressBar: UIView {
             performQueuedAnimations()
         }
     }
-
+    
     override open func layoutSubviews() {
         super.layoutSubviews()
         layout()
     }
-
+    
 }
 
 // MARK: - Private functions
 
 private extension DottedProgressBar {
-
+    
     func setup() {
         backgroundColor = progressAppearance.backColor
         for i in 0..<numberOfDots {
@@ -120,14 +120,14 @@ private extension DottedProgressBar {
             addSubview(dot)
         }
     }
-
+    
     func layout() {
         for (index, dot) in subviews.enumerated() where dot != walkingDot {
             dot.layer.cornerRadius = progressAppearance.dotRadius
             dot.frame = dotFrame(forIndex: index)
         }
     }
-
+    
     /// Calculating frame for given index of dot, supports vertical and horizontal alignment.
     ///
     /// - Parameter index: Index of dot (including 0).
@@ -146,10 +146,10 @@ private extension DottedProgressBar {
                           y: externalFrame.midY - progressAppearance.dotRadius,
                           width: progressAppearance.dotRadius * 2,
                           height: progressAppearance.dotRadius * 2)
-           /* return CGRect(x: externalFrame.midX - progressAppearance.dotRadius,
-                          y: externalFrame.midY - progressAppearance.dotRadius,
-                          width: progressAppearance.dotRadius * 2,
-                          height: progressAppearance.dotRadius * 2)*/
+            /* return CGRect(x: externalFrame.midX - progressAppearance.dotRadius,
+             y: externalFrame.midY - progressAppearance.dotRadius,
+             width: progressAppearance.dotRadius * 2,
+             height: progressAppearance.dotRadius * 2)*/
         } else {
             let externalFrameHeight: CGFloat = frame.size.height / CGFloat(numberOfDots)
             let externalFrame = CGRect(x: 0,
@@ -162,7 +162,7 @@ private extension DottedProgressBar {
                           height: progressAppearance.dotRadius * 2)
         }
     }
-
+    
     /// Starting execution of all queued animations.
     func performQueuedAnimations() {
         if let nextAnimation = animationQueue.dequeue() {
@@ -190,13 +190,13 @@ private extension DottedProgressBar {
             isAnimatingCurrently = false
         }
     }
-
+    
     /// Performs animation for changing the number of dots
     ///
     /// - Parameter animation: The animation model
     func animateNumberChange(animation: DottedBarAnimation) {
         numberOfDots = animation.value
-
+        
         if numberOfDots > subviews.count {
             UIView.animate(withDuration: animation.animated ? dotsNumberChangeAnimationDuration * 0.6 : 0.0,
                            delay: 0.0, options: UIViewAnimationOptions(), animations: {
@@ -224,7 +224,7 @@ private extension DottedProgressBar {
                         self.performQueuedAnimations()
                     }
                 })
-
+                
                 self.layout()
             })
         } else {
@@ -256,21 +256,21 @@ private extension DottedProgressBar {
             })
         }
     }
-
+    
     /// Performs animation for changing the current progress
     ///
     /// - Parameter animation: The animation model
     func animateProgress(animation: DottedBarAnimation) {
         previousProgress = currentProgress
         currentProgress = animation.value
-
+        
         if animation.animated {
             walkingDot.backgroundColor = progressAppearance.dotsProgressColor
             walkingDot.layer.cornerRadius = progressAppearance.dotRadius
             walkingDot.frame = dotFrame(forIndex: previousProgress - 1)
             addSubview(walkingDot)
             walkingDot.layer.zPosition = 1
-
+            
             UIView.animate(withDuration: progressChangeAnimationDuration * 0.7,
                            delay: 0.0,
                            options: .curveLinear,
@@ -327,3 +327,4 @@ private extension DottedProgressBar {
         }
     }
 }
+

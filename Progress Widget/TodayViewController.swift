@@ -9,10 +9,10 @@
 import UIKit
 import NotificationCenter
 import RealmSwift
-import FirebaseAnalytics
 import DottedProgressBar
 import SwiftDate
 import DZNEmptyDataSet
+import Crashlytics
 
 class SavedTask: Object {
     @objc dynamic var title = ""
@@ -47,6 +47,7 @@ class TodayViewController: UIViewController, NCWidgetProviding, UITableViewDeleg
 
     override func viewDidLoad() {
         super.viewDidLoad()
+
         self.tableView.dataSource = self
         self.tableView.delegate = self
         
@@ -59,6 +60,7 @@ class TodayViewController: UIViewController, NCWidgetProviding, UITableViewDeleg
          self.realm = try! Realm(configuration: config)
         
         self.tasksList = fetchObjects()
+        self.addAllTasksDueTodaytoYourDay()
     }
     
     //fetches objects from database
@@ -72,6 +74,39 @@ class TodayViewController: UIViewController, NCWidgetProviding, UITableViewDeleg
         
         //sorts list by todayDisplayOrder attribute
         return list.sorted(byKeyPath: "todayDisplayOrder", ascending: true)
+    }
+    
+    @objc func addAllTasksDueTodaytoYourDay(){
+        if (self.tasksList?.count)! > 0 {
+            for task in self.tasksList!{
+                if task.deadline != nil && task.isCompleted == false {
+                    let deadline: Date = task.deadline!
+                    if deadline.isToday{
+                       let index = (self.tasksList?.count)!
+                        
+                        try! self.realm.write {
+                            task.isToday = true
+                            task.todayDisplayOrder = index
+                        }
+                    }
+                }
+            }
+        }
+        self.updateArrayDisplayOrder(self.tasksList)
+    }
+    
+    //used to update display orders after items are deleted + added
+    func updateArrayDisplayOrder(_ array: Results<SavedTask>?){
+        guard let uwArray = array else {
+            return
+        }
+        var i = 0
+        for ro in uwArray {
+            try! self.realm.write {
+                ro.displayOrder = i
+            }
+            i+=1
+        }
     }
 
     
@@ -92,6 +127,10 @@ class TodayViewController: UIViewController, NCWidgetProviding, UITableViewDeleg
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         let count = (tasksList?.count)!
         return count
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return CGFloat(45)
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {

@@ -1,6 +1,0 @@
-framework module DottedProgressBar {
-  umbrella header "DottedProgressBar-iOS11.0-umbrella.h"
-
-  export *
-  module * { export * }
-}
