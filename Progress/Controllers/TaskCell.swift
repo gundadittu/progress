@@ -48,7 +48,7 @@ class TaskCell:  MGSwipeTableCell {
     var customDelegate: CustomTaskCellDelegate?
     var taskObj: SavedTask?
     var isBeingEdited = false
-    var objectDeleted = false 
+    var objectDeleted = false
     
     override func awakeFromNib() {
         super.awakeFromNib()

@@ -632,17 +632,17 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         
         try! self.realm.write {
             //move recently unchecked task to bottom of pending - make selected task displayOrder = 0 + move all other up 1
-            for task in list {
+            /*for task in list {
                 if task != selectedTask && task.isCompleted == false {
                     let original = task.displayOrder
                     task.displayOrder = original + 1
                 }
-            }
+            }*/
             
-            selectedTask.displayOrder = 0
+            //selectedTask.displayOrder = 0
+            selectedTask.displayOrder = list.count
             selectedTask.isToday = false
         }
-        
         self.updateArrayDisplayOrder(self.tasksList)
         
         if NotificationsController.checkInAppNotificationPermissions() == true &&  defaults.string(forKey: "showAlertAfterFirstSwipeRightInTodayVC") != nil{
