@@ -74,6 +74,7 @@ class TodayVC: UIViewController {
         
         NotificationCenter.default.addObserver(self, selector: #selector(self.showAlertToSwipeRight), name: Notification.Name("triggerTodayVCSwipeAlert"), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(self.flashSelectedCell), name: Notification.Name("todayWidgetSelectedTask"), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(self.updateObjects), name: Notification.Name("syncData"), object: nil)
 
         //Fetch data from database
         self.tasksList = self.fetchObjects()
@@ -112,8 +113,12 @@ class TodayVC: UIViewController {
         }
     }
     
+    @objc func updateObjects() {
+        self.tasksList = self.fetchObjects()
+    }
+    
     //fetches objects from database
-    func fetchObjects() -> Results<SavedTask> {
+     func fetchObjects() -> Results<SavedTask> {
         let isTodayPredicate = NSPredicate(format: "isToday == %@",  Bool(booleanLiteral: true) as CVarArg)
         let isNotCompletedPredicate = NSPredicate(format: "isCompleted == %@",  Bool(booleanLiteral: false) as CVarArg)
        
@@ -133,7 +138,7 @@ class TodayVC: UIViewController {
         var i = 0
         for ro in uwArray {
             try! self.realm.write {
-                ro.displayOrder = i
+                ro.todayDisplayOrder = i
             }
             i+=1
         }
@@ -227,7 +232,7 @@ extension TodayVC: UITableViewDelegate, UITableViewDataSource, TableViewReorderD
       
         let destinationObjectOrder = destinationObject.todayDisplayOrder
         if sourceIndexPath.row < destinationIndexPath.row {
-            for index in sourceIndexPath.row...destinationIndexPath.row {
+            for index in (sourceIndexPath.row...destinationIndexPath.row) {
                 let object = tasksList![index]
                 object.todayDisplayOrder -= 1
             }
@@ -626,7 +631,6 @@ extension TodayVC: CustomTodayTaskCellDelegate {
         let list = vc.fetchObjects()
         
         try! self.realm.write {
-        
             //move recently unchecked task to bottom of pending - make selected task displayOrder = 0 + move all other up 1
             for task in list {
                 if task != selectedTask && task.isCompleted == false {

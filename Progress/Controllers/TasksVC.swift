@@ -94,6 +94,7 @@ class TasksVC: UIViewController, FloatyDelegate  {
           NotificationCenter.default.addObserver(self, selector: #selector(self.showAlertToSwipeRight), name: Notification.Name("triggerTaskVCSwipeAlert"), object: nil)
          NotificationCenter.default.addObserver(self, selector: #selector(self.createNewTask), name: Notification.Name("shortcutCreateTask"), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(self.addAllTasksDueTodaytoYourDay), name: Notification.Name("addTasksDueTodayToYourDay"), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(self.updateObjects), name: Notification.Name("syncData"), object: nil)
 
         self.tasksList = self.fetchObjects()
          self.updateArrayDisplayOrder(self.tasksList)
@@ -134,8 +135,12 @@ class TasksVC: UIViewController, FloatyDelegate  {
         }
     }
     
+    @objc func updateObjects() {
+        self.tasksList = self.fetchObjects()
+    }
+    
     //fetches objects from realm
-    func fetchObjects() -> Results<SavedTask> {
+     func fetchObjects() -> Results<SavedTask> {
         let isNotTodayPredicate = NSPredicate(format: "isToday == %@",  Bool(booleanLiteral: false) as CVarArg)
         let list = self.realm.objects(SavedTask.self).filter(isNotTodayPredicate)
         let sortProperties = [ SortDescriptor(keyPath: "isCompleted", ascending: true), SortDescriptor(keyPath: "displayOrder", ascending: false)]
@@ -146,7 +151,7 @@ class TasksVC: UIViewController, FloatyDelegate  {
     //used to update display orders after items are deleted + added
     func updateArrayDisplayOrder(_ array: Results<SavedTask>?){
         guard let uwArray = array else {
-            return //nil
+            return 
         }
         var i = uwArray.count - 1
         for ro in uwArray {

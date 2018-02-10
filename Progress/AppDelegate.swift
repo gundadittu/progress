@@ -21,6 +21,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     
     var window: UIWindow?
     let defaults = UserDefaults.standard
+    var notificationToken: NotificationToken?
+    let realm = try! Realm()
     
     func applicationDidBecomeActive(_ application: UIApplication) {
         NotificationCenter.default.post(name: Notification.Name("addTasksDueTodayToYourDay"), object: nil)
@@ -55,13 +57,51 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             defaults.setValue(true, forKey: "transferredDataToSharedAppGroup")
         }
         
-        let config = Realm.Configuration(
+        /*SyncUser.logIn(with: .usernamePassword(username: "gundadittu@gmail.com", password: "maroonppl123", register: false), server: URL(string: "http://40.78.107.52:9080")!) { user, error in
+            guard let user = user else {
+                fatalError(String(describing: error))
+            }
+            
+            DispatchQueue.main.async(execute: {
+                // Open Realm
+                /*let configuration = Realm.Configuration(
+                    syncConfiguration: SyncConfiguration(user: user, realmURL: URL(string: "realm://40.78.107.52:9080/~/progress")!)
+                )*/
+                
+                let config = Realm.Configuration(
+                    fileURL: FileManager
+                        .default
+                        .containerURL(forSecurityApplicationGroupIdentifier: "group.progress.tasks")!
+                        .appendingPathComponent("db.realm"),
+                    syncConfiguration: SyncConfiguration(user: user, realmURL: URL(string: "realm://40.78.107.52:9080/~/progress")!),
+                    objectTypes: [SavedTask.self]
+                )
+                
+                Realm.Configuration.defaultConfiguration = config
+                
+                
+                //self.realm = try! Realm(configuration: configuration)
+                
+                // Set realm notification block
+                self.notificationToken = self.realm.observe { notification , realm in 
+                    NotificationCenter.default.post(name: Notification.Name("syncData"), object: nil)
+                }
+                
+                /*addNotificationBlock{ _ in
+                    NotificationCenter.default.post(name: Notification.Name("syncData"), object: nil)
+                }*/
+                
+                NotificationCenter.default.post(name: Notification.Name("syncData"), object: nil)
+            })
+        }*/
+        
+       /* let config = Realm.Configuration(
             fileURL: FileManager
                 .default
                 .containerURL(forSecurityApplicationGroupIdentifier: "group.progress.tasks")!
                 .appendingPathComponent("db.realm"),
             objectTypes: [SavedTask.self])
-        Realm.Configuration.defaultConfiguration = config
+        Realm.Configuration.defaultConfiguration = config*/
         
         let sharedDirectory: URL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.progress.tasks")! as URL
         let sharedRealmURL = sharedDirectory.appendingPathComponent("db.realm")
