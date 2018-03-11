@@ -48,6 +48,7 @@ class TasksVC: UIViewController, FloatyDelegate  {
         super.viewDidLoad()
         self.title = "All Tasks"
         self.navigationController?.navigationBar.prefersLargeTitles = true
+        self.navigationController?.hidesBarsOnSwipe = false 
 
         //plus button attributes
         Floaty.global.button.buttonColor = color
@@ -149,21 +150,6 @@ class TasksVC: UIViewController, FloatyDelegate  {
         return sortedList
     }
     
-    //used to update display orders after items are deleted + added
-    /*func updateArrayDisplayOrder(_ array: Results<SavedTask>?){
-        guard let uwArray = array else {
-            return 
-        }
-        var i = uwArray.count - 1
-        for ro in uwArray {
-            try! self.realm.write {
-                ro.displayOrder = i
-            }
-            i-=1
-        }
-        //return uwArray
-    }*/
-    
     func updateArrayDisplayOrder(_ array: Results<SavedTask>?){
         guard let uwArray = array else {
             return
@@ -262,13 +248,6 @@ class TasksVC: UIViewController, FloatyDelegate  {
         }
         drawerVC.setDrawerPosition(position: .open, animated: true)
         
-        /*var offset = CGFloat(0)
-        if self.tableView.contentOffset != CGPoint.zero {
-            offset = (self.navigationController?.navigationBar.frame.height)!
-        }*/
-        
-       // self.tableView.scrollToRow(at: IndexPath(row: (self.tasksList?.count)!-1, section: 0), at: UITableViewScrollPosition.top, animated: true)
-        self.tableView.scrollToNearestSelectedRow(at: .bottom, animated: true)
         let newTask = SavedTask()
         newTask.isNewTask = true
         let order = (self.tasksList?.count)!
@@ -276,6 +255,11 @@ class TasksVC: UIViewController, FloatyDelegate  {
         try! self.realm.write {
             self.realm.add(newTask)
         }
+        
+        let height = self.tableView.contentSize.height //- self.tableView.bounds.size.height
+        let point = CGPoint(x: 0, y: height)
+        self.tableView.setContentOffset(point, animated: true)
+        
         
         /*self.tableView.animateScrollToTop(offset: offset, withDuration: TimeInterval(1.0)) {
             
@@ -288,35 +272,8 @@ class TasksVC: UIViewController, FloatyDelegate  {
                 self.realm.add(newTask)
             }
         }*/
-        
     }
 }
-
-/*extension UIScrollView {
-    
-    /// Animate scroll to top with completion
-    ///
-    /// - Parameters:
-    ///   - duration:   TimeInterval
-    ///   - completion: Completion block
-    func animateScrollToTop(offset: CGFloat, withDuration duration:  TimeInterval,
-                            completion:             @escaping (()->())) {
-
-        var actualOffset = CGFloat(0)
-        if self.contentOffset != CGPoint.zero {
-            actualOffset = offset
-         }
-        
-        UIView.animate(withDuration: duration, animations: { [weak self] in
-            self?.setContentOffset(CGPoint(x: 0, y: -actualOffset), animated: false)
-            }, completion: { finish in
-                guard finish else {
-                    return
-                }
-                completion()
-        })
-    }
-}*/
 
 extension TasksVC: UITableViewDelegate, UITableViewDataSource, TableViewReorderDelegate {
     
@@ -334,7 +291,10 @@ extension TasksVC: UITableViewDelegate, UITableViewDataSource, TableViewReorderD
         
         //if it is new task created, automatically focuses on task to get user input on task title, etc.
         if selectedTask.isNewTask == true {
-            cell.customDelegate?.cellDidBeginEditing(editingCell: cell)
+            let delay = DispatchTime.now() + .microseconds(500000)
+            DispatchQueue.main.asyncAfter(deadline: delay, execute: {
+                cell.customDelegate?.cellDidBeginEditing(editingCell: cell)
+            })
         }
         return cell
     }
@@ -611,15 +571,7 @@ extension TasksVC: CustomTaskCellDelegate {
             try! self.realm.write {
                 let list = self.fetchObjects()
                 
-                //move recently unchecked task to bottom of pending - make selected task displayOrder = 0 + move all other up 1
-                /*for task in list {
-                    if task != selectedTask && task.isCompleted == false {
-                        let original = task.displayOrder
-                        task.displayOrder = original + 1
-                    }
-                }
-                
-                selectedTask.displayOrder = 0*/
+                selectedTask.displayOrder = 0
                 for index in (selectedTask.displayOrder..<(list.count)) {
                     self.tasksList?[index].displayOrder -= 1
                 }
@@ -802,12 +754,6 @@ extension TasksVC: CustomTaskCellDelegate {
         
         //makes due date button visible so user can choose deadline
         editingCell.dueDateBtn.isHidden = false
-        
-        //shorten  delay before showing
-        //if cell is not visible, this doesn't work when creating new task
-        //doesnt work when creating a new task after finishing up current new task
-        let delayTime = DispatchTime.now() +  .microseconds(1000000)
-        DispatchQueue.main.asyncAfter(deadline: delayTime) {
             
             editingCell.taskTitleLabel.isEnabled = true//to allow user input
             editingCell.taskTitleLabel.becomeFirstResponder()
@@ -827,7 +773,7 @@ extension TasksVC: CustomTaskCellDelegate {
                     }
                 })
             }
-        }
+        
     }
     
     func cellDidEndEditing(editingCell: TaskCell) {
@@ -994,7 +940,6 @@ extension TasksVC: MGSwipeTableCellDelegate {
                 //if user swipes to add task to today
                 self.addTasktoToday(editingCell: modifiedCell)
                 
-                
                 //log firebase debug event
                 DebugController.write(string: "swiped to add task to today - task title: \(String(describing: modifiedCell.taskObj?.title))")
                 
@@ -1069,13 +1014,11 @@ extension TasksVC {
         var introTasks = [SavedTask]()
         
         let introTask5 = SavedTask()
-        //introTask5.displayOrder = 4
         introTask5.displayOrder = 0
         introTask5.title = "Tip: Use the plus button to create a task."
         introTasks.append(introTask5)
         
         let introTask1 = SavedTask()
-        //introTask1.displayOrder = 3
         introTask1.displayOrder = 1
         introTask1.title = "Tip: Swipe left to delete me. <--"
         introTasks.append(introTask1)
@@ -1086,13 +1029,11 @@ extension TasksVC {
         introTasks.append(introTask2)
         
         let introTask3 = SavedTask()
-        //introTask3.displayOrder = 1
         introTask3.displayOrder = 3
         introTask3.title = "Tip: Keep me pressed to move me."
         introTasks.append(introTask3)
         
         let introTask4 = SavedTask()
-       // introTask4.displayOrder = 0
         introTask4.displayOrder = 4
         introTask4.title = "Tip: Tap the checkbox to complete me."
         introTasks.append(introTask4)
