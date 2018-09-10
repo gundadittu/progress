@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "0700"
+   LastUpgradeVersion = "0930"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -13,11 +13,11 @@
             buildForProfiling = "YES"
             buildForArchiving = "YES">
             <BuildableReference
-               BuildableIdentifier = 'primary'
-               BlueprintIdentifier = 'CCF0DEAC44CFACA228C46EC979A49473'
-               BlueprintName = 'RMDateSelectionViewController'
-               ReferencedContainer = 'container:Pods.xcodeproj'
-               BuildableName = 'RMDateSelectionViewController.framework'>
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "2CE2C3DFA8307E0A85AAA1CBA1CEDE55"
+               BlueprintName = "RMDateSelectionViewController"
+               ReferencedContainer = "container:Pods.xcodeproj"
+               BuildableName = "RMDateSelectionViewController.framework">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>

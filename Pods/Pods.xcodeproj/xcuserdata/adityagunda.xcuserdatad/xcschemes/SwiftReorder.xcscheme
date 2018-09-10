@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "0700"
+   LastUpgradeVersion = "0930"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -13,11 +13,11 @@
             buildForProfiling = "YES"
             buildForArchiving = "YES">
             <BuildableReference
-               BuildableIdentifier = 'primary'
-               BlueprintIdentifier = '06A64D4353EBE3B4540E5865851F63B0'
-               BlueprintName = 'SwiftReorder'
-               ReferencedContainer = 'container:Pods.xcodeproj'
-               BuildableName = 'SwiftReorder.framework'>
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "33725CD593FB7CB048126368F3565A4F"
+               BlueprintName = "SwiftReorder"
+               ReferencedContainer = "container:Pods.xcodeproj"
+               BuildableName = "SwiftReorder.framework">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>

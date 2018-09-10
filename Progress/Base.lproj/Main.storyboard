@@ -6,7 +6,6 @@
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13772"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
-        <capability name="Navigation items with more than one left or right bar item" minToolsVersion="7.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -268,20 +267,12 @@
                         <viewLayoutGuide key="safeArea" id="s9P-yW-HLi"/>
                     </view>
                     <navigationItem key="navigationItem" id="hji-3M-NwO">
-                        <rightBarButtonItems>
-                            <barButtonItem image="settings" style="done" id="Xc0-DW-hbP">
-                                <color key="tintColor" red="0.68888300660000001" green="0.71366006140000005" blue="0.73448425530000006" alpha="1" colorSpace="calibratedRGB"/>
-                                <connections>
-                                    <segue destination="XsR-mW-Fh0" kind="show" identifier="toSettings" id="Vp1-dg-9f8"/>
-                                </connections>
-                            </barButtonItem>
-                            <barButtonItem systemItem="compose" id="orf-ZE-WAm">
-                                <color key="tintColor" red="0.68888300660000001" green="0.71366006140000005" blue="0.73448425530000006" alpha="1" colorSpace="calibratedRGB"/>
-                                <connections>
-                                    <action selector="composeBtnClicked:" destination="TLJ-mf-QcS" id="rgY-qX-a7d"/>
-                                </connections>
-                            </barButtonItem>
-                        </rightBarButtonItems>
+                        <barButtonItem key="rightBarButtonItem" image="settings" style="done" id="Xc0-DW-hbP">
+                            <color key="tintColor" red="0.68888300660000001" green="0.71366006140000005" blue="0.73448425530000006" alpha="1" colorSpace="calibratedRGB"/>
+                            <connections>
+                                <segue destination="XsR-mW-Fh0" kind="show" identifier="toSettings" id="Vp1-dg-9f8"/>
+                            </connections>
+                        </barButtonItem>
                     </navigationItem>
                     <connections>
                         <outlet property="tableView" destination="cv6-bY-Vmc" id="NMS-AQ-yQ1"/>
