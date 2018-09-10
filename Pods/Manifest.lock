@@ -1,5 +1,5 @@
 PODS:
-  - Alamofire (4.6.0)
+  - Alamofire (4.7.3)
   - AlertOnboarding (2.0)
   - BEMCheckBox (1.4.1)
   - BPStatusBarAlert (0.1.5)
@@ -12,56 +12,87 @@ PODS:
     - Fabric (~> 1.7.2)
   - DottedProgressBar (1.0.4)
   - DZNEmptyDataSet (1.8.1)
-  - Fabric (1.7.2)
-  - Firebase/Core (4.7.0):
-    - FirebaseAnalytics (= 4.0.5)
-    - FirebaseCore (= 4.0.12)
-  - Firebase/Performance (4.7.0):
+  - Fabric (1.7.11)
+  - Firebase/Core (5.7.0):
+    - Firebase/CoreOnly
+    - FirebaseAnalytics (= 5.1.1)
+  - Firebase/CoreOnly (5.7.0):
+    - FirebaseCore (= 5.1.2)
+  - Firebase/Performance (5.7.0):
     - Firebase/Core
-    - FirebasePerformance (= 1.0.7)
-  - FirebaseAnalytics (4.0.5):
-    - FirebaseCore (~> 4.0)
-    - FirebaseInstanceID (~> 2.0)
-    - GoogleToolboxForMac/NSData+zlib (~> 2.1)
+    - FirebasePerformance (= 2.1.1)
+  - FirebaseAnalytics (5.1.1):
+    - FirebaseCore (~> 5.1)
+    - FirebaseInstanceID (~> 3.2)
+    - GoogleAppMeasurement (~> 5.1)
+    - GoogleUtilities/AppDelegateSwizzler (~> 5.2.0)
+    - GoogleUtilities/MethodSwizzler (~> 5.2.0)
+    - GoogleUtilities/Network (~> 5.2)
+    - "GoogleUtilities/NSData+zlib (~> 5.2)"
     - nanopb (~> 0.3)
-  - FirebaseCore (4.0.12):
-    - GoogleToolboxForMac/NSData+zlib (~> 2.1)
-  - FirebaseInstanceID (2.0.7)
-  - FirebasePerformance (1.0.7):
-    - FirebaseAnalytics (~> 4.0)
-    - FirebaseInstanceID (~> 2.0)
-    - FirebaseSwizzlingUtilities (~> 1.0)
+  - FirebaseCore (5.1.2):
+    - GoogleUtilities/Logger (~> 5.2)
+  - FirebaseInstanceID (3.2.1):
+    - FirebaseCore (~> 5.1)
+    - GoogleUtilities/Environment (~> 5.2)
+  - FirebasePerformance (2.1.1):
+    - FirebaseAnalytics (~> 5.1)
+    - FirebaseInstanceID (~> 3.2)
     - GoogleToolboxForMac/Logger (~> 2.1)
-    - GoogleToolboxForMac/NSData+zlib (~> 2.1)
+    - "GoogleToolboxForMac/NSData+zlib (~> 2.1)"
+    - GoogleUtilities/ISASwizzler (~> 5.2.0)
+    - GoogleUtilities/MethodSwizzler (~> 5.2.0)
     - GTMSessionFetcher/Core (~> 1.1)
-    - Protobuf (~> 3.1)
-  - FirebaseSwizzlingUtilities (1.0.0)
-  - Floaty (4.0.0)
-  - GoogleToolboxForMac/Defines (2.1.3)
-  - GoogleToolboxForMac/Logger (2.1.3):
-    - GoogleToolboxForMac/Defines (= 2.1.3)
-  - GoogleToolboxForMac/NSData+zlib (2.1.3):
-    - GoogleToolboxForMac/Defines (= 2.1.3)
-  - GTMSessionFetcher/Core (1.1.12)
-  - MGSwipeTableCell (1.6.6)
+    - Protobuf (~> 3.5)
+  - Floaty (4.0.1)
+  - GoogleAppMeasurement (5.1.1):
+    - GoogleUtilities/AppDelegateSwizzler (~> 5.2.0)
+    - GoogleUtilities/MethodSwizzler (~> 5.2.0)
+    - GoogleUtilities/Network (~> 5.2)
+    - "GoogleUtilities/NSData+zlib (~> 5.2)"
+    - nanopb (~> 0.3)
+  - GoogleToolboxForMac/Defines (2.1.4)
+  - GoogleToolboxForMac/Logger (2.1.4):
+    - GoogleToolboxForMac/Defines (= 2.1.4)
+  - "GoogleToolboxForMac/NSData+zlib (2.1.4)":
+    - GoogleToolboxForMac/Defines (= 2.1.4)
+  - GoogleUtilities/AppDelegateSwizzler (5.2.3):
+    - GoogleUtilities/Environment
+    - GoogleUtilities/Logger
+    - GoogleUtilities/Network
+  - GoogleUtilities/Environment (5.2.3)
+  - GoogleUtilities/ISASwizzler (5.2.3)
+  - GoogleUtilities/Logger (5.2.3):
+    - GoogleUtilities/Environment
+  - GoogleUtilities/MethodSwizzler (5.2.3):
+    - GoogleUtilities/Logger
+  - GoogleUtilities/Network (5.2.3):
+    - GoogleUtilities/Logger
+    - "GoogleUtilities/NSData+zlib"
+    - GoogleUtilities/Reachability
+  - "GoogleUtilities/NSData+zlib (5.2.3)"
+  - GoogleUtilities/Reachability (5.2.3):
+    - GoogleUtilities/Logger
+  - GTMSessionFetcher/Core (1.2.0)
+  - MGSwipeTableCell (1.6.7)
   - nanopb (0.3.8):
     - nanopb/decode (= 0.3.8)
     - nanopb/encode (= 0.3.8)
   - nanopb/decode (0.3.8)
   - nanopb/encode (0.3.8)
-  - Protobuf (3.5.0)
-  - Pulley (2.2.2)
-  - Realm (3.0.2):
-    - Realm/Headers (= 3.0.2)
-  - Realm/Headers (3.0.2)
-  - RealmSwift (3.0.2):
-    - Realm (= 3.0.2)
+  - Protobuf (3.6.1)
+  - Pulley (2.5.0)
+  - Realm (3.8.0):
+    - Realm/Headers (= 3.8.0)
+  - Realm/Headers (3.8.0)
+  - RealmSwift (3.8.0):
+    - Realm (= 3.8.0)
   - RMActionController (1.3.1)
   - RMDateSelectionViewController (2.3.1):
     - RMActionController (~> 1.3.1)
   - SwiftDate (4.5.1)
-  - SwiftReorder (3.2.0)
-  - SwiftyJSON (4.0.0)
+  - SwiftReorder (5.0.0)
+  - SwiftyJSON (4.1.0)
 
 DEPENDENCIES:
   - Alamofire
@@ -86,6 +117,40 @@ DEPENDENCIES:
   - SwiftReorder
   - SwiftyJSON
 
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - Alamofire
+    - AlertOnboarding
+    - BEMCheckBox
+    - BPStatusBarAlert
+    - CFAlertViewController
+    - CFNotify
+    - Crashlytics
+    - DottedProgressBar
+    - DZNEmptyDataSet
+    - Fabric
+    - Firebase
+    - FirebaseAnalytics
+    - FirebaseCore
+    - FirebaseInstanceID
+    - FirebasePerformance
+    - Floaty
+    - GoogleAppMeasurement
+    - GoogleToolboxForMac
+    - GoogleUtilities
+    - GTMSessionFetcher
+    - MGSwipeTableCell
+    - nanopb
+    - Protobuf
+    - Pulley
+    - Realm
+    - RealmSwift
+    - RMActionController
+    - RMDateSelectionViewController
+    - SwiftDate
+    - SwiftReorder
+    - SwiftyJSON
+
 EXTERNAL SOURCES:
   ChameleonFramework:
     :git: https://github.com/ViccAlexander/Chameleon.git
@@ -96,7 +161,7 @@ CHECKOUT OPTIONS:
     :git: https://github.com/ViccAlexander/Chameleon.git
 
 SPEC CHECKSUMS:
-  Alamofire: f41a599bd63041760b26d393ec1069d9d7b917f4
+  Alamofire: c7287b6e5d7da964a70935e5db17046b7fde6568
   AlertOnboarding: 2e6804e67894894807c5d24bcfcd7905897e6f08
   BEMCheckBox: 5ba6e37ade3d3657b36caecc35c8b75c6c2b1a4e
   BPStatusBarAlert: 0bc567e3a0f740189239f49c6c516bd61cb3c758
@@ -106,28 +171,29 @@ SPEC CHECKSUMS:
   Crashlytics: dbb07d01876c171c5ccbdf7826410380189e452c
   DottedProgressBar: 4b5cb99a9afd68e20b21f7c9a40f0014ede52e77
   DZNEmptyDataSet: 9525833b9e68ac21c30253e1d3d7076cc828eaa7
-  Fabric: 9cd6a848efcf1b8b07497e0b6a2e7d336353ba15
-  Firebase: dbfb98ccec2dcfcd21ab9cc1b4981a3f3c8c5e26
-  FirebaseAnalytics: 5b02a63ead2c3f0259cfc7f15e053e440587ecf8
-  FirebaseCore: 6cf108b63997bc08c04a1ffa55a3ac0d71a59ffc
-  FirebaseInstanceID: 148c25c986c8699e67304b114e365713dce467f2
-  FirebasePerformance: de71cd3093d4cf579d8a65326557cbe67bad6e80
-  FirebaseSwizzlingUtilities: f1c49a5a372ac852c853722a5891a0a5e2344a6c
-  Floaty: 4f88811bbf08521807f42355db6a9c0db85d5d78
-  GoogleToolboxForMac: 2501e2ad72a52eb3dfe7bd9aee7dad11b858bd20
-  GTMSessionFetcher: ebaa1f79a5366922c1735f1566901f50beba23b7
-  MGSwipeTableCell: c3bc6e261e7bc06c112909fe3fb8205de286082c
+  Fabric: f233c9492b3bbc1f04e3882986740f7988a58edb
+  Firebase: 734a4f92957aa6c40e7ae3fda3d9359e1890aa87
+  FirebaseAnalytics: 993577e91157feb40945abedd6ab346d8a4b6ac8
+  FirebaseCore: 3a97432acb324b439fbed338e642f9cbb516a63d
+  FirebaseInstanceID: ea5af6920d0a4a29b40459d055bebe4a6c1333c4
+  FirebasePerformance: e732cd3fe9488c68bf2e9ae7a55672e873d0c55a
+  Floaty: 82854e1a5ef4fa208281ebd4da2f3d1e51ba67a6
+  GoogleAppMeasurement: f7507b39b70ad0bd80b3d81518b2f43868974307
+  GoogleToolboxForMac: 91c824d21e85b31c2aae9bb011c5027c9b4e738f
+  GoogleUtilities: 6f681e27050c5e130325e89fa0316dfca826f954
+  GTMSessionFetcher: 0c4baf0a73acd0041bf9f71ea018deedab5ea84e
+  MGSwipeTableCell: fb20e983988bde2b8d0df29c2d9e1d8ffd10b74a
   nanopb: 5601e6bca2dbf1ed831b519092ec110f66982ca3
-  Protobuf: 8a9838fba8dae3389230e1b7f8c104aa32389c03
-  Pulley: b9c20b583663668f532853de25066ae8d89396c4
-  Realm: 6f23fd1f178a09342eac21bfa7c2bf4312a7a180
-  RealmSwift: 695393add1b8f9d5fa75dd16e6355cf3935f71e2
+  Protobuf: 1eb9700044745f00181c136ef21b8ff3ad5a0fd5
+  Pulley: cd351f605ec2e7412c69d39313c49f99dd1f97c1
+  Realm: 3fdae59de78838064e9f77638d7cdb7b8cff9dc8
+  RealmSwift: c990518b800e106d1f77099d3a4648c3b100337d
   RMActionController: 535715be9f3d9eb96a838485370dcccee0dda597
   RMDateSelectionViewController: 1157d34245e6a1dda700e8a9c44417321d181951
   SwiftDate: 7b56d42a221f582047287deb256b23fc5ed49a60
-  SwiftReorder: 27d737099efd6125339d5e8cb090e46c67341143
-  SwiftyJSON: 070dabdcb1beb81b247c65ffa3a79dbbfb3b48aa
+  SwiftReorder: 66c81f33321629715c53a8f8214a1e892a9f0fdd
+  SwiftyJSON: c29297daf073d2aa016295d5809cdd68045c39b3
 
 PODFILE CHECKSUM: 4d83c1aa86308490559e94614b9ca860431e81d9
 
-COCOAPODS: 1.4.0.beta.2
+COCOAPODS: 1.5.3

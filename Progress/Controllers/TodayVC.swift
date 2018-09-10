@@ -119,13 +119,7 @@ class TodayVC: UIViewController {
     
     //fetches objects from database
      func fetchObjects() -> Results<SavedTask> {
-        let isTodayPredicate = NSPredicate(format: "isToday == %@",  Bool(booleanLiteral: true) as CVarArg)
-        let isNotCompletedPredicate = NSPredicate(format: "isCompleted == %@",  Bool(booleanLiteral: false) as CVarArg)
-       
-        //only fetches objects with isToday tasks and not completed
-        let andPredicate = NSCompoundPredicate(type: NSCompoundPredicate.LogicalType.and, subpredicates: [isTodayPredicate, isNotCompletedPredicate])
-        let list = self.realm.objects(SavedTask.self).filter(andPredicate)
-        
+        let list = self.realm.objects(SavedTask.self).filter("isToday = 1 AND isCompleted = 0")
         //sorts list by todayDisplayOrder attribute
         return list.sorted(byKeyPath: "todayDisplayOrder", ascending: true)
     }

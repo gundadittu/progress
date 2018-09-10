@@ -58,10 +58,19 @@ public protocol TableViewReorderDelegate: class {
     func tableView(_ tableView: UITableView, canReorderRowAt indexPath: IndexPath) -> Bool
     
     /**
+     When attempting to move a row from a sourceIndexPath to a proposedDestinationIndexPath, asks the reorder delegate what the actual targetIndexPath should be. This allows the reorder delegate to selectively allow or modify reordering between sections or groups of rows, for example.
+     - Parameter tableView: The table view requesting this information.
+     - Parameter sourceIndexPath: The original index path of the row to be moved.
+     - Parameter proposedDestinationIndexPath: The potential index path of the row's new location.
+     */
+    func tableView(_ tableView: UITableView, targetIndexPathForReorderFromRowAt sourceIndexPath: IndexPath, to proposedDestinationIndexPath: IndexPath) -> IndexPath
+
+    /**
      Tells the delegate that the user has begun reordering a row.
      - Parameter tableView: The table view providing this information.
+     - Parameter indexPath: The index path of the selected row.
      */
-    func tableViewDidBeginReordering(_ tableView: UITableView)
+    func tableViewDidBeginReordering(_ tableView: UITableView, at indexPath: IndexPath)
     
     /**
      Tells the delegate that the user has finished reordering.
@@ -79,7 +88,11 @@ public extension TableViewReorderDelegate {
         return true
     }
     
-    func tableViewDidBeginReordering(_ tableView: UITableView) {
+    func tableView(_ tableView: UITableView, targetIndexPathForReorderFromRowAt sourceIndexPath: IndexPath, to proposedDestinationIndexPath: IndexPath) -> IndexPath {
+        return proposedDestinationIndexPath
+    }
+
+    func tableViewDidBeginReordering(_ tableView: UITableView, at indexPath: IndexPath) {
     }
     
     func tableViewDidFinishReordering(_ tableView: UITableView, from initialSourceIndexPath: IndexPath, to finalDestinationIndexPath:IndexPath) {
@@ -156,8 +169,7 @@ public class ReorderController: NSObject {
     public func spacerCell(for indexPath: IndexPath) -> UITableViewCell? {
         if case let .reordering(context) = reorderState, indexPath == context.destinationRow {
             return createSpacerCell()
-        }
-        else if case let .ready(snapshotRow) = reorderState, indexPath == snapshotRow {
+        } else if case let .ready(snapshotRow) = reorderState, indexPath == snapshotRow {
             return createSpacerCell()
         }
         return nil
@@ -234,7 +246,7 @@ public class ReorderController: NSObject {
         )
         reorderState = .reordering(context: context)
 
-        delegate.tableViewDidBeginReordering(tableView)
+        delegate.tableViewDidBeginReordering(tableView, at: sourceRow)
     }
     
     func updateReorder(touchPosition: CGPoint) {

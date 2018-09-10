@@ -35,7 +35,8 @@ extension ReorderController {
     func updateDestinationRow() {
         guard case .reordering(let context) = reorderState,
             let tableView = tableView,
-            let newDestinationRow = newDestinationRow(),
+            let proposedNewDestinationRow = proposedNewDestinationRow(),
+            let newDestinationRow = delegate?.tableView(tableView, targetIndexPathForReorderFromRowAt: context.destinationRow, to: proposedNewDestinationRow),
             newDestinationRow != context.destinationRow
         else { return }
         
@@ -51,11 +52,10 @@ extension ReorderController {
         tableView.endUpdates()
     }
     
-    func newDestinationRow() -> IndexPath? {
+    func proposedNewDestinationRow() -> IndexPath? {
         guard case .reordering(let context) = reorderState,
             let tableView = tableView,
             let superview = tableView.superview,
-            let delegate = delegate,
             let snapshotView = snapshotView
         else { return nil }
         
@@ -87,7 +87,7 @@ extension ReorderController {
         }
         
         let sectionIndexes = 0..<tableView.numberOfSections
-        let sectionSnapDistances = sectionIndexes.flatMap { section -> (path: IndexPath, distance: CGFloat)? in
+        let sectionSnapDistances = sectionIndexes.compactMap { section -> (path: IndexPath, distance: CGFloat)? in
             let rowsInSection = tableView.numberOfRows(inSection: section)
             
             if section > context.destinationRow.section {
@@ -100,8 +100,8 @@ extension ReorderController {
                 
                 let path = IndexPath(row: 0, section: section)
                 return (path, abs(snapshotFrame.maxY - rect.minY))
-            }
-            else if section < context.destinationRow.section {
+                
+            } else if section < context.destinationRow.section {
                 let rect: CGRect
                 if rowsInSection == 0 {
                     rect = rectForEmptySection(section)
@@ -111,15 +111,14 @@ extension ReorderController {
                 
                 let path = IndexPath(row: rowsInSection, section: section)
                 return (path, abs(snapshotFrame.minY - rect.maxY))
-            }
-            else {
+                
+            } else {
                 return nil
             }
         }
         
         let snapDistances = rowSnapDistances + sectionSnapDistances
-        let availableSnapDistances = snapDistances.filter { delegate.tableView(tableView, canReorderRowAt: $0.path) != false }
-        return availableSnapDistances.min(by: { $0.distance < $1.distance })?.path
+        return snapDistances.min(by: { $0.distance < $1.distance })?.path
     }
     
     func rectForEmptySection(_ section: Int) -> CGRect {

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "0700"
+   LastUpgradeVersion = "0930"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -13,11 +13,11 @@
             buildForProfiling = "YES"
             buildForArchiving = "YES">
             <BuildableReference
-               BuildableIdentifier = 'primary'
-               BlueprintIdentifier = '0D75D3E8D32C7982489A94784418027E'
-               BlueprintName = 'CFNotify'
-               ReferencedContainer = 'container:Pods.xcodeproj'
-               BuildableName = 'CFNotify.framework'>
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "0D75D3E8D32C7982489A94784418027E"
+               BlueprintName = "CFNotify"
+               ReferencedContainer = "container:Pods.xcodeproj"
+               BuildableName = "CFNotify.framework">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>

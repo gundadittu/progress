@@ -141,8 +141,7 @@ class TasksVC: UIViewController, FloatyDelegate  {
     
     //fetches objects from realm
      func fetchObjects() -> Results<SavedTask> {
-        let isNotTodayPredicate = NSPredicate(format: "isToday == %@",  Bool(booleanLiteral: false) as CVarArg)
-        let list = self.realm.objects(SavedTask.self).filter(isNotTodayPredicate)
+        let list = self.realm.objects(SavedTask.self).filter("isToday = 0")
         let sortProperties = [ SortDescriptor(keyPath: "isCompleted", ascending: true), SortDescriptor(keyPath: "displayOrder", ascending: false)]
         let sortedList = list.sorted(by: sortProperties)
         return sortedList

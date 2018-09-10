@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "0700"
+   LastUpgradeVersion = "0930"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -13,11 +13,11 @@
             buildForProfiling = "YES"
             buildForArchiving = "YES">
             <BuildableReference
-               BuildableIdentifier = 'primary'
-               BlueprintIdentifier = 'C3EBB768BFB92E58C49A6118BDAB7176'
-               BlueprintName = 'BPStatusBarAlert'
-               ReferencedContainer = 'container:Pods.xcodeproj'
-               BuildableName = 'BPStatusBarAlert.framework'>
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "C3EBB768BFB92E58C49A6118BDAB7176"
+               BlueprintName = "BPStatusBarAlert"
+               ReferencedContainer = "container:Pods.xcodeproj"
+               BuildableName = "BPStatusBarAlert.framework">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
